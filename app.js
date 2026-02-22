@@ -1,3 +1,4 @@
+
 const SALT = "MY_SECRET_2026";
 let rawData = [];
 let userRole = null;
@@ -13,11 +14,11 @@ async function sha256(text){
 function showLogin(){
   document.getElementById('loginScreen').innerHTML = `
     <div style="display:flex;justify-content:center;align-items:center;height:100vh">
-      <div style="background:#fff;padding:30px;border-radius:12px;width:300px;text-align:center">
-        <h2>כניסה</h2>
+      <div class="login-box">
+        <h2>כניסה למערכת</h2>
         <input id="empId" placeholder="מספר עובד" style="width:100%;margin:8px 0;padding:8px">
         <input id="empCode" type="password" placeholder="קוד אישי" style="width:100%;margin:8px 0;padding:8px">
-        <button onclick="login()" style="width:100%">כניסה</button>
+        <button onclick="login()" style="width:100%;padding:10px;background:#2563eb;color:#fff;border:none;border-radius:8px">כניסה</button>
       </div>
     </div>
   `;
@@ -52,16 +53,23 @@ async function login(){
 }
 
 function startApp(jsonData, role){
-  rawData = jsonData;
+  rawData = jsonData.map(r=>({
+    ...r,
+    Dates: r.Dates ? r.Dates.map(d=>new Date(d)) : []
+  }));
+
   userRole = role;
 
-  document.getElementById('loginScreen').style.display = 'none';
-  document.getElementById('app').style.display = 'block';
+  document.getElementById('loginScreen').style.display='none';
+  document.getElementById('app').style.display='block';
 
-  document.getElementById('view').innerHTML = `
-    <h2>מחובר כ: ${role === 'admin' ? 'מנהל' : 'מדריך'}</h2>
-    <pre>${JSON.stringify(rawData, null, 2)}</pre>
-  `;
+  loadDashboard();
+}
+
+function loadDashboard(){
+  const script = document.createElement('script');
+  script.src = "dashboard.js";
+  document.body.appendChild(script);
 }
 
 showLogin();
