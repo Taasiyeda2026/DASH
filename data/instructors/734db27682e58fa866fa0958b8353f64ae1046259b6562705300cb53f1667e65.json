@@ -1,0 +1,27 @@
+[
+  {
+    "EmployeeID": 1517,
+    "Employee": "אסיל ג'בר ",
+    "Program": "מנהיגות ירוקה",
+    "EventType": "COURSE",
+    "Authority": "מטה יהודה",
+    "Manager": "גיל נאמן",
+    "School": "נווה שלום",
+    "StartTime": 0.3541666666666665,
+    "EndTime": 0.4166666666666663,
+    "Date1": 46042,
+    "Date2": 46049,
+    "Date3": 46056,
+    "Date4": 46063,
+    "Date5": 46077,
+    "Date6": 46091,
+    "Date7": 46098,
+    "Date8": 46126,
+    "Date9": 46140,
+    "Date10": 46147,
+    "End": 46147,
+    "MonthEnd": 5,
+    "EmploymentType": "תעשיידע",
+    "MonthStart": 1
+  }
+]
