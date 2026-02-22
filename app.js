@@ -12,16 +12,38 @@ async function sha256(text){
 
 function showLogin(){
   document.getElementById('loginScreen').innerHTML = `
-    <div style="display:flex;justify-content:center;align-items:center;height:100vh">
-      <div class="login-box">
-        <h2>כניסה למערכת</h2>
-        <input id="empId" placeholder="מספר עובד" style="width:100%;margin:8px 0;padding:8px">
-        <input id="empCode" type="password" placeholder="קוד אישי" style="width:100%;margin:8px 0;padding:8px">
-        <button onclick="login()" style="width:100%;padding:10px;background:#2563eb;color:#fff;border:none;border-radius:8px">כניסה</button>
-        <div id="loginError" style="color:#dc2626;margin-top:10px;min-height:20px"></div>
+    <div class="login-page">
+      <div class="login-bg-shapes">
+        <div class="login-shape login-shape-1"></div>
+        <div class="login-shape login-shape-2"></div>
+        <div class="login-shape login-shape-3"></div>
+      </div>
+      <div class="login-card">
+        <div class="login-logo-wrap">
+          <img src="logo.png" class="login-logo" onerror="this.style.display='none'" />
+        </div>
+        <div class="login-title">כניסה למערכת</div>
+        <div class="login-subtitle">דשבורד פעילויות</div>
+        <div class="login-form">
+          <div class="login-field">
+            <label class="login-label">מספר עובד</label>
+            <input id="empId" class="login-input" placeholder="הכנס מספר עובד" autocomplete="username" />
+          </div>
+          <div class="login-field">
+            <label class="login-label">קוד אישי</label>
+            <input id="empCode" class="login-input" type="password" placeholder="הכנס קוד אישי" autocomplete="current-password" />
+          </div>
+          <button class="login-btn" onclick="login()">
+            <span class="login-btn-text">כניסה</span>
+            <span class="login-btn-icon">←</span>
+          </button>
+          <div id="loginError" class="login-error"></div>
+        </div>
       </div>
     </div>
   `;
+  document.getElementById('empCode').addEventListener('keydown', e => { if(e.key === 'Enter') login(); });
+  document.getElementById('empId').addEventListener('keydown', e => { if(e.key === 'Enter') document.getElementById('empCode').focus(); });
 }
 
 function setLoginError(message){
