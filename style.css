@@ -1,0 +1,29 @@
+body{
+  margin:0;
+  font-family:Arial;
+  background:#f8fafc;
+  direction:rtl;
+}
+
+header{
+  background:#fff;
+  padding:16px;
+  border-bottom:1px solid #e2e8f0;
+}
+
+.nav{
+  display:flex;
+  gap:8px;
+  padding:12px;
+}
+
+button{
+  padding:8px 12px;
+  border-radius:8px;
+  border:1px solid #e2e8f0;
+  cursor:pointer;
+}
+
+#view{
+  padding:20px;
+}

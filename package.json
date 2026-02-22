@@ -1,0 +1,9 @@
+{
+  "name": "instructors-system",
+  "version": "1.0.0",
+  "description": "Instructor Dashboard Generator",
+  "main": "generator.js",
+  "dependencies": {
+    "xlsx": "^0.18.5"
+  }
+}
