@@ -1,4 +1,20 @@
-// ... כאן כל פונקציות ה-JS שלך ...
+function normalizeData(data){
+  return data.map(r=>({
+    ...r,
+    Dates: Array.isArray(r.Dates)
+      ? r.Dates.map(d=> new Date(d))
+      : []
+  }));
+}
+
+rawData = normalizeData(rawData);
+
+function enforceInstructorMode(){
+  if(userRole === 'instructor'){
+    window.mode = 'month';
+  }
+}
+
 const view=document.getElementById('view');
 const titleEl=document.getElementById('title');
 const filtersEl=document.getElementById('filters');
@@ -13,13 +29,26 @@ const managerFilter=document.getElementById('managerFilter');
 const employeeFilter=document.getElementById('employeeFilter');
 const summaryMonth=document.getElementById('summaryMonth');
 
-rawData = rawData.map(r => ({
-  ...r,
-  Dates: r.Dates ? r.Dates.map(d => new Date(d)) : []
-}));
+if(userRole === 'instructor'){
+  btnSummary.style.display = 'none';
+  btnInstructors.style.display = 'none';
+  filtersEl.style.display = 'none';
+  window.mode = 'month';
+}
 
 let dataRange=null;
-let mode='month';
+let _mode='month';
+Object.defineProperty(window, 'mode', {
+  get(){ return _mode; },
+  set(value){
+    if(userRole === 'instructor'){
+      _mode = 'month';
+      return;
+    }
+    _mode = value;
+  },
+  configurable: false
+});
 let mobileWeekOpen = false;
 let mobileWeekStart = null;
 let currentDate=new Date(); currentDate.setHours(0,0,0,0);
@@ -146,7 +175,7 @@ function getMinAllowedMonth(){
 }
 
 function canGoPrev(){
-  if(userRole !== 'instructor' && mode === 'summary'){
+  if(window.mode === 'summary'){
     if(summaryMonth.selectedIndex <= 0) return false;
 
     const prevOption = summaryMonth.options[summaryMonth.selectedIndex-1].value;
@@ -157,14 +186,14 @@ function canGoPrev(){
   }
   if(!dataRange) return false;
 
-  if(mode === 'month'){
+  if(window.mode === 'month'){
     const temp = new Date(currentDate);
     temp.setMonth(temp.getMonth()-1);
 
     return temp >= getMinAllowedMonth();
   }
 
-  if(mode === 'week'){
+  if(window.mode === 'week'){
     const temp = new Date(currentDate);
     temp.setDate(temp.getDate()-7);
 
@@ -177,17 +206,17 @@ function canGoPrev(){
 }
 
 function canGoNext(){
-  if(mode === 'summary') return summaryMonth.selectedIndex < summaryMonth.options.length-1;
+  if(window.mode === 'summary') return summaryMonth.selectedIndex < summaryMonth.options.length-1;
   if(!dataRange) return false;
 
-  if(mode === 'month'){
+  if(window.mode === 'month'){
     const temp = new Date(currentDate);
     temp.setMonth(temp.getMonth()+1);
     return temp.getFullYear() < dataRange.max.getFullYear() ||
       (temp.getFullYear() === dataRange.max.getFullYear() && temp.getMonth() <= dataRange.max.getMonth());
   }
 
-  if(mode === 'week'){
+  if(window.mode === 'week'){
     const temp = new Date(currentDate);
     temp.setDate(temp.getDate()+7);
     return weekOverlapsDataRange(temp);
@@ -209,10 +238,10 @@ function updateModeButtons(){
   btnSummary.classList.remove('active');
   btnInstructors.classList.remove('active');
 
-  if(mode === 'month') btnMonth.classList.add('active');
-  if(mode === 'week') btnWeek.classList.add('active');
-  if(mode === 'summary') btnSummary.classList.add('active');
-  if(mode === 'instructors') btnInstructors.classList.add('active');
+  if(window.mode === 'month') btnMonth.classList.add('active');
+  if(window.mode === 'week') btnWeek.classList.add('active');
+  if(window.mode === 'summary') btnSummary.classList.add('active');
+  if(window.mode === 'instructors') btnInstructors.classList.add('active');
 }
 
 function endDate(r){
@@ -234,20 +263,13 @@ function getDataDateRange(){
   return { min, max };
 }
 
-function initDashboard(){
+function initFromRawData(){
   dataRange = getDataDateRange();
+  window.dataRange = dataRange;
   initFilters();
   initSummaryMonths();
-
-  if(userRole === 'instructor'){
-    btnSummary.style.display = 'none';
-    btnInstructors.style.display = 'none';
-    filtersEl.style.display = 'none';
-    mode = 'month';
-  }
-
   currentDate = clampDateToDataRange(new Date());
-  mode='month';
+  window.mode='month';
   render();
 }
 
@@ -271,16 +293,13 @@ function initSummaryMonths(){
 
 function render(){
 
+  enforceInstructorMode();
   view.innerHTML='';
   side.classList.remove('open');
   mobileWeekOpen = false;
   mobileWeekStart = null;
 
-  if(userRole === 'instructor'){
-    filtersEl.style.display = 'none';
-    if(mode !== 'month') mode = 'month';
-  }
-  else if(mode === 'summary' || mode === 'instructors'){
+  if(userRole === 'instructor' || window.mode === 'summary' || window.mode === 'instructors'){
     filtersEl.style.display = 'none';
   }else{
     filtersEl.style.display = 'flex';
@@ -288,16 +307,16 @@ function render(){
 
   const isMobile = window.innerWidth < 800;
 
-  if(isMobile && (mode === 'month' || mode === 'week')){
+  if(isMobile && (window.mode === 'month' || window.mode === 'week')){
     renderMobileMonth();
   }
-  else if(mode==='summary'){
+  else if(window.mode==='summary'){
     renderSummary();
   }
-  else if(mode==='week'){
+  else if(window.mode==='week'){
     renderWeek();
   }
-  else if(mode==='instructors'){
+  else if(window.mode==='instructors'){
     renderInstructors();
   }
   else{
@@ -307,7 +326,7 @@ function render(){
   updateNavButtons();
   updateModeButtons();
 
-  if(mode === 'month'){
+  if(window.mode === 'month'){
     goCalendar.style.display = 'none';
   } else {
     goCalendar.style.display = 'inline-flex';
@@ -1023,12 +1042,13 @@ function openInstructorModal(name, courses, selectedMonth, selectedYear){
 }
 
 document.getElementById('prev').onclick = ()=>{
+  enforceInstructorMode();
   if(!canGoPrev()) return;
 
-  if(userRole !== 'instructor' && mode==='summary'){
+  if(window.mode==='summary'){
     summaryMonth.selectedIndex = Math.max(0, summaryMonth.selectedIndex-1);
   }
-  else if(mode==='week'){
+  else if(window.mode==='week'){
     const temp = new Date(currentDate);
     temp.setDate(temp.getDate()-7);
 
@@ -1036,7 +1056,7 @@ document.getElementById('prev').onclick = ()=>{
       currentDate = temp;
     }
   }
-  else if(mode==='month'){
+  else if(window.mode==='month'){
     const temp = new Date(currentDate);
     temp.setMonth(temp.getMonth()-1);
 
@@ -1048,12 +1068,13 @@ document.getElementById('prev').onclick = ()=>{
   render();
 };
 document.getElementById('next').onclick = ()=>{
+  enforceInstructorMode();
   if(!canGoNext()) return;
 
-  if(userRole !== 'instructor' && mode==='summary'){
+  if(window.mode==='summary'){
     summaryMonth.selectedIndex = Math.min(summaryMonth.options.length-1, summaryMonth.selectedIndex+1);
   }
-  else if(mode==='week'){
+  else if(window.mode==='week'){
     const temp = new Date(currentDate);
     temp.setDate(temp.getDate()+7);
 
@@ -1069,7 +1090,7 @@ document.getElementById('next').onclick = ()=>{
       currentDate = temp;
     }
   }
-  else if(mode==='month'){
+  else if(window.mode==='month'){
     const temp = new Date(currentDate);
     temp.setMonth(temp.getMonth()+1);
 
@@ -1084,27 +1105,28 @@ document.getElementById('next').onclick = ()=>{
   render();
 };
 btnMonth.onclick = ()=>{
-  mode='month';
+  window.mode='month';
   currentDate = clampDateToDataRange(new Date());
   render();
 };
 btnWeek.onclick = ()=>{
-  mode='week';
+  if(userRole === 'instructor') return;
+  window.mode='week';
   currentDate = clampDateToDataRange(new Date());
   render();
 };
 btnSummary.onclick = ()=>{
   if(userRole === 'instructor') return;
-  mode='summary';
+  window.mode='summary';
   render();
 };
 btnInstructors.onclick = ()=>{
   if(userRole === 'instructor') return;
-  mode='instructors';
+  window.mode='instructors';
   render();
 };
 goCalendar.onclick = ()=>{
-  mode = 'month';
+  window.mode = 'month';
   currentDate = clampDateToDataRange(new Date());
   render();
 };
@@ -1114,7 +1136,7 @@ document.getElementById('goToday').onclick = ()=>{
 
   currentDate = clampDateToDataRange(today);
 
-  if(userRole !== 'instructor' && mode === 'summary'){
+  if(window.mode === 'summary'){
     const key = `${today.getFullYear()}-${today.getMonth()}`;
     const options = [...summaryMonth.options].map(o=>o.value);
     const index = options.indexOf(key);
@@ -1123,7 +1145,7 @@ document.getElementById('goToday').onclick = ()=>{
     }
   }
 
-  if(mode === 'instructors'){
+  if(window.mode === 'instructors'){
     renderInstructors.selectedMonthValue =
       `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}`;
   }
@@ -1136,11 +1158,11 @@ document.getElementById('clearFilters').onclick=()=>{managerFilter.value='';empl
 summaryMonth.onchange=render;
 document.getElementById('closeSide').onclick=()=>side.classList.remove('open');
 
-initDashboard();
+initFromRawData();
 
 window.addEventListener('popstate', (e)=>{
   const isMobile = window.innerWidth < 800;
-  if(isMobile && (mode === 'month' || mode === 'week')){
+  if(isMobile && (window.mode === 'month' || window.mode === 'week')){
     side.classList.remove('open');
     view.innerHTML = '';
     renderMobileMonth();
