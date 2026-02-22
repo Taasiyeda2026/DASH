@@ -104,7 +104,7 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
 .nav{position:sticky;top:0;background:#fff;border-bottom:1px solid var(--border);z-index:10;display:flex;gap:8px;justify-content:center;align-items:center;flex-wrap:wrap;margin:0;padding:10px}
 .nav-modes{display:flex;gap:8px;align-items:center}
 .nav-arrows{display:flex;gap:8px;align-items:center}
-.nav-arrows #title{min-width:200px;text-align:center;font-weight:700}
+.nav-arrows #title{min-width:240px;text-align:center;font-weight:700;font-size:15px;white-space:nowrap;}
 
 #view{
   max-width: 1200px;
@@ -120,7 +120,7 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
 }
 .day.empty{min-height:auto;opacity:0.5;}
 .day.inactive{min-height:auto;opacity:0.3;}
-.day-header{font-size:11px;font-weight:700;border-bottom:1px solid var(--border);margin-bottom:4px;padding-bottom:4px;text-align:center;}
+.day-header{font-size:13px;font-weight:700;border-bottom:1px solid var(--border);margin-bottom:4px;padding-bottom:4px;text-align:center;letter-spacing:0.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 
 .event{padding:6px;border-radius:8px;font-size:12px;cursor:pointer;border-right:5px solid rgba(0,0,0,0.1);background:rgba(255,255,255,.9); position: relative; min-height: 55px; display: flex; flex-direction: column; justify-content: center; overflow: hidden;}
 .event.missing{border:2px solid var(--danger);border-right:5px solid var(--danger);background:#fff !important}
@@ -536,9 +536,12 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
     padding: 0;
   }
   .nav-arrows #title {
-    font-size: 14px;
+    font-size: 13px;
     min-width: 0;
     flex: 1 1 auto;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   /* כרטיסי ימים */
