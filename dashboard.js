@@ -22,6 +22,7 @@ function normalizeData(data){
     ...r,
     StartTime: excelDecimalToTime(r.StartTime),
     EndTime: excelDecimalToTime(r.EndTime),
+    End: (typeof r.End === 'number') ? excelSerialToJSDate(r.End) : (r.End ? new Date(r.End) : null),
     Dates: Array.isArray(r.Dates)
       ? r.Dates.map(d => excelSerialToJSDate(d)).filter(Boolean)
       : []
