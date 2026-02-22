@@ -904,7 +904,7 @@ function renderInstructors(){
       </div>
     `;
 
-    box.onclick = ()=> openInstructorModal("חסר מדריך", missingInstructorCourses, selectedMonth, selectedYear);
+    box.onclick = (e)=>{ e.stopPropagation(); openInstructorModal("חסר מדריך", missingInstructorCourses, selectedMonth, selectedYear); };
 
     grid.appendChild(box);
   }
@@ -940,7 +940,7 @@ function renderInstructors(){
       </div>
     `;
 
-    box.onclick = ()=> openInstructorModal(name, instructorsMap[name], selectedMonth, selectedYear);
+    box.onclick = (e)=>{ e.stopPropagation(); openInstructorModal(name, instructorsMap[name], selectedMonth, selectedYear); };
 
     grid.appendChild(box);
   });
@@ -1178,6 +1178,12 @@ employeeFilter.onchange=render;
 document.getElementById('clearFilters').onclick=()=>{managerFilter.value='';employeeFilter.value='';render();};
 summaryMonth.onchange=render;
 document.getElementById('closeSide').onclick=()=>side.classList.remove('open');
+
+document.addEventListener('click', (e)=>{
+  if(side.classList.contains('open') && !side.contains(e.target)){
+    side.classList.remove('open');
+  }
+});
 
 initFromRawData();
 
