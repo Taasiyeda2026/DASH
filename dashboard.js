@@ -880,7 +880,8 @@ function renderSummary(){
 
   const missingCard = wrap.querySelector('.missing-card');
   if (missingCard) {
-    missingCard.addEventListener('click', () => {
+    missingCard.addEventListener('click', (e) => {
+      e.stopPropagation();
       openMissingCourses(currentYear, currentMonth);
     });
   }
@@ -919,6 +920,7 @@ function renderSummary(){
     // === מנהל ===
     const managerCol = e.target.closest('[data-manager]');
     if(managerCol){
+      e.stopPropagation();
       const mgrName = managerCol.dataset.manager;
       openManagerOverlay(mgrName, currentYear, currentMonth);
     }
