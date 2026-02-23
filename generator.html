@@ -55,31 +55,39 @@ h1{font-size:22px;font-weight:700;color:#1e293b;margin-bottom:6px}
 <body>
 <div class="container">
   <h1>מחולל קבצי נתונים</h1>
-  <p class="subtitle">העלה שני קבצי אקסל — המערכת תייצר את כל ה-JSON ותוריד אותם כ-ZIP</p>
+  <p class="subtitle">העלה שלושה קבצי אקסל — המערכת תייצר את כל ה-JSON ותוריד אותם כ-ZIP</p>
 
   <div class="schema">
     <h3>מבנה עמודות נדרש</h3>
-    <div class="schema-grid">
+    <div class="schema-grid" style="grid-template-columns:1fr 1fr 1fr">
       <div>
         <div style="font-weight:600;margin-bottom:6px;color:#334155">main.xlsx</div>
         <div class="schema-item"><span class="schema-key">EmployeeID</span><span class="schema-req">*</span></div>
         <div class="schema-item"><span class="schema-key">Employee</span><span class="schema-req">*</span></div>
-        <div class="schema-item"><span class="schema-key">Manager</span><span class="schema-req">*</span></div>
-        <div class="schema-item"><span class="schema-key">Program, School, Authority…</span></div>
+        <div class="schema-item"><span class="schema-key">Program, School, Authority</span></div>
+        <div class="schema-item"><span class="schema-key">EventType, StartTime, EndTime</span></div>
         <div class="schema-item"><span class="schema-key">Date1 – Date16</span></div>
-        <div class="schema-item"><span class="schema-key">StartTime, EndTime</span></div>
+        <div class="schema-item"><span class="schema-key">End, MonthStart, MonthEnd</span></div>
       </div>
       <div>
         <div style="font-weight:600;margin-bottom:6px;color:#334155">codes.xlsx</div>
         <div class="schema-item"><span class="schema-key">EmployeeID</span><span class="schema-req">*</span></div>
         <div class="schema-item"><span class="schema-key">EntryCode</span><span class="schema-req">*</span></div>
         <div class="schema-item"><span class="schema-key">Role</span><span class="schema-req">*</span> <span style="color:#64748b">(instructor / admin)</span></div>
-        <div class="schema-item"><span class="schema-key">Name</span><span class="schema-opt">אופציונלי</span> <span style="color:#94a3b8">— שם להצגה</span></div>
+        <div class="schema-item"><span class="schema-key">Employee, Manager</span></div>
+        <div class="schema-item"><span class="schema-key">EmploymentType</span></div>
+        <div class="schema-item"><span class="schema-key">HomeAuthority</span></div>
+      </div>
+      <div>
+        <div style="font-weight:600;margin-bottom:6px;color:#334155">distance.xlsx</div>
+        <div class="schema-item"><span class="schema-key">Authority</span><span class="schema-req">*</span></div>
+        <div class="schema-item"><span class="schema-key">Latitude</span><span class="schema-req">*</span></div>
+        <div class="schema-item"><span class="schema-key">Longitude</span><span class="schema-req">*</span></div>
       </div>
     </div>
   </div>
 
-  <div class="cards">
+  <div class="cards" style="grid-template-columns:1fr 1fr 1fr">
     <div class="card" id="cardMain">
       <div class="card-icon">📊</div>
       <div class="card-label">קובץ נתונים ראשי</div>
@@ -93,6 +101,13 @@ h1{font-size:22px;font-weight:700;color:#1e293b;margin-bottom:6px}
       <div class="card-hint">codes.xlsx</div>
       <div class="card-status" id="statusCodes">לחץ או גרור קובץ</div>
       <input type="file" id="codesFile" accept=".xlsx,.xls">
+    </div>
+    <div class="card" id="cardDistance">
+      <div class="card-icon">📍</div>
+      <div class="card-label">מרחקים ורשויות</div>
+      <div class="card-hint">distance.xlsx</div>
+      <div class="card-status" id="statusDistance">לחץ או גרור קובץ</div>
+      <input type="file" id="distanceFile" accept=".xlsx,.xls">
     </div>
   </div>
 
@@ -109,7 +124,7 @@ h1{font-size:22px;font-weight:700;color:#1e293b;margin-bottom:6px}
 
 <script>
 const SALT = "MY_SECRET_2026";
-let mainData = null, codesData = null, zipBlob = null;
+let mainData = null, codesData = null, distanceData = null, zipBlob = null;
 
 async function sha256(text){
   const encoder = new TextEncoder();
@@ -141,7 +156,7 @@ function setCard(id, state, text){
 }
 
 function checkReady(){
-  document.getElementById('generateBtn').disabled = !(mainData && codesData);
+  document.getElementById('generateBtn').disabled = !(mainData && codesData && distanceData);
 }
 
 document.getElementById('mainFile').addEventListener('change', async e=>{
@@ -170,6 +185,19 @@ document.getElementById('codesFile').addEventListener('change', async e=>{
   checkReady();
 });
 
+document.getElementById('distanceFile').addEventListener('change', async e=>{
+  const file = e.target.files[0]; if(!file) return;
+  setCard('Distance','','טוען...');
+  try{
+    distanceData = await readExcel(file);
+    setCard('Distance','loaded',`✓ ${distanceData.length} רשויות נטענו`);
+  }catch(_){
+    distanceData = null;
+    setCard('Distance','error','שגיאה בקריאת הקובץ');
+  }
+  checkReady();
+});
+
 document.getElementById('generateBtn').addEventListener('click', async ()=>{
   const log = document.getElementById('log');
   const progressWrap = document.getElementById('progressWrap');
@@ -183,8 +211,20 @@ document.getElementById('generateBtn').addEventListener('click', async ()=>{
   progressBar.style.width = '0%';
 
   const zip = new JSZip();
-  const instructorsFolder = zip.folder('data/instructors');
-  const adminsFolder      = zip.folder('data/admins');
+  const instructorsFolder  = zip.folder('data/instructors');
+  const adminsFolder       = zip.folder('data/admins');
+  const schedulingFolder   = zip.folder('data/Scheduling');
+
+  // בניית מיפוי רשויות ← distance.xlsx
+  const authorityLocations = {};
+  distanceData.forEach(r => {
+    const auth = String(r.Authority ?? '').trim();
+    const lat  = Number(r.Latitude);
+    const lng  = Number(r.Longitude);
+    if(auth && !isNaN(lat) && !isNaN(lng)){
+      authorityLocations[auth] = { lat, lng };
+    }
+  });
 
   let instructorCount = 0, adminCount = 0, skipped = 0;
   const total = codesData.length;
@@ -245,7 +285,39 @@ document.getElementById('generateBtn').addEventListener('click', async ()=>{
   progressBar.style.width = '100%';
   progressLabel.textContent = 'הושלם!';
 
-  log.innerHTML += `<div class="log-summary">סה"כ: ${instructorCount} מדריכים · ${adminCount} מנהלים · ${skipped} דולגו</div>`;
+  // ===== יצירת scheduling.json =====
+
+  // מדריכים לשיבוצים — מתוך codes.xlsx בלבד, ללא EntryCode/hash/SALT
+  const schedulingInstructors = codesData
+    .filter(r => String(r.Role ?? '').trim().toLowerCase() === 'instructor')
+    .map(r => ({
+      EmployeeID:     String(r.EmployeeID     ?? '').trim(),
+      Employee:       String(r.Employee       ?? '').trim(),
+      Manager:        String(r.Manager        ?? '').trim(),
+      EmploymentType: String(r.EmploymentType ?? '').trim(),
+      HomeAuthority:  String(r.HomeAuthority  ?? '').trim(),
+      Role:           'instructor'
+    }));
+
+  // כל הקורסים עם Dates[] — מתוך main.xlsx
+  const schedulingCourses = mainData.map(course => {
+    const dates = [];
+    for(let i = 1; i <= 16; i++){
+      if(course[`Date${i}`] != null && course[`Date${i}`] !== '') dates.push(course[`Date${i}`]);
+    }
+    return { ...course, Dates: dates };
+  });
+
+  const schedulingJson = {
+    generatedAt:        new Date().toISOString(),
+    authorityLocations,
+    instructors:        schedulingInstructors,
+    courses:            schedulingCourses
+  };
+
+  schedulingFolder.file('scheduling.json', JSON.stringify(schedulingJson, null, 2));
+
+  log.innerHTML += `<div class="log-summary">סה"כ: ${instructorCount} מדריכים · ${adminCount} מנהלים · ${skipped} דולגו · ${Object.keys(authorityLocations).length} רשויות · scheduling.json נוצר</div>`;
 
   zipBlob = await zip.generateAsync({type:'blob'});
   downloadBtn.style.display = 'block';
