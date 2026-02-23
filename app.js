@@ -131,6 +131,7 @@ function startApp(jsonData, role, hash){
   sessionStorage.setItem('dash_hash', hash);
   sessionStorage.setItem('dash_role', role);
   if(name) sessionStorage.setItem('dash_name', name);
+  window.EmployeeID = sessionStorage.getItem('dash_empId') || '';
 
   document.getElementById('loginScreen').style.display='none';
   document.getElementById('app').style.display='block';
