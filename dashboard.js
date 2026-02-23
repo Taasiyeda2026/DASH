@@ -31,19 +31,38 @@ function normalizeData(data){
 
 rawData = normalizeData(rawData);
 
-// ===== Map מדריכים מתוך rawData =====
-let instructorsMapById = new Map();
+let schedulingJson = null;
+let employmentTypeByEmployeeId = new Map();
 
-rawData.forEach(r => {
-  if (r.EmployeeID && r.EmploymentType) {
-    instructorsMapById.set(
-      String(r.EmployeeID).trim(),
-      {
-        EmploymentType: String(r.EmploymentType).trim()
-      }
+async function loadSchedulingJson(){
+  try{
+    const res = await fetch('data/Scheduling/scheduling.json', { cache: 'no-store' });
+    if(!res.ok) throw new Error('Failed to fetch scheduling.json: ' + res.status);
+    schedulingJson = await res.json();
+
+    const instructors = Array.isArray(schedulingJson?.instructors) ? schedulingJson.instructors : [];
+
+    employmentTypeByEmployeeId = new Map(
+      instructors.map(i => [
+        String(i.EmployeeID ?? '').trim(),
+        String(i.EmploymentType ?? '').trim()
+      ])
     );
+  }catch(err){
+    console.error('loadSchedulingJson error:', err);
+    schedulingJson = null;
+    employmentTypeByEmployeeId = new Map();
   }
-});
+}
+
+function getEmploymentTypeForEmployeeId(employeeId){
+  if(userRole === 'instructor') return '—';
+
+  const id = String(employeeId ?? '').trim();
+  if(!id) return '—';
+
+  return employmentTypeByEmployeeId.get(id) || '—';
+}
 function enforceInstructorMode(){
   if(userRole === 'instructor'){
     window.mode = 'month';
@@ -326,7 +345,7 @@ function getDataDateRange(){
   return { min, max };
 }
 
-function initFromRawData(){
+async function initFromRawData(){
   dataRange = getDataDateRange();
   window.dataRange = dataRange;
   initFilters();
@@ -342,6 +361,11 @@ function initFromRawData(){
   updateSchedulingButtonVisibility();
 
   window.mode='week';
+
+  if(userRole !== 'instructor'){
+    await loadSchedulingJson();
+  }
+
   render();
 }
 
@@ -1182,7 +1206,7 @@ function openInstructorModal(name, courses, selectedMonth, selectedYear){
   });
 
   totalWorkDays = maxDays;
-  let employmentType = '—';  if (courses[0]?.EmployeeID) {   const instructorObj = instructorsMapById.get(String(courses[0].EmployeeID));   if (instructorObj && instructorObj.EmploymentType) {     employmentType = instructorObj.EmploymentType;   } }
+  const employmentType = getEmploymentTypeForEmployeeId(courses?.[0]?.EmployeeID);
     const managerName = getInstructorManager(courses[0]) || '—';
 
     // הוספת שורת רשות אם מדובר ב"חסר מדריך"
