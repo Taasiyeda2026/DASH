@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>מערכת שיבוצים חכמה</title>
+
+<style>
+body{
+  font-family:Arial;
+  background:#f4f6f9;
+  margin:0;
+  padding:30px;
+}
+h1{
+  margin-bottom:20px;
+}
+.card{
+  background:white;
+  padding:20px;
+  border-radius:12px;
+  box-shadow:0 4px 16px rgba(0,0,0,0.08);
+  margin-bottom:20px;
+}
+select,input,button{
+  padding:10px;
+  margin:5px 0;
+  border-radius:8px;
+  border:1px solid #ccc;
+}
+button{
+  background:#2563eb;
+  color:white;
+  cursor:pointer;
+  border:none;
+}
+button:hover{
+  background:#1e40af;
+}
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:15px;
+}
+th,td{
+  padding:10px;
+  border-bottom:1px solid #eee;
+  text-align:center;
+}
+th{
+  background:#f1f5f9;
+}
+.green{color:#059669;font-weight:bold;}
+.red{color:#dc2626;font-weight:bold;}
+</style>
+</head>
+<body>
+
+<h1>📊 מערכת שיבוצים חכמה</h1>
+
+<div class="card">
+  <label>רשות יעד:</label><br>
+  <select id="authoritySelect"></select><br>
+
+  <label>תאריך:</label><br>
+  <input type="date" id="dateInput"><br>
+
+  <button onclick="runScheduling()">חשב שיבוץ</button>
+</div>
+
+<div class="card">
+  <table id="resultsTable">
+    <thead>
+      <tr>
+        <th>מדריך</th>
+        <th>רשות בית</th>
+        <th>מרחק (ק״מ)</th>
+        <th>עומס חודשי</th>
+        <th>זמינות</th>
+        <th>ציון חכם</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<script>
+let schedulingData;
+
+async function loadData(){
+  const res = await fetch('data/Scheduling/scheduling.json');
+  schedulingData = await res.json();
+
+  const authorities = Object.keys(schedulingData.authorityLocations);
+  const select = document.getElementById('authoritySelect');
+
+  authorities.forEach(a=>{
+    const opt=document.createElement('option');
+    opt.value=a;
+    opt.textContent=a;
+    select.appendChild(opt);
+  });
+}
+
+function haversine(lat1, lon1, lat2, lon2){
+  const R=6371;
+  const toRad=x=>x*Math.PI/180;
+  const dLat=toRad(lat2-lat1);
+  const dLon=toRad(lon2-lon1);
+  const a=Math.sin(dLat/2)**2+
+          Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*
+          Math.sin(dLon/2)**2;
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+
+function getDistance(instructor,targetAuthority){
+  const homeLoc=schedulingData.authorityLocations[instructor.HomeAuthority];
+  const targetLoc=schedulingData.authorityLocations[targetAuthority];
+  if(!homeLoc||!targetLoc)return null;
+  return haversine(homeLoc.lat,homeLoc.lng,targetLoc.lat,targetLoc.lng);
+}
+
+function isBusy(instructorID,date){
+  return schedulingData.courses.some(c=>
+    c.EmployeeID===instructorID && c.Dates.includes(date)
+  );
+}
+
+function monthlyLoad(instructorID,date){
+  const month=date.slice(0,7);
+  return schedulingData.courses.filter(c=>
+    c.EmployeeID===instructorID &&
+    c.Dates.some(d=>d.startsWith(month))
+  ).length;
+}
+
+function calculateScore(distance,load,busy){
+  if(busy)return -999;
+  let score=100;
+  score-=distance*1.2;
+  score-=load*5;
+  return score;
+}
+
+function runScheduling(){
+  const targetAuthority=document.getElementById('authoritySelect').value;
+  const date=document.getElementById('dateInput').value;
+  const tbody=document.querySelector('#resultsTable tbody');
+  tbody.innerHTML='';
+
+  const results=schedulingData.instructors
+    .filter(i=>i.Role==="instructor")
+    .map(i=>{
+      const distance=getDistance(i,targetAuthority);
+      const busy=isBusy(i.EmployeeID,date);
+      const load=monthlyLoad(i.EmployeeID,date);
+      const score=calculateScore(distance,load,busy);
+      return {...i,distance,load,busy,score};
+    })
+    .sort((a,b)=>b.score-a.score);
+
+  results.forEach(r=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td>${r.Employee}</td>
+      <td>${r.HomeAuthority}</td>
+      <td>${r.distance? r.distance.toFixed(1):'-'}</td>
+      <td>${r.load}</td>
+      <td class="${r.busy?'red':'green'}">${r.busy?'תפוס':'פנוי'}</td>
+      <td>${r.score.toFixed(1)}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+loadData();
+</script>
+
+</body>
+</html>
