@@ -402,21 +402,29 @@ function computeFreeWindows(events){
   return free;
 }
 
-function pickBestSlot(freeWindows, durationMin){
+function pickBestSlot(freeWindows, durationMin, dateISO, employeeID){
   const WORK_START = 8*60;
   const WORK_END   = 15*60;
 
   const candidates = [];
   for(const [s,e] of freeWindows){
     if((e - s) < durationMin) continue;
-    const slot = [s, s + durationMin];
-    candidates.push(slot);
+
+    // יצירת מספר אופציות בתוך אותו חלון כל 30 דקות
+    for(let t = s; t + durationMin <= e; t += 30){
+      candidates.push([t, t + durationMin]);
+    }
   }
   if(candidates.length === 0) return null;
 
-  // Prefer middle slots
-  const middle = candidates.find(([s,e]) => s > WORK_START && e < WORK_END);
-  return middle || candidates[0];
+  // יצירת seed דטרמיניסטי לפי תאריך + מדריך
+  const seed =
+    Number(employeeID) +
+    new Date(dateISO).getDate();
+
+  const index = seed % candidates.length;
+
+  return candidates[index];
 }
 
 function computeInstructorStats(data){
@@ -493,7 +501,7 @@ function scoreCandidate(data, inst, targetAuthority, dateISO, durationMin){
 
   // free windows & slot
   const free = computeFreeWindows(events);
-  const slot = pickBestSlot(free, durationMin);
+  const slot = pickBestSlot(free, durationMin, dateISO, empId);
   if(!slot) return { ok:false, reason:'NoWindow' };
 
   // authority movement rule (same day)
@@ -563,6 +571,7 @@ function buildSuggestions(data, targetAuthority, durationMin, topN, daysLimit){
     .filter(i => String(i.Role||'').toLowerCase() === 'instructor');
 
   const results = [];
+  const usedInPreviousDay = new Set();
 
   for(const dateISO of dates){
     // אל תציע שיבוץ ביום חג
@@ -591,12 +600,21 @@ function buildSuggestions(data, targetAuthority, durationMin, topN, daysLimit){
     candidates.sort((a,b)=>b.score - a.score);
 
     const picked = [];
-    const used = new Set();
+    const usedToday = new Set();
     for(const c of candidates){
-      if(used.has(c.EmployeeID)) continue;
+      // אל תבחר מדריך שהופיע בתאריך הקודם
+      if(usedInPreviousDay.has(c.EmployeeID)) continue;
+
+      if(usedToday.has(c.EmployeeID)) continue;
+
       picked.push(c);
-      used.add(c.EmployeeID);
+      usedToday.add(c.EmployeeID);
       if(picked.length >= topN) break;
+    }
+
+    usedInPreviousDay.clear();
+    for(const p of picked){
+      usedInPreviousDay.add(p.EmployeeID);
     }
 
     // choose a single slot label for the day: use best candidate slot (top1)
