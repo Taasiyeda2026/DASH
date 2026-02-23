@@ -51,6 +51,19 @@ const managerFilter=document.getElementById('managerFilter');
 const employeeFilter=document.getElementById('employeeFilter');
 const summaryMonth=document.getElementById('summaryMonth');
 
+function updateSchedulingButtonVisibility(){
+  const btn = document.getElementById('btnScheduling');
+  if(!btn) return;
+
+  const id = String(window.EmployeeID || '').trim();
+
+  if(id === '6000' || id === '8000'){
+    btn.style.display = '';
+  }else{
+    btn.style.display = 'none';
+  }
+}
+
 if(userRole === 'instructor'){
   btnSummary.style.display = 'none';
   btnInstructors.style.display = 'none';
@@ -310,6 +323,8 @@ function initFromRawData(){
   const name = sessionStorage.getItem('dash_name') || '';
   const greetingEl = document.getElementById('greetingName');
   if(greetingEl && name) greetingEl.textContent = `שלום, ${name}`;
+
+  updateSchedulingButtonVisibility();
 
   window.mode='week';
   render();
