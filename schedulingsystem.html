@@ -34,6 +34,14 @@
     max-width:520px;
     width:100%;
   }
+  .courses-wrapper{
+    display:flex;
+    justify-content:center;
+  }
+  .courses-wrapper .card{
+    max-width:520px;
+    width:100%;
+  }
   .card{
     background:#fff;
     padding:18px;
@@ -166,11 +174,79 @@
     .page-shell{padding:0 4px 14px;}
     .card{padding:14px;}
   }
+
+  /* Scheduling table - compact mode */
+  .scheduling-page .table-wrap{
+    max-width: 100%;
+    overflow: auto;
+  }
+
+  .scheduling-page .courses-wrapper .table-wrap{
+    width: fit-content;
+    max-width: 100%;
+    margin-inline-start: 0;
+  }
+
+  .scheduling-page .courses-wrapper .topbar{
+    align-items: center;
+  }
+
+  /* הכי חשוב: קומפקטיות */
+  .scheduling-page table{
+    width: auto;
+    border-collapse: collapse;
+    table-layout: auto;
+    font-size: 12px;
+    line-height: 1.2;
+    white-space: nowrap;
+  }
+
+  /* כותרות ותאים */
+  .scheduling-page th,
+  .scheduling-page td{
+    padding: 4px 6px;
+    border: 1px solid #e2e8f0;
+    vertical-align: middle;
+  }
+
+  /* כותרת קומפקטית */
+  .scheduling-page th{
+    font-weight: 800;
+    position: sticky;
+    top: 0;
+    background: #fff;
+    z-index: 2;
+  }
+
+  /* שורות נמוכות יותר */
+  .scheduling-page tr{
+    height: 26px;
+  }
+
+  /* עמודות מספרים (ID וכו') */
+  .scheduling-page td.num,
+  .scheduling-page th.num{
+    text-align: center;
+    width: 1%;
+  }
+
+  /* עמודות טקסט קצר */
+  .scheduling-page td.short,
+  .scheduling-page th.short{
+    width: 1%;
+  }
+
+  /* עמודות ארוכות – לקצץ עם ... */
+  .scheduling-page td.ellipsis{
+    max-width: 180px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 </style>
 </head>
 
 <body>
-  <div class="page-shell">
+  <div class="page-shell scheduling-page">
   <h1>📌 Scheduling — מערכת שיבוצים חכמה (עצמאית)</h1>
   <div style="margin-bottom:14px;">
     <button class="back-dashboard-btn" onclick="goBackToDashboard()">
@@ -220,7 +296,8 @@
       </div>
     </div>
 
-    <div class="card">
+    <div class="courses-wrapper">
+      <div class="card">
       <div class="topbar">
         <div>
           <div style="font-weight:900;">מדריכים — כמות קורסים (כמו במערכת)</div>
@@ -233,8 +310,8 @@
         <table>
           <thead>
             <tr>
-              <th>מדריך</th>
-              <th>כמות קורסים</th>
+              <th class="ellipsis">מדריך</th>
+              <th class="num short">כמות קורסים</th>
             </tr>
           </thead>
           <tbody id="coursesBody">
@@ -244,6 +321,7 @@
       </div>
 
       <div class="status" id="statusBoxCourses"></div>
+      </div>
     </div>
 
     <div class="card">
@@ -489,8 +567,8 @@ function renderCoursesTable(rows){
   for(const r of filtered){
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td><strong>${r.Employee}</strong></td>
-      <td><span class="pill">${r.CoursesCount}</span></td>
+      <td class="ellipsis"><strong>${r.Employee}</strong></td>
+      <td class="num short"><span class="pill">${r.CoursesCount}</span></td>
     `;
     tbody.appendChild(tr);
   }
