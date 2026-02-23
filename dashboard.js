@@ -723,10 +723,12 @@ function renderSummary(){
 
       document.body.appendChild(details);
 
-      overlayBg.onclick = ()=>{
+      function closeManagerOverlay(){
         overlayBg.remove();
         details.remove();
-      };
+      }
+      overlayBg.onclick = closeManagerOverlay;
+      overlayBg.addEventListener('touchend', e=>{ e.preventDefault(); closeManagerOverlay(); }, { passive: false });
     };
 
     split.appendChild(col);
@@ -932,8 +934,8 @@ function renderInstructors(){
     box.style.textAlign = 'center';
     box.style.minHeight = '140px';
 
-    box.onmouseenter = ()=> box.style.transform='scale(1.03)';
-    box.onmouseleave = ()=> box.style.transform='scale(1)';
+    box.addEventListener('mouseenter', ()=>{ if(!window.matchMedia('(hover:none)').matches) box.style.transform='scale(1.03)'; });
+    box.addEventListener('mouseleave', ()=>{ box.style.transform='scale(1)'; });
 
     box.innerHTML = `
       <div style="font-weight:800;font-size:18px;margin-bottom:10px">
@@ -1190,6 +1192,23 @@ document.addEventListener('click', (e)=>{
     side.classList.remove('open');
   }
 });
+
+/* ===== סגירת פאנל בהחלקה (swipe) במובייל ===== */
+(function(){
+  let _tx = 0, _ty = 0;
+  side.addEventListener('touchstart', e=>{
+    _tx = e.touches[0].clientX;
+    _ty = e.touches[0].clientY;
+  }, { passive: true });
+  side.addEventListener('touchend', e=>{
+    const dx = e.changedTouches[0].clientX - _tx;
+    const dy = Math.abs(e.changedTouches[0].clientY - _ty);
+    // החלקה שמאלה (סגירה) — לפחות 60px ואופקית יותר מאנכית
+    if(dx < -60 && dy < Math.abs(dx) * 0.8){
+      side.classList.remove('open');
+    }
+  }, { passive: true });
+})();
 
 initFromRawData();
 

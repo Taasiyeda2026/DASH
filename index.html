@@ -94,8 +94,36 @@
 :root{
   --bg:#f8fafc;--card:#ffffff;--border:#e2e8f0;--text:#0f172a;--muted:#64748b;--danger:#dc2626;
 }
-*{box-sizing:border-box}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 body{margin:0;font-family:system-ui,Arial;background:var(--bg);color:var(--text);overflow-x:hidden}
+
+/* ===== MOBILE TOUCH OPTIMIZATIONS ===== */
+
+/* ביטול עיכוב 300ms בלחיצה */
+button,select,a,[onclick]{touch-action:manipulation;}
+
+/* פידבק חזותי ללחיצה במובייל */
+.event:active{opacity:0.78;transform:scale(0.97);transition:transform 0.1s,opacity 0.1s;}
+.summary-col:active{transform:translateY(-2px);transition:transform 0.1s;}
+.login-btn:active{transform:translateY(1px) !important;filter:brightness(0.93) !important;}
+.today-star:active{transform:scale(0.88) !important;}
+.today-calendar:active{transform:scale(0.88) !important;}
+#prev:active,#next:active{transform:scale(0.9);}
+#btnMonth:active,#btnWeek:active,#btnSummary:active,#btnInstructors:active{filter:brightness(0.93);}
+
+/* מינימום שטח לחיצה 44px */
+@media(max-width:800px){
+  button{min-height:44px;}
+  select{min-height:44px;}
+  .side .close,.side-close{width:44px !important;height:44px !important;font-size:22px !important;}
+  .nav-arrows #prev,.nav-arrows #next{min-width:44px;min-height:44px;}
+  /* תחושת לחיצה לכרטיסי מדריכים */
+  #view div[style*="cursor: pointer"]:active{
+    transform:scale(0.96) !important;
+    opacity:0.85;
+    transition:transform 0.1s,opacity 0.1s;
+  }
+}
 header{background:#fff;border-bottom:1px solid var(--border)}
 .header-inner{max-width:1200px;margin:auto;padding:14px;display:flex;gap:12px;align-items:center}
 .app-logo{height:40px}
