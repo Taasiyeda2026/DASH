@@ -149,6 +149,12 @@
 <body>
   <div class="page-shell">
   <h1>📌 Scheduling — מערכת שיבוצים חכמה (עצמאית)</h1>
+  <div style="margin-bottom:14px;">
+    <button onclick="goBackToDashboard()"
+            style="background:#334155;color:#fff;border:none;padding:8px 14px;border-radius:10px;font-weight:800;cursor:pointer;">
+      ⬅ חזרה לדשבורד
+    </button>
+  </div>
 
   <div class="grid">
 
@@ -761,6 +767,10 @@ async function runSuggestions(){
     showStatus('statusBox2', 'שגיאה בטעינת scheduling.json או בחישוב ההצעות.', 'error');
     document.getElementById('resultsList').innerHTML = `<li class="muted">שגיאה.</li>`;
   }
+}
+
+function goBackToDashboard(){
+  location.href = 'index.html';
 }
 
 boot();
