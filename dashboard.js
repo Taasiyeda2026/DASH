@@ -1070,19 +1070,26 @@ function openInstructorModal(name, courses, selectedMonth, selectedYear){
 
   totalWorkDays = maxDays;
   const employmentType = courses[0]?.EmploymentType || '—';
-  const managerName = getInstructorManager(courses[0]) || '—';
+    const managerName = getInstructorManager(courses[0]) || '—';
 
-  sideContent.innerHTML = `
-    <div class="instructor-header">
-      <div class="instructor-name">${name}</div>
-      <div class="instructor-badges">
-        <span class="badge type">${employmentType}</span>
-        <span class="badge days">${totalWorkDays} ימי עבודה בשבוע</span>
-        <span class="badge courses">${courses.length} קורסים</span>
-        <span class="badge">מנהל: ${managerName}</span>
+    // הוספת שורת רשות אם מדובר ב"חסר מדריך"
+    let authorityRow = '';
+    if (name === "חסר מדריך" && courses[0]?.Authority) {
+      authorityRow = `<span class="badge" style="background:#f1f5f9;color:#475569;border:1px solid #cbd5e1;">רשות: ${courses[0].Authority}</span>`;
+    }
+
+    sideContent.innerHTML = `
+      <div class="instructor-header">
+        <div class="instructor-name">${name}</div>
+        <div class="instructor-badges">
+          <span class="badge type">${employmentType}</span>
+          <span class="badge days">${totalWorkDays} ימי עבודה בשבוע</span>
+          <span class="badge courses">${courses.length} קורסים</span>
+          <span class="badge">מנהל: ${managerName}</span>
+          ${authorityRow}
+        </div>
       </div>
-    </div>
-  `;
+    `;
 
   courses.forEach(r=>{
 
