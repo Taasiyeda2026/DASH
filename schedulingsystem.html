@@ -145,6 +145,21 @@
     width:280px;
     max-width:100%;
   }
+  .back-dashboard-btn{
+    background:#475569;
+    color:#fff;
+    border:none;
+    width:auto;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    padding:4px 10px;
+    height:30px;
+    border-radius:6px;
+    font-size:13px;
+    font-weight:400;
+    cursor:pointer;
+  }
 
   @media (max-width: 640px){
     body{padding:14px 10px;}
@@ -158,8 +173,7 @@
   <div class="page-shell">
   <h1>📌 Scheduling — מערכת שיבוצים חכמה (עצמאית)</h1>
   <div style="margin-bottom:14px;">
-    <button onclick="goBackToDashboard()"
-            style="background:#334155;color:#fff;border:none;padding:8px 14px;border-radius:10px;font-weight:800;cursor:pointer;">
+    <button class="back-dashboard-btn" onclick="goBackToDashboard()">
       ⬅ חזרה לדשבורד
     </button>
   </div>
