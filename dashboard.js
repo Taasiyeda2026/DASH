@@ -31,6 +31,19 @@ function normalizeData(data){
 
 rawData = normalizeData(rawData);
 
+// ===== Map מדריכים מתוך rawData =====
+let instructorsMapById = new Map();
+
+rawData.forEach(r => {
+  if (r.EmployeeID && r.EmploymentType) {
+    instructorsMapById.set(
+      String(r.EmployeeID).trim(),
+      {
+        EmploymentType: String(r.EmploymentType).trim()
+      }
+    );
+  }
+});
 function enforceInstructorMode(){
   if(userRole === 'instructor'){
     window.mode = 'month';
@@ -1086,7 +1099,7 @@ function openInstructorModal(name, courses, selectedMonth, selectedYear){
   });
 
   totalWorkDays = maxDays;
-  const employmentType = courses[0]?.EmploymentType || '—';
+  let employmentType = '—';  if (courses[0]?.EmployeeID) {   const instructorObj = instructorsMapById.get(String(courses[0].EmployeeID));   if (instructorObj && instructorObj.EmploymentType) {     employmentType = instructorObj.EmploymentType;   } }
     const managerName = getInstructorManager(courses[0]) || '—';
 
     // הוספת שורת רשות אם מדובר ב"חסר מדריך"
