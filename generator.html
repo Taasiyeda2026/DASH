@@ -236,6 +236,23 @@ document.getElementById('generateBtn').addEventListener('click', async ()=>{
       ])
   );
 
+  function collectCourseDates(course){
+    const dates = [];
+    for(let i = 1; i <= 16; i++){
+      if(course[`Date${i}`] != null && course[`Date${i}`] !== '') dates.push(course[`Date${i}`]);
+    }
+    return dates;
+  }
+
+  function normalizeCourse(course, extraFields = {}){
+    const { Manager, ...courseWithoutManager } = course;
+    return {
+      ...courseWithoutManager,
+      Dates: collectCourseDates(course),
+      ...extraFields
+    };
+  }
+
   let instructorCount = 0, adminCount = 0, skipped = 0;
   const total = codesData.length;
 
@@ -262,15 +279,9 @@ document.getElementById('generateBtn').addEventListener('click', async ()=>{
 
       const courses = mainData
         .filter(r => Number(r.EmployeeID) === Number(EmployeeID))
-        .map(course => {
-          const dates = [];
-          for(let i=1;i<=16;i++){ if(course[`Date${i}`]) dates.push(course[`Date${i}`]); }
-          return {
-            ...course,
-            Dates: dates,
-            InstructorManager: instructorManager
-          };
-        });
+        .map(course => normalizeCourse(course, {
+          InstructorManager: instructorManager
+        }));
 
       const name = NameField || courses[0]?.Employee || '';
       instructorsFolder.file(`${hash}.json`, JSON.stringify({name, data: courses}, null, 2));
@@ -279,14 +290,10 @@ document.getElementById('generateBtn').addEventListener('click', async ()=>{
     }
     else if(Role === 'admin'){
       const allCourses = mainData.map(course => {
-        const dates = [];
-        for(let i=1;i<=16;i++){ if(course[`Date${i}`]) dates.push(course[`Date${i}`]); }
         const employeeId = String(course.EmployeeID ?? '').trim();
-        return {
-          ...course,
-          Dates: dates,
+        return normalizeCourse(course, {
           InstructorManager: instructorManagersByEmployeeId.get(employeeId) || ''
-        };
+        });
       });
 
       const name = NameField || '';
@@ -322,15 +329,9 @@ document.getElementById('generateBtn').addEventListener('click', async ()=>{
 
   // כל הקורסים עם Dates[] — מתוך main.xlsx
   const schedulingCourses = mainData.map(course => {
-    const dates = [];
-    for(let i = 1; i <= 16; i++){
-      if(course[`Date${i}`] != null && course[`Date${i}`] !== '') dates.push(course[`Date${i}`]);
-    }
-    return {
-      ...course,
-      Dates: dates,
+    return normalizeCourse(course, {
       CourseManager: String(course.CourseManager ?? '').trim()
-    };
+    });
   });
 
   const schedulingJson = {
