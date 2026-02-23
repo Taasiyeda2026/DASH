@@ -1119,8 +1119,7 @@ document.getElementById('next').onclick = ()=>{
     }
   }
   else if(window.mode==='month'){
-    const temp = new Date(currentDate);
-    temp.setMonth(temp.getMonth()+1);
+    const temp = new Date(currentDate.getFullYear(), currentDate.getMonth()+1, 1);
 
     if(dataRange){
       const maxMonth = new Date(dataRange.max.getFullYear(), dataRange.max.getMonth(), 1);
