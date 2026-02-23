@@ -470,6 +470,14 @@ function computeInstructorKPI(data){
 }
 
 /* ===== Scoring (Hard rules + fairness next week) ===== */
+function isHolidayDate(data, dateISO){
+  for(const c of (data.courses || [])){
+    if(String(c.EventType || '').trim().toUpperCase() !== 'HOLIDAY') continue;
+    if((c.Dates || []).includes(dateISO)) return true;
+  }
+  return false;
+}
+
 function scoreCandidate(data, inst, targetAuthority, dateISO, durationMin){
   const empId = String(inst.EmployeeID);
   const home = String(inst.HomeAuthority || '').trim();
@@ -570,6 +578,9 @@ function buildSuggestions(data, targetAuthority, durationMin, topN, daysLimit){
   const results = [];
 
   for(const dateISO of dates){
+    // אל תציע שיבוץ ביום חג
+    if(isHolidayDate(data, dateISO)) continue;
+
     const candidates = [];
 
     for(const inst of instructors){
