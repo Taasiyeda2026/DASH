@@ -667,9 +667,26 @@ function renderSummary(){
   const totalCourses = activeThisMonth + startingFuture;
 
   const missingInstructorCount = rawData.filter(r => {
-    if(String(r.EventType || '').trim().toUpperCase() !== 'COURSE') return false;
-    if(r.Employee && r.Employee.trim()) return false;
-    return r.Dates.some(d => d && d.getFullYear() === currentYear && d.getMonth() === currentMonth);
+
+    if(String(r.EventType || '').trim().toUpperCase() !== 'COURSE')
+      return false;
+
+    if(r.Employee && r.Employee.trim())
+      return false;
+
+    const activeInMonth = r.Dates.some(d =>
+      d &&
+      d.getFullYear() === currentYear &&
+      d.getMonth() === currentMonth
+    );
+
+    const startDate = getCourseStartDate(r);
+    const isFuture =
+      startDate &&
+      startDate >= nextMonthStart;
+
+    return activeInMonth || isFuture;
+
   }).length;
 
   titleEl.textContent = currentMonthStart.toLocaleString('he-IL',{month:'long',year:'numeric'});
