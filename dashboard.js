@@ -625,6 +625,125 @@ function getCourseStartDate(r){
   return new Date(Math.min(...validDates.map(d => d.getTime())));
 }
 
+function openMissingCourses(year, month){
+  const missingCourses = rawData.filter(r => {
+
+    if (String(r.EventType || '').trim().toUpperCase() !== 'COURSE')
+      return false;
+
+    if (r.Employee && r.Employee.trim())
+      return false;
+
+    const activeInMonth = r.Dates.some(d =>
+      d &&
+      d.getFullYear() === year &&
+      d.getMonth() === month
+    );
+
+    const startDate = getCourseStartDate(r);
+    const nextMonthStart = new Date(year, month + 1, 1);
+    nextMonthStart.setHours(0,0,0,0);
+
+    const isFuture =
+      startDate &&
+      startDate >= nextMonthStart;
+
+    return activeInMonth || isFuture;
+  });
+
+  sideContent.innerHTML = `
+    <h2>קורסים ללא מדריך</h2>
+    <div class="subtitle">${missingCourses.length} קורסים</div>
+    <div style="border-top:1px solid var(--border); margin:10px 0;"></div>
+  `;
+
+  missingCourses.forEach(r => {
+
+    const startDate = getCourseStartDate(r);
+    const end = endDate(r);
+
+    sideContent.innerHTML += `
+      <div class="course-card">
+        <div style="font-weight:800;font-size:16px;margin-bottom:6px">
+          ${r.Program || '—'}
+        </div>
+        <div>🏫 בית ספר: ${r.School || '—'}</div>
+        <div>🌍 רשות: ${r.Authority || '—'}</div>
+        <div>👨‍💼 מנהל: ${getCourseManager(r) || '—'}</div>
+        <div>📅 התחלה: ${startDate ? startDate.toLocaleDateString('he-IL') : '—'}</div>
+        <div>🏁 סיום: ${end ? end.toLocaleDateString('he-IL') : '—'}</div>
+      </div>
+    `;
+  });
+
+  side.classList.add('open');
+}
+
+function openManagerOverlay(mgr, year, month){
+  const courses = rawData.filter(isCourse);
+  const mgrCourses = courses.filter(r=>getCourseManager(r) === mgr);
+  const mgrEndedThisMonth = mgrCourses.filter(r =>
+    isCourseEndingInMonth(r, year, month)
+  ).sort((a,b)=>parseDate(a.End)-parseDate(b.End));
+
+  const mgrMissingActive = mgrCourses.filter(r =>
+    isCourseActiveInMonth(r, year, month) &&
+    (!r.Employee || !r.Employee.trim())
+  );
+
+  document.querySelectorAll('.manager-overlay-bg, .manager-details-overlay')
+    .forEach(el=>el.remove());
+
+  const overlayBg = document.createElement('div');
+  overlayBg.className = 'manager-overlay-bg';
+  document.body.appendChild(overlayBg);
+
+  const details = document.createElement('div');
+  details.className = 'manager-details-overlay';
+
+  details.innerHTML = `
+    <h3>${mgr}</h3>
+    ${mgrMissingActive.length > 0 ? `
+      <div style="background:#fef2f2;border:1.5px solid #dc2626;border-radius:12px;padding:14px;margin-bottom:16px">
+        <div style="font-weight:800;color:#dc2626;margin-bottom:10px">⚠ קורסים פעילים ללא מדריך: ${mgrMissingActive.length}</div>
+        ${mgrMissingActive.map(r=>`
+          <div style="font-size:13px;padding:5px 0;border-bottom:1px solid #fecaca">
+            ${r.Program || '—'}${r.School ? ` · ${r.School}` : ''}
+          </div>`).join('')}
+      </div>` : ''}
+    ${
+      mgrEndedThisMonth.length
+        ? mgrEndedThisMonth.map(r=>{
+            const empName = (r.Employee && r.Employee.trim())
+              ? r.Employee
+              : `<span style="color:#dc2626;font-weight:700">חסר מדריך</span>`;
+
+            return `
+              <div class="manager-course-card">
+                <div class="manager-course-title">${r.Program}</div>
+                <div class="manager-course-meta">
+                  👤 מדריך: ${empName}<br>
+                  🏫 בית ספר: ${r.School || '—'}<br>
+                  🌍 רשות: ${r.Authority || '—'}<br>
+                  📅 תאריך סיום: ${parseDate(r.End).toLocaleDateString('he-IL')}
+                </div>
+              </div>
+            `;
+          }).join('')
+        : '<div style="color:#94a3b8">אין קורסים המסתיימים החודש</div>'
+    }
+  `;
+
+  document.body.appendChild(details);
+
+  function closeManagerOverlay(){
+    overlayBg.remove();
+    details.remove();
+  }
+  overlayBg.onclick = closeManagerOverlay;
+  overlayBg.addEventListener('touchend', e=>{ e.preventDefault(); closeManagerOverlay(); }, { passive: false });
+}
+
 function renderSummary(){
   const selectedValue = summaryMonth.value;
 
@@ -747,12 +866,8 @@ function renderSummary(){
       isCourseEndingInMonth(r, currentYear, currentMonth)
     ).sort((a,b)=>parseDate(a.End)-parseDate(b.End));
 
-    const mgrMissingActive = mgrCourses.filter(r =>
-      isCourseActiveInMonth(r, currentYear, currentMonth) &&
-      (!r.Employee || !r.Employee.trim())
-    );
-
     const col = document.createElement('div'); col.className = 'summary-col';
+    col.dataset.manager = mgr;
     col.innerHTML = `
       <div style="text-align:center;margin-bottom:10px">
         <div style="font-size:13px;color:#64748b">קורסים פעילים</div>
@@ -763,124 +878,28 @@ function renderSummary(){
         קורסים שמסתיימים החודש: ${mgrEndedThisMonth.length}
       </div>`;
 
-    col.onclick = () => {
-      document.querySelectorAll('.manager-overlay-bg, .manager-details-overlay')
-        .forEach(el=>el.remove());
-
-      const overlayBg = document.createElement('div');
-      overlayBg.className = 'manager-overlay-bg';
-      document.body.appendChild(overlayBg);
-
-      const details = document.createElement('div');
-      details.className = 'manager-details-overlay';
-
-      details.innerHTML = `
-        <h3>${mgr}</h3>
-        ${mgrMissingActive.length > 0 ? `
-          <div style="background:#fef2f2;border:1.5px solid #dc2626;border-radius:12px;padding:14px;margin-bottom:16px">
-            <div style="font-weight:800;color:#dc2626;margin-bottom:10px">⚠ קורסים פעילים ללא מדריך: ${mgrMissingActive.length}</div>
-            ${mgrMissingActive.map(r=>`
-              <div style="font-size:13px;padding:5px 0;border-bottom:1px solid #fecaca">
-                ${r.Program || '—'}${r.School ? ` · ${r.School}` : ''}
-              </div>`).join('')}
-          </div>` : ''}
-        ${
-          mgrEndedThisMonth.length
-            ? mgrEndedThisMonth.map(r=>{
-                const empName = (r.Employee && r.Employee.trim())
-                  ? r.Employee
-                  : `<span style="color:#dc2626;font-weight:700">חסר מדריך</span>`;
-
-                return `
-                  <div class="manager-course-card">
-                    <div class="manager-course-title">${r.Program}</div>
-                    <div class="manager-course-meta">
-                      👤 מדריך: ${empName}<br>
-                      🏫 בית ספר: ${r.School || '—'}<br>
-                      🌍 רשות: ${r.Authority || '—'}<br>
-                      📅 תאריך סיום: ${parseDate(r.End).toLocaleDateString('he-IL')}
-                    </div>
-                  </div>
-                `;
-              }).join('')
-            : '<div style="color:#94a3b8">אין קורסים המסתיימים החודש</div>'
-        }
-      `;
-
-      document.body.appendChild(details);
-
-      function closeManagerOverlay(){
-        overlayBg.remove();
-        details.remove();
-      }
-      overlayBg.onclick = closeManagerOverlay;
-      overlayBg.addEventListener('touchend', e=>{ e.preventDefault(); closeManagerOverlay(); }, { passive: false });
-    };
-
     split.appendChild(col);
   });
   wrap.appendChild(split);
   view.appendChild(wrap);
 
-  // חיבור לחיצה לחסר מדריך
-  const missingCard = wrap.querySelector('.missing-card');
+  wrap.addEventListener('click', function(e){
 
-  if (missingCard) {
-    missingCard.addEventListener('click', () => {
+    // === חסר מדריך ===
+    const missing = e.target.closest('.missing-card');
+    if(missing){
+      openMissingCourses(currentYear, currentMonth);
+      return;
+    }
 
-      const missingCourses = rawData.filter(r => {
+    // === מנהל ===
+    const managerCol = e.target.closest('[data-manager]');
+    if(managerCol){
+      const mgrName = managerCol.dataset.manager;
+      openManagerOverlay(mgrName, currentYear, currentMonth);
+    }
 
-        if (String(r.EventType || '').trim().toUpperCase() !== 'COURSE')
-          return false;
-
-        if (r.Employee && r.Employee.trim())
-          return false;
-
-        const activeInMonth = r.Dates.some(d =>
-          d &&
-          d.getFullYear() === currentYear &&
-          d.getMonth() === currentMonth
-        );
-
-        const startDate = getCourseStartDate(r);
-        const nextMonthStart = new Date(currentYear, currentMonth + 1, 1);
-        nextMonthStart.setHours(0,0,0,0);
-
-        const isFuture =
-          startDate &&
-          startDate >= nextMonthStart;
-
-        return activeInMonth || isFuture;
-      });
-
-      sideContent.innerHTML = `
-        <h2>קורסים ללא מדריך</h2>
-        <div class="subtitle">${missingCourses.length} קורסים</div>
-        <div style="border-top:1px solid var(--border); margin:10px 0;"></div>
-      `;
-
-      missingCourses.forEach(r => {
-
-        const startDate = getCourseStartDate(r);
-        const end = endDate(r);
-
-        sideContent.innerHTML += `
-          <div class="course-card">
-            <div style="font-weight:800;font-size:16px;margin-bottom:6px">
-              ${r.Program || '—'}
-            </div>
-            <div>🏫 בית ספר: ${r.School || '—'}</div>
-            <div>🌍 רשות: ${r.Authority || '—'}</div>
-            <div>👨‍💼 מנהל: ${getCourseManager(r) || '—'}</div>
-            <div>📅 התחלה: ${startDate ? startDate.toLocaleDateString('he-IL') : '—'}</div>
-            <div>🏁 סיום: ${end ? end.toLocaleDateString('he-IL') : '—'}</div>
-          </div>
-        `;
-      });
-
-      side.classList.add('open');
-    });
-  }
+  });
 }
 
 function getUniqueInstructorMonths(){
