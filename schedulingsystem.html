@@ -3,178 +3,753 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>מערכת שיבוצים חכמה</title>
+<title>Scheduling — מערכת שיבוצים חכמה</title>
 
 <style>
-body{
-  font-family:Arial;
-  background:#f4f6f9;
-  margin:0;
-  padding:30px;
-}
-h1{
-  margin-bottom:20px;
-}
-.card{
-  background:white;
-  padding:20px;
-  border-radius:12px;
-  box-shadow:0 4px 16px rgba(0,0,0,0.08);
-  margin-bottom:20px;
-}
-select,input,button{
-  padding:10px;
-  margin:5px 0;
-  border-radius:8px;
-  border:1px solid #ccc;
-}
-button{
-  background:#2563eb;
-  color:white;
-  cursor:pointer;
-  border:none;
-}
-button:hover{
-  background:#1e40af;
-}
-table{
-  width:100%;
-  border-collapse:collapse;
-  margin-top:15px;
-}
-th,td{
-  padding:10px;
-  border-bottom:1px solid #eee;
-  text-align:center;
-}
-th{
-  background:#f1f5f9;
-}
-.green{color:#059669;font-weight:bold;}
-.red{color:#dc2626;font-weight:bold;}
+  *{box-sizing:border-box}
+  body{
+    font-family: Arial, sans-serif;
+    background:#f4f6f9;
+    margin:0;
+    padding:22px;
+    color:#0f172a;
+  }
+  h1{margin:0 0 14px 0;font-size:22px}
+  .grid{
+    display:grid;
+    grid-template-columns: 1fr;
+    gap:14px;
+  }
+  .card{
+    background:#fff;
+    padding:16px;
+    border-radius:14px;
+    box-shadow:0 6px 22px rgba(0,0,0,.08);
+  }
+  .row{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap:12px;
+  }
+  label{
+    display:block;font-size:13px;font-weight:800;
+    color:#2563eb;margin:8px 0 6px
+  }
+  select,input,button{
+    width:100%;
+    padding:10px 12px;
+    border-radius:10px;
+    border:1px solid #cbd5e1;
+    font-size:14px;
+    background:#fff;
+  }
+  button{
+    margin-top:12px;
+    background:#2563eb;
+    color:#fff;
+    border:none;
+    font-weight:900;
+    cursor:pointer;
+  }
+  button:hover{background:#1e40af}
+  .note{
+    margin-top:10px;
+    font-size:12px;
+    color:#64748b;
+    line-height:1.6;
+  }
+  .status{
+    display:none;
+    margin-top:10px;
+    padding:10px 12px;
+    border-radius:12px;
+    font-size:13px;
+    line-height:1.6;
+  }
+  .status.error{background:#fef2f2;border:1px solid #fecaca;color:#991b1b}
+  .status.ok{background:#eff6ff;border:1px solid #bfdbfe;color:#1d4ed8}
+
+  /* tables */
+  .table-wrap{overflow:auto;border:1px solid #e2e8f0;border-radius:12px}
+  table{width:100%;border-collapse:collapse}
+  th,td{
+    padding:10px 12px;
+    border-bottom:1px solid #eef2f7;
+    text-align:right;
+    font-size:13px;
+    white-space:nowrap;
+  }
+  th{background:#f1f5f9;font-weight:900}
+  tr:hover td{background:#fafcff}
+  .small{font-size:12px;color:#64748b;font-weight:700}
+  .pill{
+    display:inline-block;
+    padding:4px 10px;
+    border-radius:999px;
+    border:1px solid #e2e8f0;
+    background:#f8fafc;
+    font-weight:900;
+    font-size:12px;
+  }
+
+  /* suggestions list */
+  .list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:10px}
+  .item{
+    border:1px solid #e2e8f0;
+    border-radius:12px;
+    padding:12px;
+    background:#fff;
+  }
+  .item-header{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:10px;
+    margin-bottom:8px;
+  }
+  .item-title{font-weight:900;font-size:14px}
+  .item-sub{font-size:12px;color:#64748b;font-weight:700}
+  .options{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+  .opt{
+    border:1px solid #e2e8f0;
+    background:#f8fafc;
+    border-radius:999px;
+    padding:7px 10px;
+    font-size:12px;
+    font-weight:900;
+  }
+  .opt strong{color:#0f172a}
+  .muted{color:#94a3b8;font-weight:700}
+  .topbar{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;
+  }
+  .search{
+    width:280px;
+    max-width:100%;
+  }
 </style>
 </head>
+
 <body>
+  <h1>📌 Scheduling — מערכת שיבוצים חכמה (עצמאית)</h1>
 
-<h1>📊 מערכת שיבוצים חכמה</h1>
+  <div class="grid">
 
-<div class="card">
-  <label>רשות יעד:</label><br>
-  <select id="authoritySelect"></select><br>
+    <!-- CARD 1: Instructors KPI (next week only) -->
+    <div class="card">
+      <div class="topbar">
+        <div>
+          <div style="font-weight:900;">מצב מדריכים — עומסים בשבוע הבא (א׳–ה׳)</div>
+          <div class="small" id="weekRangeText">—</div>
+        </div>
+        <input class="search" id="instructorSearch" placeholder="חיפוש מדריך..." oninput="renderInstructorTableFromLast()"/>
+      </div>
 
-  <label>תאריך:</label><br>
-  <input type="date" id="dateInput"><br>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>מדריך</th>
+              <th>ימי עבודה שבוע הבא</th>
+              <th>מספר קורסים (כמו במערכת)</th>
+              <th>רשות בית</th>
+            </tr>
+          </thead>
+          <tbody id="instructorsBody">
+            <tr><td colspan="4" class="muted">טוען נתונים…</td></tr>
+          </tbody>
+        </table>
+      </div>
 
-  <button onclick="runScheduling()">חשב שיבוץ</button>
-</div>
+      <div class="note">
+        * ימי עבודה = מספר תאריכים ייחודיים (Distinct) שבהם יש למדריך לפחות קורס אחד בשבוע הבא בלבד.  
+        * המערכת אינה שומרת זיכרון/Cache — כל טעינה/הרצה מבצעת חישוב מחדש מתוך scheduling.json.
+      </div>
 
-<div class="card">
-  <table id="resultsTable">
-    <thead>
-      <tr>
-        <th>מדריך</th>
-        <th>רשות בית</th>
-        <th>מרחק (ק״מ)</th>
-        <th>עומס חודשי</th>
-        <th>זמינות</th>
-        <th>ציון חכם</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-</div>
+      <div class="status" id="statusBox1"></div>
+    </div>
+
+    <!-- CARD 2: Suggest scheduling -->
+    <div class="card">
+      <div style="font-weight:900;margin-bottom:8px;">הצעת שיבוצים — תאריכים ושעות חלון (120 דק׳)</div>
+
+      <div class="row">
+        <div>
+          <label>רשות יעד</label>
+          <select id="authoritySelect"></select>
+        </div>
+        <div>
+          <label>כמות ימים להציג</label>
+          <select id="daysLimit">
+            <option value="10">10</option>
+            <option value="20" selected>20</option>
+            <option value="30">30</option>
+            <option value="50">50</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label>אפשרויות לכל תאריך</label>
+          <select id="topN">
+            <option value="3" selected>Top 3</option>
+            <option value="5">Top 5</option>
+          </select>
+        </div>
+        <div>
+          <label>משך קורס (דקות)</label>
+          <input id="durationMin" type="number" value="120" min="30" step="5"/>
+        </div>
+      </div>
+
+      <button onclick="runSuggestions()">מצא שיבוצים חכמים</button>
+
+      <div class="note" id="rangeNote">—</div>
+      <div class="status" id="statusBox2"></div>
+    </div>
+
+    <!-- CARD 3: Results -->
+    <div class="card">
+      <div class="topbar">
+        <div style="font-weight:900;">תוצאות שיבוץ — תאריך + חלון + אפשרויות (Top N)</div>
+        <div class="small" id="metaInfo">—</div>
+      </div>
+
+      <ul class="list" id="resultsList">
+        <li class="muted">לחץ “מצא שיבוצים חכמים” כדי להציג תוצאות.</li>
+      </ul>
+    </div>
+
+  </div>
 
 <script>
-let schedulingData;
+/* ===========================
+   Scheduling — Self-contained
+   No cache, no shared state.
+   Each action fetches JSON fresh.
+   =========================== */
 
-async function loadData(){
-  const res = await fetch('data/Scheduling/scheduling.json');
-  schedulingData = await res.json();
-
-  const authorities = Object.keys(schedulingData.authorityLocations);
-  const select = document.getElementById('authoritySelect');
-
-  authorities.forEach(a=>{
-    const opt=document.createElement('option');
-    opt.value=a;
-    opt.textContent=a;
-    select.appendChild(opt);
-  });
+function showStatus(id, msg, type){
+  const box = document.getElementById(id);
+  box.textContent = msg;
+  box.className = `status ${type}`;
+  box.style.display = 'block';
+}
+function clearStatus(id){
+  const box = document.getElementById(id);
+  box.style.display = 'none';
+  box.textContent = '';
 }
 
+function pad2(n){ return String(n).padStart(2,'0'); }
+function toISODateLocal(d){
+  return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
+}
+function addDays(d, days){
+  const x = new Date(d.getTime());
+  x.setDate(x.getDate() + days);
+  return x;
+}
+function parseISODate(iso){
+  const m = iso.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if(!m) return null;
+  return new Date(Number(m[1]), Number(m[2])-1, Number(m[3]));
+}
+
+function timeToMin(t){
+  if(typeof t !== 'string') return null;
+  const m = t.trim().match(/^(\d{1,2}):(\d{2})$/);
+  if(!m) return null;
+  const hh = Number(m[1]), mm = Number(m[2]);
+  if(Number.isNaN(hh) || Number.isNaN(mm)) return null;
+  return hh*60 + mm;
+}
+function minToTime(m){
+  const hh = Math.floor(m/60);
+  const mm = m % 60;
+  return `${pad2(hh)}:${pad2(mm)}`;
+}
+
+function isWorkdaySunThu(dateObj){
+  // JS: 0=Sun .. 6=Sat
+  const d = dateObj.getDay();
+  return d >= 0 && d <= 4; // Sun-Thu
+}
+
+/* ===== Next Week (Sun-Thu) =====
+   "השבוע הבא" = השבוע שמתחיל ביום ראשון הבא (לא השבוע הנוכחי).
+*/
+function getNextWeekDatesISO(){
+  const today = new Date();
+  const dow = today.getDay(); // 0=Sun
+  let daysUntilNextSunday = (7 - dow) % 7;
+  if(daysUntilNextSunday === 0) daysUntilNextSunday = 7; // if today is Sunday -> next Sunday
+  const nextSunday = addDays(new Date(today.getFullYear(), today.getMonth(), today.getDate()), daysUntilNextSunday);
+
+  const dates = [];
+  for(let i=0;i<5;i++){ // Sun..Thu
+    dates.push(toISODateLocal(addDays(nextSunday, i)));
+  }
+  return dates;
+}
+
+/* ===== Range for suggestions: TODAY..TODAY+45, Sun-Thu only ===== */
+function getSuggestionDatesISO(){
+  const today = new Date();
+  const start = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  const end = addDays(start, 45);
+
+  const dates = [];
+  let cur = start;
+  while(cur <= end){
+    if(isWorkdaySunThu(cur)){
+      dates.push(toISODateLocal(cur));
+    }
+    cur = addDays(cur, 1);
+  }
+  return dates;
+}
+
+/* ===== Data Loader (always fresh) ===== */
+async function loadSchedulingDataFresh(){
+  const res = await fetch('data/Scheduling/scheduling.json', { cache:'no-store' });
+  if(!res.ok) throw new Error('לא ניתן לטעון data/Scheduling/scheduling.json');
+  return await res.json();
+}
+
+/* ===== Distance (Haversine) computed on demand ===== */
 function haversine(lat1, lon1, lat2, lon2){
-  const R=6371;
-  const toRad=x=>x*Math.PI/180;
-  const dLat=toRad(lat2-lat1);
-  const dLon=toRad(lon2-lon1);
-  const a=Math.sin(dLat/2)**2+
-          Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*
-          Math.sin(dLon/2)**2;
-  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+  const R = 6371;
+  const toRad = x => x * Math.PI / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+  const a =
+    Math.sin(dLat/2)**2 +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon/2)**2;
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  return R * c;
+}
+function getDistanceKm(data, fromAuthority, toAuthority){
+  const fromLoc = data.authorityLocations?.[fromAuthority];
+  const toLoc   = data.authorityLocations?.[toAuthority];
+  if(!fromLoc || !toLoc) return null;
+  return haversine(fromLoc.lat, fromLoc.lng, toLoc.lat, toLoc.lng);
 }
 
-function getDistance(instructor,targetAuthority){
-  const homeLoc=schedulingData.authorityLocations[instructor.HomeAuthority];
-  const targetLoc=schedulingData.authorityLocations[targetAuthority];
-  if(!homeLoc||!targetLoc)return null;
-  return haversine(homeLoc.lat,homeLoc.lng,targetLoc.lat,targetLoc.lng);
+/* ===== Dates matching helper ===== */
+function courseOccursOnDate(course, dateISO){
+  const dates = course.Dates || [];
+  return dates.includes(dateISO);
 }
 
-function isBusy(instructorID,date){
-  return schedulingData.courses.some(c=>
-    c.EmployeeID===instructorID && c.Dates.includes(date)
+/* ===== Collect events for instructor on a date (fresh scan) ===== */
+function getInstructorEventsOnDate(data, employeeID, dateISO){
+  const evs = [];
+  for(const c of (data.courses || [])){
+    if(String(c.EmployeeID) !== String(employeeID)) continue;
+    if(!courseOccursOnDate(c, dateISO)) continue;
+    const s = timeToMin(c.StartTime);
+    const e = timeToMin(c.EndTime);
+    if(s === null || e === null) continue;
+    evs.push({ startMin:s, endMin:e, authority: String(c.Authority || '').trim() });
+  }
+  evs.sort((a,b)=>a.startMin-b.startMin);
+  return evs;
+}
+
+/* ===== Compute free windows inside 08:00-15:00 ===== */
+function computeFreeWindows(events){
+  const WORK_START = 8*60;
+  const WORK_END   = 15*60;
+
+  const free = [];
+  let cur = WORK_START;
+
+  for(const ev of events){
+    if(cur < ev.startMin){
+      free.push([cur, ev.startMin]);
+    }
+    cur = Math.max(cur, ev.endMin);
+  }
+  if(cur < WORK_END){
+    free.push([cur, WORK_END]);
+  }
+  return free;
+}
+
+/* ===== Extract possible slots of duration within free windows =====
+   We return a single "best" slot:
+   Prefer a slot fully inside day (not touching edges) if possible,
+   otherwise earliest slot.
+*/
+function pickBestSlot(freeWindows, durationMin){
+  const WORK_START = 8*60;
+  const WORK_END   = 15*60;
+
+  const candidates = [];
+  for(const [s,e] of freeWindows){
+    if((e - s) < durationMin) continue;
+    const slot = [s, s + durationMin];
+    candidates.push(slot);
+  }
+  if(candidates.length === 0) return null;
+
+  // Prefer middle slots
+  const middle = candidates.find(([s,e]) => s > WORK_START && e < WORK_END);
+  return middle || candidates[0];
+}
+
+/* ===== Instructor KPI: WorkDaysNextWeek (Distinct) + CoursesCount ===== */
+function computeInstructorKPI(data){
+  const nextWeek = new Set(getNextWeekDatesISO());
+
+  const instructors = (data.instructors || [])
+    .filter(i => String(i.Role||'').toLowerCase() === 'instructor');
+
+  // CoursesCount: "כמו במערכת" = count of course rows in data.courses matching EmployeeID
+  // WorkDaysNextWeek: distinct dates within nextWeek
+  const rows = instructors.map(inst => {
+    const empId = String(inst.EmployeeID);
+    let coursesCount = 0;
+    const daysSet = new Set();
+
+    for(const c of (data.courses || [])){
+      if(String(c.EmployeeID) !== empId) continue;
+      coursesCount++;
+
+      const ds = c.Dates || [];
+      for(const d of ds){
+        if(typeof d === 'string' && nextWeek.has(d)){
+          daysSet.add(d);
+        }
+      }
+    }
+
+    return {
+      EmployeeID: empId,
+      Employee: inst.Employee || '—',
+      HomeAuthority: inst.HomeAuthority || '—',
+      WorkDaysNextWeek: daysSet.size,
+      CoursesCount: coursesCount
+    };
+  });
+
+  // Sort: WorkDaysNextWeek desc, then CoursesCount desc, then name
+  rows.sort((a,b) =>
+    (b.WorkDaysNextWeek - a.WorkDaysNextWeek) ||
+    (b.CoursesCount - a.CoursesCount) ||
+    String(a.Employee).localeCompare(String(b.Employee), 'he')
   );
+
+  return rows;
 }
 
-function monthlyLoad(instructorID,date){
-  const month=date.slice(0,7);
-  return schedulingData.courses.filter(c=>
-    c.EmployeeID===instructorID &&
-    c.Dates.some(d=>d.startsWith(month))
-  ).length;
+/* ===== Scoring (Hard rules + fairness next week) ===== */
+function scoreCandidate(data, inst, targetAuthority, dateISO, durationMin){
+  const empId = String(inst.EmployeeID);
+  const home = String(inst.HomeAuthority || '').trim();
+
+  // distance home->target must exist
+  const distHome = getDistanceKm(data, home, targetAuthority);
+  if(distHome === null) return { ok:false, reason:'MissingDistance' };
+
+  // events today
+  const events = getInstructorEventsOnDate(data, empId, dateISO);
+
+  // Hard: max 3 events/day
+  if(events.length >= 3) return { ok:false, reason:'MaxDaily' };
+
+  // free windows & slot
+  const free = computeFreeWindows(events);
+  const slot = pickBestSlot(free, durationMin);
+  if(!slot) return { ok:false, reason:'NoWindow' };
+
+  // authority movement rule (same day)
+  const authoritiesToday = new Set(events.map(e => e.authority).filter(Boolean));
+  const alreadyInTarget = authoritiesToday.has(String(targetAuthority).trim());
+
+  let maxInter = 0;
+  for(const a of authoritiesToday){
+    if(!a || a === String(targetAuthority).trim()) continue;
+    const d = getDistanceKm(data, a, targetAuthority);
+    if(d === null) continue;
+    maxInter = Math.max(maxInter, d);
+  }
+  if(maxInter > 45) return { ok:false, reason:'InterAuthority>45' }; // Hard fail
+
+  // WorkDaysNextWeek (fairness) computed fresh on demand (no caching)
+  const nextWeekSet = new Set(getNextWeekDatesISO());
+  const daysSet = new Set();
+  let coursesCountTotal = 0;
+
+  for(const c of (data.courses || [])){
+    if(String(c.EmployeeID) !== empId) continue;
+    coursesCountTotal++;
+    const ds = c.Dates || [];
+    for(const d of ds){
+      if(typeof d === 'string' && nextWeekSet.has(d)) daysSet.add(d);
+    }
+  }
+  const workDaysNextWeek = daysSet.size;
+
+  // Score
+  let score = 0;
+  score += 50; // has window
+  if(events.length === 0) score += 10; // empty day
+  score -= (events.length * 5);
+
+  // home distance band
+  if(distHome <= 15) score += 0;
+  else if(distHome <= 30) score -= 5;
+  else if(distHome <= 50) score -= 15;
+  else score -= 30;
+
+  // authority same-day preference
+  if(alreadyInTarget) score += 10;
+  else {
+    if(maxInter > 30 && maxInter <= 45) score -= 15;
+  }
+
+  // slot quality bonus
+  const WORK_START = 8*60, WORK_END = 15*60;
+  const [sMin, eMin] = slot;
+  if(sMin > WORK_START && eMin < WORK_END) score += 5;
+
+  // Fairness: only next week workdays
+  score -= (workDaysNextWeek * 3);
+
+  // Soft load: total courses count (like in system)
+  score -= (coursesCountTotal * 0.5);
+
+  return {
+    ok:true,
+    score,
+    distHome,
+    slotStartMin: sMin,
+    slotEndMin: eMin,
+    workDaysNextWeek,
+    coursesCountTotal,
+    eventsCountToday: events.length
+  };
 }
 
-function calculateScore(distance,load,busy){
-  if(busy)return -999;
-  let score=100;
-  score-=distance*1.2;
-  score-=load*5;
-  return score;
+/* ===== Suggestions Builder (no caching) =====
+   For each date in allowed range, compute Top N options
+*/
+function buildSuggestions(data, targetAuthority, durationMin, topN, daysLimit){
+  const dates = getSuggestionDatesISO(); // TODAY..+45, Sun-Thu only
+
+  const instructors = (data.instructors || [])
+    .filter(i => String(i.Role||'').toLowerCase() === 'instructor');
+
+  const results = [];
+
+  for(const dateISO of dates){
+    const candidates = [];
+
+    for(const inst of instructors){
+      const out = scoreCandidate(data, inst, targetAuthority, dateISO, durationMin);
+      if(!out.ok) continue;
+
+      candidates.push({
+        EmployeeID: String(inst.EmployeeID),
+        Employee: inst.Employee || '—',
+        HomeAuthority: inst.HomeAuthority || '—',
+        score: out.score,
+        slotStartMin: out.slotStartMin,
+        slotEndMin: out.slotEndMin,
+        distHome: out.distHome
+      });
+    }
+
+    if(candidates.length === 0) continue;
+
+    // sort by score desc
+    candidates.sort((a,b)=>b.score - a.score);
+
+    // pick Top N (try to diversify: unique EmployeeID)
+    const picked = [];
+    const used = new Set();
+    for(const c of candidates){
+      if(used.has(c.EmployeeID)) continue;
+      picked.push(c);
+      used.add(c.EmployeeID);
+      if(picked.length >= topN) break;
+    }
+
+    // choose a single slot label for the day: use best candidate slot (top1)
+    const top1 = picked[0];
+    results.push({
+      date: dateISO,
+      slot: `${minToTime(top1.slotStartMin)}–${minToTime(top1.slotEndMin)}`,
+      options: picked.map(p => ({
+        name: p.Employee,
+        score: p.score,
+        home: p.HomeAuthority
+      }))
+    });
+
+    if(results.length >= daysLimit) break; // limit number of days shown
+  }
+
+  return results;
 }
 
-function runScheduling(){
-  const targetAuthority=document.getElementById('authoritySelect').value;
-  const date=document.getElementById('dateInput').value;
-  const tbody=document.querySelector('#resultsTable tbody');
-  tbody.innerHTML='';
+/* ===== UI Renderers ===== */
+let _lastInstructorRows = []; // UI-only: not an index for logic; just last rendered rows for filtering
+function renderInstructorTable(rows){
+  _lastInstructorRows = rows;
 
-  const results=schedulingData.instructors
-    .filter(i=>i.Role==="instructor")
-    .map(i=>{
-      const distance=getDistance(i,targetAuthority);
-      const busy=isBusy(i.EmployeeID,date);
-      const load=monthlyLoad(i.EmployeeID,date);
-      const score=calculateScore(distance,load,busy);
-      return {...i,distance,load,busy,score};
-    })
-    .sort((a,b)=>b.score-a.score);
+  const q = (document.getElementById('instructorSearch').value || '').trim().toLowerCase();
+  const filtered = q
+    ? rows.filter(r => String(r.Employee).toLowerCase().includes(q))
+    : rows;
 
-  results.forEach(r=>{
-    const tr=document.createElement('tr');
-    tr.innerHTML=`
-      <td>${r.Employee}</td>
+  const tbody = document.getElementById('instructorsBody');
+  tbody.innerHTML = '';
+
+  if(filtered.length === 0){
+    tbody.innerHTML = `<tr><td colspan="4" class="muted">אין תוצאות</td></tr>`;
+    return;
+  }
+
+  for(const r of filtered){
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><strong>${r.Employee}</strong></td>
+      <td><span class="pill">${r.WorkDaysNextWeek}</span></td>
+      <td><span class="pill">${r.CoursesCount}</span></td>
       <td>${r.HomeAuthority}</td>
-      <td>${r.distance? r.distance.toFixed(1):'-'}</td>
-      <td>${r.load}</td>
-      <td class="${r.busy?'red':'green'}">${r.busy?'תפוס':'פנוי'}</td>
-      <td>${r.score.toFixed(1)}</td>
     `;
     tbody.appendChild(tr);
-  });
+  }
+}
+function renderInstructorTableFromLast(){
+  renderInstructorTable(_lastInstructorRows || []);
 }
 
-loadData();
-</script>
+function renderSuggestions(list){
+  const ul = document.getElementById('resultsList');
+  ul.innerHTML = '';
 
+  if(list.length === 0){
+    ul.innerHTML = `<li class="muted">לא נמצאו שיבוצים מתאימים בטווח (מהיום ועד 45 ימים קדימה, א׳–ה׳).</li>`;
+    return;
+  }
+
+  for(const row of list){
+    const li = document.createElement('li');
+    li.className = 'item';
+
+    const opts = row.options.map((o, idx) =>
+      `<span class="opt"><strong>${idx+1})</strong> ${o.name} — ${o.score.toFixed(1)}</span>`
+    ).join('');
+
+    li.innerHTML = `
+      <div class="item-header">
+        <div>
+          <div class="item-title">${row.date} — ${row.slot}</div>
+          <div class="item-sub">אפשרויות: ${row.options.length} (שם + ציון)</div>
+        </div>
+        <div class="pill">Top</div>
+      </div>
+      <div class="options">${opts}</div>
+    `;
+    ul.appendChild(li);
+  }
+}
+
+/* ===== Boot (initial load of dropdown + KPI) ===== */
+async function boot(){
+  clearStatus('statusBox1');
+  clearStatus('statusBox2');
+
+  // range note
+  const todayISO = toISODateLocal(new Date());
+  const maxISO = toISODateLocal(addDays(new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate()), 45));
+  document.getElementById('rangeNote').textContent =
+    `הצעות שיבוץ: רק מהיום (${todayISO}) ועד ${maxISO} (45 ימים), רק א׳–ה׳, בטווח 08:00–15:00.`;
+
+  // next week label
+  const nw = getNextWeekDatesISO();
+  document.getElementById('weekRangeText').textContent =
+    `שבוע הבא: ${nw[0]} עד ${nw[nw.length-1]} (א׳–ה׳ בלבד).`;
+
+  try{
+    const data = await loadSchedulingDataFresh();
+
+    // meta info
+    const gen = data.generatedAt ? new Date(data.generatedAt) : null;
+    document.getElementById('metaInfo').textContent =
+      gen ? `עודכן: ${gen.toLocaleString('he-IL')}` : `עודכן: —`;
+
+    // authorities dropdown
+    const authorities = Object.keys(data.authorityLocations || {}).sort((a,b)=>a.localeCompare(b,'he'));
+    const sel = document.getElementById('authoritySelect');
+    sel.innerHTML = '';
+    for(const a of authorities){
+      const opt = document.createElement('option');
+      opt.value = a;
+      opt.textContent = a;
+      sel.appendChild(opt);
+    }
+
+    // KPI table
+    const rows = computeInstructorKPI(data);
+    renderInstructorTable(rows);
+
+    showStatus('statusBox1', `נטענו ${rows.length} מדריכים.`, 'ok');
+
+  }catch(err){
+    console.error(err);
+    showStatus('statusBox1', 'שגיאה בטעינת scheduling.json (בדוק נתיב/הרשאות/העלאה).', 'error');
+  }
+}
+
+/* ===== Run Suggestions (fresh fetch, no cache) ===== */
+async function runSuggestions(){
+  clearStatus('statusBox2');
+  document.getElementById('resultsList').innerHTML = `<li class="muted">מחשב הצעות…</li>`;
+
+  const targetAuthority = document.getElementById('authoritySelect').value;
+  const daysLimit = Number(document.getElementById('daysLimit').value);
+  const topN = Number(document.getElementById('topN').value);
+  const durationMin = Number(document.getElementById('durationMin').value);
+
+  if(!targetAuthority){
+    showStatus('statusBox2', 'יש לבחור רשות יעד.', 'error');
+    return;
+  }
+  if(!Number.isFinite(durationMin) || durationMin < 30){
+    showStatus('statusBox2', 'משך קורס לא תקין.', 'error');
+    return;
+  }
+
+  try{
+    const data = await loadSchedulingDataFresh(); // always fresh
+
+    const suggestions = buildSuggestions(data, targetAuthority, durationMin, topN, daysLimit);
+    renderSuggestions(suggestions);
+
+    showStatus(
+      'statusBox2',
+      `נמצאו ${suggestions.length} תאריכים עם חלון מתאים. מוצגות עד ${daysLimit} שורות, עם ${topN} אפשרויות לכל תאריך.`,
+      'ok'
+    );
+
+  }catch(err){
+    console.error(err);
+    showStatus('statusBox2', 'שגיאה בטעינת scheduling.json או בחישוב ההצעות.', 'error');
+    document.getElementById('resultsList').innerHTML = `<li class="muted">שגיאה.</li>`;
+  }
+}
+
+boot();
+</script>
 </body>
 </html>
