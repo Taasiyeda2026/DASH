@@ -291,7 +291,7 @@ function initFromRawData(){
   initFilters();
   initSummaryMonths();
   currentDate = clampDateToDataRange(new Date());
-  window.mode='month';
+  window.mode='week';
   render();
 }
 
