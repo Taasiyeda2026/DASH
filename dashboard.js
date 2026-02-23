@@ -333,9 +333,11 @@ function initFromRawData(){
   initSummaryMonths();
   currentDate = clampDateToDataRange(new Date());
 
-  const name = sessionStorage.getItem('dash_name') || '';
+  const sessionName = sessionStorage.getItem('dash_name') || '';
+  const currentUser = rawData.find(r => String(r.EmployeeID || '').trim() === String(window.EmployeeID || '').trim());
+  const name = sessionName || (currentUser?.Employee || '');
   const greetingEl = document.getElementById('greetingName');
-  if(greetingEl && name) greetingEl.textContent = `שלום, ${name}`;
+  if(greetingEl) greetingEl.textContent = name ? `שלום, ${name}` : '';
 
   updateSchedulingButtonVisibility();
 
