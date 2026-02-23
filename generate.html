@@ -288,9 +288,11 @@ async function generate() {
 
     // 2. Process each row in codes
     for (const row of codesData) {
-      const EmployeeID = String(row.EmployeeID ?? '').trim();
-      const EntryCode  = String(row.EntryCode  ?? '').trim();
-      const Role       = String(row.Role       ?? '').trim().toLowerCase();
+      const EmployeeID      = String(row.EmployeeID      ?? '').trim();
+      const EntryCode       = String(row.EntryCode       ?? '').trim();
+      const Role            = String(row.Role            ?? '').trim().toLowerCase();
+      const EmploymentType  = String(row.EmploymentType  ?? '').trim();
+      const Manager         = String(row.Manager         ?? '').trim();
 
       if (!EmployeeID || !EntryCode || !Role) { countSkipped++; continue; }
 
@@ -299,7 +301,7 @@ async function generate() {
       if (Role === 'instructor') {
         const courses = mainData
           .filter(r => String(r.EmployeeID).trim() === EmployeeID)
-          .map(addDates);
+          .map(r => ({ ...addDates(r), EmploymentType, Manager }));
         instructorsFolder.file(`${hash}.json`, JSON.stringify(courses, null, 2));
         countInstr++;
 
