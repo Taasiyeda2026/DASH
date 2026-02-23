@@ -16,48 +16,47 @@
 *{box-sizing:border-box;margin:0;padding:0;}
 body{
   min-height:100vh;
-  background:linear-gradient(135deg,#0f172a 0%,#1e3a5f 45%,#1e40af 100%);
+  background:#f0f4f8;
   display:flex;align-items:center;justify-content:center;
-  font-family:'Segoe UI',Arial,sans-serif;direction:rtl;color:#f1f5f9;
+  font-family:'Segoe UI',Arial,sans-serif;direction:rtl;color:#1e293b;
 }
 
 .card{
-  background:rgba(255,255,255,0.07);
-  backdrop-filter:blur(12px);
-  border:1px solid rgba(255,255,255,0.15);
+  background:#ffffff;
+  border:1px solid #e2e8f0;
   border-radius:20px;
   padding:40px 36px;
   width:100%;max-width:520px;
-  box-shadow:0 20px 60px rgba(0,0,0,0.4);
+  box-shadow:0 8px 32px rgba(0,0,0,0.08);
 }
 
 h1{
   font-size:1.5rem;font-weight:700;
   text-align:center;margin-bottom:8px;
-  color:#e2e8f0;
+  color:#1e293b;
 }
 .subtitle{
   text-align:center;font-size:.85rem;
-  color:#94a3b8;margin-bottom:32px;
+  color:#64748b;margin-bottom:32px;
 }
 
 .field{margin-bottom:20px;}
 label{
   display:block;font-size:.82rem;font-weight:600;
-  color:#93c5fd;margin-bottom:8px;letter-spacing:.3px;
+  color:#2563eb;margin-bottom:8px;letter-spacing:.3px;
 }
 
 /* drop zones */
 .drop-zone{
-  border:2px dashed rgba(147,197,253,0.35);
+  border:2px dashed #cbd5e1;
   border-radius:12px;padding:20px 16px;
   text-align:center;cursor:pointer;
   transition:border-color .2s,background .2s;
-  background:rgba(255,255,255,0.04);
+  background:#f8fafc;
   position:relative;
 }
 .drop-zone:hover,.drop-zone.dragover{
-  border-color:#60a5fa;background:rgba(96,165,250,0.08);
+  border-color:#2563eb;background:#eff6ff;
 }
 .drop-zone input[type=file]{
   position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;
@@ -65,27 +64,27 @@ label{
 .drop-icon{font-size:1.6rem;display:block;margin-bottom:6px;}
 .drop-label{font-size:.85rem;color:#94a3b8;}
 .drop-name{
-  font-size:.82rem;font-weight:600;color:#34d399;
+  font-size:.82rem;font-weight:600;color:#059669;
   margin-top:6px;display:none;
 }
 
 /* salt field */
 .salt-row{display:flex;gap:10px;align-items:center;}
 .salt-input{
-  flex:1;background:rgba(255,255,255,0.07);
-  border:1px solid rgba(255,255,255,0.15);border-radius:10px;
-  padding:10px 14px;color:#f1f5f9;font-size:.9rem;
+  flex:1;background:#f8fafc;
+  border:1px solid #cbd5e1;border-radius:10px;
+  padding:10px 14px;color:#1e293b;font-size:.9rem;
   outline:none;direction:ltr;text-align:left;
   font-family:monospace;
 }
-.salt-input:focus{border-color:#60a5fa;}
+.salt-input:focus{border-color:#2563eb;}
 .toggle-btn{
-  background:none;border:1px solid rgba(255,255,255,0.15);
+  background:none;border:1px solid #cbd5e1;
   border-radius:8px;padding:10px 12px;cursor:pointer;
-  color:#94a3b8;font-size:.8rem;white-space:nowrap;
+  color:#64748b;font-size:.8rem;white-space:nowrap;
   transition:border-color .2s,color .2s;
 }
-.toggle-btn:hover{border-color:#60a5fa;color:#60a5fa;}
+.toggle-btn:hover{border-color:#2563eb;color:#2563eb;}
 
 /* generate button */
 .btn-generate{
@@ -94,11 +93,11 @@ label{
   border:none;border-radius:12px;color:#fff;
   font-size:1rem;font-weight:700;cursor:pointer;
   letter-spacing:.4px;
-  box-shadow:0 4px 20px rgba(37,99,235,0.4);
+  box-shadow:0 4px 16px rgba(37,99,235,0.3);
   transition:opacity .2s,transform .1s;
 }
 .btn-generate:hover:not(:disabled){opacity:.88;transform:translateY(-1px);}
-.btn-generate:disabled{opacity:.4;cursor:not-allowed;}
+.btn-generate:disabled{opacity:.35;cursor:not-allowed;}
 
 /* status / log */
 .status-box{
@@ -106,13 +105,13 @@ label{
   padding:14px 16px;font-size:.82rem;line-height:1.7;
   display:none;
 }
-.status-box.info{background:rgba(37,99,235,0.18);border:1px solid rgba(96,165,250,0.3);color:#bfdbfe;}
-.status-box.success{background:rgba(5,150,105,0.18);border:1px solid rgba(52,211,153,0.3);color:#6ee7b7;}
-.status-box.error{background:rgba(185,28,28,0.18);border:1px solid rgba(248,113,113,0.3);color:#fca5a5;}
+.status-box.info{background:#eff6ff;border:1px solid #bfdbfe;color:#1d4ed8;}
+.status-box.success{background:#f0fdf4;border:1px solid #86efac;color:#166534;}
+.status-box.error{background:#fef2f2;border:1px solid #fca5a5;color:#991b1b;}
 
 .spinner{
   display:inline-block;width:14px;height:14px;
-  border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;
+  border:2px solid rgba(37,99,235,0.25);border-top-color:#2563eb;
   border-radius:50%;animation:spin .7s linear infinite;
   vertical-align:middle;margin-left:6px;
 }
