@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>מחולל קבצי נתונים</title>
+<script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#f1f5f9;min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:40px 16px;direction:rtl}
+.container{width:100%;max-width:680px}
+h1{font-size:22px;font-weight:700;color:#1e293b;margin-bottom:6px}
+.subtitle{font-size:13px;color:#64748b;margin-bottom:32px}
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
+.card{background:#fff;border:2px dashed #cbd5e1;border-radius:14px;padding:20px;text-align:center;transition:border-color .2s,background .2s;cursor:pointer;position:relative}
+.card:hover{border-color:#6366f1;background:#f5f3ff}
+.card.loaded{border-style:solid;border-color:#22c55e;background:#f0fdf4}
+.card.error{border-style:solid;border-color:#ef4444;background:#fef2f2}
+.card-icon{font-size:32px;margin-bottom:10px}
+.card-label{font-size:13px;font-weight:600;color:#334155;margin-bottom:4px}
+.card-hint{font-size:11px;color:#94a3b8;margin-bottom:12px}
+.card-status{font-size:12px;font-weight:600;color:#64748b;min-height:18px}
+.card.loaded .card-status{color:#16a34a}
+.card.error .card-status{color:#dc2626}
+.card input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.btn{width:100%;padding:14px;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;transition:background .2s,opacity .2s}
+.btn-primary{background:#6366f1;color:#fff}
+.btn-primary:hover:not(:disabled){background:#4f46e5}
+.btn-primary:disabled{opacity:0.4;cursor:not-allowed}
+.btn-download{background:#16a34a;color:#fff;margin-top:12px;display:none}
+.btn-download:hover{background:#15803d}
+.log{margin-top:20px;background:#fff;border-radius:12px;border:1px solid #e2e8f0;max-height:320px;overflow-y:auto;font-size:12px}
+.log:empty{display:none}
+.log-row{padding:8px 16px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;gap:8px}
+.log-row:last-child{border-bottom:none}
+.log-ok .icon{color:#22c55e}
+.log-warn .icon{color:#f59e0b}
+.log-err .icon{color:#ef4444}
+.log-summary{padding:12px 16px;font-weight:700;color:#334155;background:#f8fafc;border-radius:0 0 12px 12px;font-size:13px}
+.progress-wrap{display:none;margin-top:16px}
+.progress-bar-bg{background:#e2e8f0;border-radius:99px;height:8px;overflow:hidden}
+.progress-bar{background:#6366f1;height:100%;width:0%;transition:width .1s;border-radius:99px}
+.progress-label{font-size:12px;color:#64748b;margin-top:6px;text-align:center}
+.schema{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px 20px;margin-bottom:24px;font-size:12px;color:#475569}
+.schema h3{font-size:13px;font-weight:700;color:#1e293b;margin-bottom:10px}
+.schema-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 24px}
+.schema-item{display:flex;gap:6px;align-items:flex-start}
+.schema-key{font-family:monospace;background:#f1f5f9;padding:1px 6px;border-radius:4px;font-size:11px;white-space:nowrap;color:#6366f1}
+.schema-req{color:#ef4444;font-size:10px;margin-right:2px}
+.schema-opt{color:#94a3b8;font-size:10px;margin-right:2px}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>מחולל קבצי נתונים</h1>
+  <p class="subtitle">העלה שני קבצי אקסל — המערכת תייצר את כל ה-JSON ותוריד אותם כ-ZIP</p>
+
+  <div class="schema">
+    <h3>מבנה עמודות נדרש</h3>
+    <div class="schema-grid">
+      <div>
+        <div style="font-weight:600;margin-bottom:6px;color:#334155">main.xlsx</div>
+        <div class="schema-item"><span class="schema-key">EmployeeID</span><span class="schema-req">*</span></div>
+        <div class="schema-item"><span class="schema-key">Employee</span><span class="schema-req">*</span></div>
+        <div class="schema-item"><span class="schema-key">Manager</span><span class="schema-req">*</span></div>
+        <div class="schema-item"><span class="schema-key">Program, School, Authority…</span></div>
+        <div class="schema-item"><span class="schema-key">Date1 – Date16</span></div>
+        <div class="schema-item"><span class="schema-key">StartTime, EndTime</span></div>
+      </div>
+      <div>
+        <div style="font-weight:600;margin-bottom:6px;color:#334155">codes.xlsx</div>
+        <div class="schema-item"><span class="schema-key">EmployeeID</span><span class="schema-req">*</span></div>
+        <div class="schema-item"><span class="schema-key">EntryCode</span><span class="schema-req">*</span></div>
+        <div class="schema-item"><span class="schema-key">Role</span><span class="schema-req">*</span> <span style="color:#64748b">(instructor / admin)</span></div>
+        <div class="schema-item"><span class="schema-key">Name</span><span class="schema-opt">אופציונלי</span> <span style="color:#94a3b8">— שם להצגה</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cards">
+    <div class="card" id="cardMain">
+      <div class="card-icon">📊</div>
+      <div class="card-label">קובץ נתונים ראשי</div>
+      <div class="card-hint">main.xlsx</div>
+      <div class="card-status" id="statusMain">לחץ או גרור קובץ</div>
+      <input type="file" id="mainFile" accept=".xlsx,.xls">
+    </div>
+    <div class="card" id="cardCodes">
+      <div class="card-icon">🔑</div>
+      <div class="card-label">קובץ קודי כניסה</div>
+      <div class="card-hint">codes.xlsx</div>
+      <div class="card-status" id="statusCodes">לחץ או גרור קובץ</div>
+      <input type="file" id="codesFile" accept=".xlsx,.xls">
+    </div>
+  </div>
+
+  <button class="btn btn-primary" id="generateBtn" disabled>⚙ צור קבצי JSON</button>
+  <button class="btn btn-download" id="downloadBtn">⬇ הורד data.zip</button>
+
+  <div class="progress-wrap" id="progressWrap">
+    <div class="progress-bar-bg"><div class="progress-bar" id="progressBar"></div></div>
+    <div class="progress-label" id="progressLabel">מעבד...</div>
+  </div>
+
+  <div class="log" id="log"></div>
+</div>
+
+<script>
+const SALT = "MY_SECRET_2026";
+let mainData = null, codesData = null, zipBlob = null;
+
+async function sha256(text){
+  const encoder = new TextEncoder();
+  const data = encoder.encode(text);
+  const buf = await crypto.subtle.digest('SHA-256', data);
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+function readExcel(file){
+  return new Promise((resolve,reject)=>{
+    const reader = new FileReader();
+    reader.onload = e => {
+      try{
+        const wb = XLSX.read(e.target.result, {type:'array'});
+        resolve(XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]));
+      }catch(err){ reject(err); }
+    };
+    reader.onerror = reject;
+    reader.readAsArrayBuffer(file);
+  });
+}
+
+function setCard(id, state, text){
+  const card = document.getElementById('card'+id);
+  const status = document.getElementById('status'+id);
+  card.classList.remove('loaded','error');
+  if(state) card.classList.add(state);
+  status.textContent = text;
+}
+
+function checkReady(){
+  document.getElementById('generateBtn').disabled = !(mainData && codesData);
+}
+
+document.getElementById('mainFile').addEventListener('change', async e=>{
+  const file = e.target.files[0]; if(!file) return;
+  setCard('Main','','טוען...');
+  try{
+    mainData = await readExcel(file);
+    setCard('Main','loaded',`✓ ${mainData.length} שורות נטענו`);
+  }catch(_){
+    mainData = null;
+    setCard('Main','error','שגיאה בקריאת הקובץ');
+  }
+  checkReady();
+});
+
+document.getElementById('codesFile').addEventListener('change', async e=>{
+  const file = e.target.files[0]; if(!file) return;
+  setCard('Codes','','טוען...');
+  try{
+    codesData = await readExcel(file);
+    setCard('Codes','loaded',`✓ ${codesData.length} עובדים נטענו`);
+  }catch(_){
+    codesData = null;
+    setCard('Codes','error','שגיאה בקריאת הקובץ');
+  }
+  checkReady();
+});
+
+document.getElementById('generateBtn').addEventListener('click', async ()=>{
+  const log = document.getElementById('log');
+  const progressWrap = document.getElementById('progressWrap');
+  const progressBar = document.getElementById('progressBar');
+  const progressLabel = document.getElementById('progressLabel');
+  const downloadBtn = document.getElementById('downloadBtn');
+
+  log.innerHTML = '';
+  downloadBtn.style.display = 'none';
+  progressWrap.style.display = 'block';
+  progressBar.style.width = '0%';
+
+  const zip = new JSZip();
+  const instructorsFolder = zip.folder('data/instructors');
+  const adminsFolder      = zip.folder('data/admins');
+
+  let instructorCount = 0, adminCount = 0, skipped = 0;
+  const total = codesData.length;
+
+  for(let idx = 0; idx < total; idx++){
+    const row = codesData[idx];
+    const EmployeeID = String(row.EmployeeID ?? '').trim();
+    const EntryCode  = String(row.EntryCode  ?? '').trim();
+    const Role       = String(row.Role       ?? '').trim().toLowerCase();
+    const NameField  = row.Name ? String(row.Name).trim() : '';
+
+    progressBar.style.width = Math.round(((idx+1)/total)*100)+'%';
+    progressLabel.textContent = `מעבד ${idx+1} מתוך ${total}…`;
+
+    if(!EmployeeID || !EntryCode || !Role){
+      skipped++;
+      log.innerHTML += `<div class="log-row log-warn"><span class="icon">⚠</span> שורה ${idx+2}: חסרים שדות — דולגה</div>`;
+      continue;
+    }
+
+    const hash = await sha256(EmployeeID + EntryCode + SALT);
+
+    if(Role === 'instructor'){
+      const courses = mainData
+        .filter(r => Number(r.EmployeeID) === Number(EmployeeID))
+        .map(course => {
+          const dates = [];
+          for(let i=1;i<=16;i++){ if(course[`Date${i}`]) dates.push(course[`Date${i}`]); }
+          return {...course, Dates: dates};
+        });
+
+      const name = NameField || courses[0]?.Employee || '';
+      instructorsFolder.file(`${hash}.json`, JSON.stringify({name, data: courses}, null, 2));
+      log.innerHTML += `<div class="log-row log-ok"><span class="icon">✓</span> מדריך: <strong>${name||EmployeeID}</strong> — ${courses.length} קורסים</div>`;
+      instructorCount++;
+    }
+    else if(Role === 'admin'){
+      const allCourses = mainData.map(course => {
+        const dates = [];
+        for(let i=1;i<=16;i++){ if(course[`Date${i}`]) dates.push(course[`Date${i}`]); }
+        return {...course, Dates: dates};
+      });
+
+      const name = NameField || '';
+      adminsFolder.file(`${hash}.json`, JSON.stringify({name, data: allCourses}, null, 2));
+      log.innerHTML += `<div class="log-row log-ok"><span class="icon">✓</span> מנהל: <strong>${name||EmployeeID}</strong> — ${allCourses.length} קורסים</div>`;
+      adminCount++;
+    }
+    else{
+      skipped++;
+      log.innerHTML += `<div class="log-row log-warn"><span class="icon">⚠</span> ${EmployeeID}: תפקיד לא מוכר "${row.Role}" — דולגה</div>`;
+    }
+
+    // let the browser breathe every 10 rows
+    if(idx % 10 === 9) await new Promise(r => setTimeout(r, 0));
+  }
+
+  progressBar.style.width = '100%';
+  progressLabel.textContent = 'הושלם!';
+
+  log.innerHTML += `<div class="log-summary">סה"כ: ${instructorCount} מדריכים · ${adminCount} מנהלים · ${skipped} דולגו</div>`;
+
+  zipBlob = await zip.generateAsync({type:'blob'});
+  downloadBtn.style.display = 'block';
+  log.scrollTop = log.scrollHeight;
+});
+
+document.getElementById('downloadBtn').addEventListener('click', ()=>{
+  saveAs(zipBlob, 'data.zip');
+});
+</script>
+</body>
+</html>
