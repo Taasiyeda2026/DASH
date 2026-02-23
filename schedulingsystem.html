@@ -21,10 +21,10 @@
     padding:0 10px 20px;
   }
   h1{margin:0 0 14px 0;font-size:22px}
-  .grid{
+  .scheduling-page .grid{
     display:grid;
-    grid-template-columns: 1fr;
-    gap:16px;
+    grid-template-columns:1fr;
+    gap:20px;
   }
   .col{
     display:flex;
@@ -103,16 +103,6 @@
   th{background:#f1f5f9;font-weight:900}
   tr:hover td{background:#fafcff}
   .small{font-size:12px;color:#64748b;font-weight:700}
-  .pill{
-    display:inline-block;
-    padding:4px 10px;
-    border-radius:999px;
-    border:1px solid #e2e8f0;
-    background:#f8fafc;
-    font-weight:900;
-    font-size:12px;
-  }
-
   /* suggestions list */
   .list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:10px}
   .item{
@@ -128,22 +118,27 @@
     gap:10px;
     margin-bottom:8px;
   }
-  .item-title{font-weight:900;font-size:14px}
+  .card-title{
+    font-size:18px;
+    font-weight:700;
+    margin-bottom:12px;
+    border-bottom:1px solid #e5e7eb;
+    padding-bottom:8px;
+  }
+  .result-date{
+    font-weight:700;
+    margin-bottom:6px;
+  }
   .item-sub{font-size:12px;color:#64748b;font-weight:700}
   .options{
-    display:flex;
-    flex-wrap:wrap;
-    gap:8px;
+    display:block;
   }
   .opt{
-    border:1px solid #e2e8f0;
-    background:#f8fafc;
-    border-radius:999px;
-    padding:7px 10px;
-    font-size:12px;
-    font-weight:900;
+    display:block;
+    padding:6px 0;
+    font-size:13px;
+    font-weight:700;
   }
-  .opt strong{color:#0f172a}
   .muted{color:#94a3b8;font-weight:700}
   .topbar{
     display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;
@@ -168,11 +163,9 @@
     cursor:pointer;
   }
 
-  @media (min-width: 980px){
-    .grid.two-col{
-      grid-template-columns: 1fr 1fr;
-      align-items:start;
-      gap:18px;
+  @media (min-width:1000px){
+    .scheduling-page .grid{
+      grid-template-columns:1fr 1fr;
     }
   }
 
@@ -251,12 +244,12 @@
     </button>
   </div>
 
-  <div class="grid two-col">
+  <div class="grid">
 
     <div class="col">
       <div class="suggestion-wrapper">
         <div class="card">
-          <div style="font-weight:900;margin-bottom:8px;">הצעת שיבוצים</div>
+          <div class="card-title">הצעת שיבוצים</div>
 
           <div class="row">
             <div>
@@ -297,7 +290,7 @@
       <div class="card">
         <div class="topbar">
           <div style="font-weight:900;">תוצאות שיבוץ</div>
-          <div class="small" id="metaInfo">—</div>
+          <div class="small" id="metaInfo"></div>
         </div>
 
         <ul class="list" id="resultsList">
@@ -589,6 +582,35 @@ function isHolidayDate(data, dateISO){
   return false;
 }
 
+function hasRecurringConflictNextMonth(data, employeeID, dateISO, startMin, endMin){
+  const targetDate = parseISODate(dateISO);
+  if(!targetDate) return false;
+
+  const targetDow = targetDate.getDay();
+  const rangeAhead = addDays(targetDate, 45);
+
+  for(const c of (data.courses || [])){
+    if(String(c.EmployeeID) !== String(employeeID)) continue;
+
+    const courseStart = timeToMin(c.StartTime);
+    const courseEnd = timeToMin(c.EndTime);
+    if(courseStart === null || courseEnd === null) continue;
+
+    if(!(startMin < courseEnd && endMin > courseStart)) continue;
+
+    for(const courseDateISO of (c.Dates || [])){
+      const courseDate = parseISODate(courseDateISO);
+      if(!courseDate) continue;
+      if(courseDate <= targetDate) continue;
+      if(courseDate > rangeAhead) continue;
+      if(courseDate.getDay() !== targetDow) continue;
+      return true;
+    }
+  }
+
+  return false;
+}
+
 function scoreCandidate(data, inst, targetAuthority, dateISO, durationMin){
   const empId = String(inst.EmployeeID);
   const home = String(inst.HomeAuthority || '').trim();
@@ -608,6 +630,11 @@ function scoreCandidate(data, inst, targetAuthority, dateISO, durationMin){
   const free = computeFreeWindows(events);
   const slot = pickBestSlot(free, durationMin, dateISO, empId);
   if(!slot) return { ok:false, reason:'NoWindow' };
+  const [sMin, eMin] = slot;
+
+  if(hasRecurringConflictNextMonth(data, empId, dateISO, sMin, eMin)){
+    return { ok:false, reason:'RecurringConflictNextMonth' };
+  }
 
   // authority movement rule (same day)
   const authoritiesToday = new Set(events.map(e => e.authority).filter(Boolean));
@@ -646,7 +673,6 @@ function scoreCandidate(data, inst, targetAuthority, dateISO, durationMin){
 
   // slot quality bonus
   const WORK_START = 8*60, WORK_END = 15*60;
-  const [sMin, eMin] = slot;
   if(sMin > WORK_START && eMin < WORK_END) score += 5;
 
   // Fairness: only next week workdays
@@ -767,7 +793,7 @@ function renderSuggestions(list){
     li.innerHTML = `
       <div class="item-header">
         <div>
-          <div class="item-title">${row.date}</div>
+          <div class="result-date">${row.date}</div>
           <div class="item-sub">אפשרויות: ${row.options.length}</div>
         </div>
       </div>
