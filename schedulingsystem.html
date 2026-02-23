@@ -26,14 +26,13 @@
     grid-template-columns: 1fr;
     gap:16px;
   }
-  .suggestion-wrapper{
+  .col{
     display:flex;
-    justify-content:center;
+    flex-direction:column;
+    gap:16px;
   }
-  .suggestion-wrapper .card{
-    max-width:520px;
-    width:100%;
-  }
+  .suggestion-wrapper{ display:block; }
+  .suggestion-wrapper .card{ max-width:none; width:100%; }
   .courses-wrapper{
     display:flex;
     justify-content:center;
@@ -169,6 +168,14 @@
     cursor:pointer;
   }
 
+  @media (min-width: 980px){
+    .grid.two-col{
+      grid-template-columns: 1fr 1fr;
+      align-items:start;
+      gap:18px;
+    }
+  }
+
   @media (max-width: 640px){
     body{padding:14px 10px;}
     .page-shell{padding:0 4px 14px;}
@@ -244,85 +251,89 @@
     </button>
   </div>
 
-  <div class="grid">
+  <div class="grid two-col">
 
-    <div class="suggestion-wrapper">
+    <div class="col">
+      <div class="suggestion-wrapper">
+        <div class="card">
+          <div style="font-weight:900;margin-bottom:8px;">הצעת שיבוצים</div>
+
+          <div class="row">
+            <div>
+              <label>רשות יעד</label>
+              <select id="authoritySelect"></select>
+            </div>
+            <div>
+              <label>כמות ימים להציג</label>
+              <select id="daysLimit">
+                <option value="10">10</option>
+                <option value="20" selected>20</option>
+                <option value="30">30</option>
+                <option value="50">50</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="row">
+            <div>
+              <label>אפשרויות לכל תאריך</label>
+              <select id="topN">
+                <option value="3" selected>Top 3</option>
+                <option value="5">Top 5</option>
+              </select>
+            </div>
+            <div>
+              <label>משך קורס (דקות)</label>
+              <input id="durationMin" type="number" value="120" min="30" step="5"/>
+            </div>
+          </div>
+
+          <button onclick="runSuggestions()">מצא שיבוץ </button>
+
+          <div class="status" id="statusBox2"></div>
+        </div>
+      </div>
+
       <div class="card">
-        <div style="font-weight:900;margin-bottom:8px;">הצעת שיבוצים</div>
-
-        <div class="row">
-          <div>
-            <label>רשות יעד</label>
-            <select id="authoritySelect"></select>
-          </div>
-          <div>
-            <label>כמות ימים להציג</label>
-            <select id="daysLimit">
-              <option value="10">10</option>
-              <option value="20" selected>20</option>
-              <option value="30">30</option>
-              <option value="50">50</option>
-            </select>
-          </div>
+        <div class="topbar">
+          <div style="font-weight:900;">תוצאות שיבוץ</div>
+          <div class="small" id="metaInfo">—</div>
         </div>
 
-        <div class="row">
-          <div>
-            <label>אפשרויות לכל תאריך</label>
-            <select id="topN">
-              <option value="3" selected>Top 3</option>
-              <option value="5">Top 5</option>
-            </select>
-          </div>
-          <div>
-            <label>משך קורס (דקות)</label>
-            <input id="durationMin" type="number" value="120" min="30" step="5"/>
-          </div>
-        </div>
-
-        <button onclick="runSuggestions()">מצא שיבוץ </button>
-
-        <div class="status" id="statusBox2"></div>
+        <ul class="list" id="resultsList">
+          <li class="muted">לחץ “מצא שיבוץ” כדי להציג תוצאות.</li>
+        </ul>
       </div>
     </div>
 
-    <div class="courses-wrapper">
-      <div class="card">
-      <div class="topbar">
-        <div>
-          <div style="font-weight:900;">מדריכים — כמות קורסים</div>
-          <div class="small">רשימת מדריכים + מספר קורסים </div>
+    <div class="col">
+      <div class="courses-wrapper">
+        <div class="card">
+        <div class="topbar">
+          <div>
+            <div style="font-weight:900;">מדריכים — כמות קורסים</div>
+            <div class="small">רשימת מדריכים + מספר קורסים </div>
+          </div>
+          <input class="search" id="coursesSearch" placeholder="חיפוש מדריך..." oninput="renderCoursesTableFromLast()"/>
         </div>
-        <input class="search" id="coursesSearch" placeholder="חיפוש מדריך..." oninput="renderCoursesTableFromLast()"/>
-      </div>
 
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th class="ellipsis">מדריך</th>
-              <th class="num short">כמות קורסים</th>
-            </tr>
-          </thead>
-          <tbody id="coursesBody">
-            <tr><td colspan="2" class="muted">טוען…</td></tr>
-          </tbody>
-        </table>
-      </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th class="ellipsis">מדריך</th>
+                <th class="num short">כמות קורסים</th>
+              </tr>
+            </thead>
+            <tbody id="coursesBody">
+              <tr><td colspan="2" class="muted">טוען…</td></tr>
+            </tbody>
+          </table>
+        </div>
 
-      <div class="status" id="statusBoxCourses"></div>
+        <div class="status" id="statusBoxCourses"></div>
+        </div>
       </div>
-    </div>
-
-    <div class="card">
-      <div class="topbar">
-        <div style="font-weight:900;">תוצאות שיבוץ</div>
-        <div class="small" id="metaInfo">—</div>
-      </div>
-
-      <ul class="list" id="resultsList">
-        <li class="muted">לחץ “מצא שיבוץ” כדי להציג תוצאות.</li>
-      </ul>
     </div>
 
   </div>
@@ -583,6 +594,7 @@ function scoreCandidate(data, inst, targetAuthority, dateISO, durationMin){
   // distance home->target must exist
   const distHome = getDistanceKm(data, home, targetAuthority);
   if(distHome === null) return { ok:false, reason:'MissingDistance' };
+  if(distHome > 30) return { ok:false, reason:'HomeDistance>30' };
 
   // events today
   const events = getInstructorEventsOnDate(data, empId, dateISO);
@@ -622,9 +634,7 @@ function scoreCandidate(data, inst, targetAuthority, dateISO, durationMin){
 
   // home distance band
   if(distHome <= 15) score += 0;
-  else if(distHome <= 30) score -= 5;
-  else if(distHome <= 50) score -= 15;
-  else score -= 30;
+  else score -= 5; // 15–30
 
   // authority same-day preference
   if(alreadyInTarget) score += 10;
@@ -718,17 +728,16 @@ function buildSuggestions(data, targetAuthority, durationMin, topN, daysLimit){
       usedInPreviousDay.add(p.EmployeeID);
     }
 
-    // choose a single slot label for the day: use best candidate slot (top1)
-    if(picked.length === 0) continue;
-    const top1 = picked[0];
     results.push({
       date: dateISO,
-      slot: `${minToTime(top1.slotStartMin)}–${minToTime(top1.slotEndMin)}`,
-      options: picked.map(p => ({
-        name: p.Employee,
-        score: p.score,
-        home: p.HomeAuthority
-      }))
+      options: picked
+        .sort((a,b)=> b.score - a.score)
+        .map(p => ({
+          name: p.Employee,
+          start: minToTime(p.slotStartMin),
+          end: minToTime(p.slotEndMin),
+          score: p.score
+        }))
     });
 
     if(results.length >= daysLimit) break; // limit number of days shown
@@ -751,13 +760,13 @@ function renderSuggestions(list){
     li.className = 'item';
 
     const opts = row.options.map((o, idx) =>
-      `<span class="opt"><strong>${idx+1})</strong> ${o.name} — ${o.score.toFixed(1)}</span>`
+      `<span class="opt"><strong>${idx+1})</strong> ${o.start}–${o.end} — ${o.name}</span>`
     ).join('');
 
     li.innerHTML = `
       <div class="item-header">
         <div>
-          <div class="item-title">${row.date} — ${row.slot}</div>
+          <div class="item-title">${row.date}</div>
           <div class="item-sub">אפשרויות: ${row.options.length}</div>
         </div>
         <div class="pill">Top</div>
