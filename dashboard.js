@@ -638,6 +638,12 @@ function renderSummary(){
 
   const totalCourses = activeThisMonth + startingFuture;
 
+  const missingInstructorCount = rawData.filter(r => {
+    if(String(r.EventType || '').trim().toUpperCase() !== 'COURSE') return false;
+    if(r.Employee && r.Employee.trim()) return false;
+    return r.Dates.some(d => d && d.getFullYear() === currentYear && d.getMonth() === currentMonth);
+  }).length;
+
   titleEl.textContent = currentMonthStart.toLocaleString('he-IL',{month:'long',year:'numeric'});
 
   const wrap = document.createElement('div'); wrap.className = 'summary-wrap';
@@ -659,6 +665,12 @@ function renderSummary(){
         <div class="kpi-value">${startingFuture}</div>
       </div>
 
+      ${missingInstructorCount > 0 ? `
+      <div class="kpi-card" style="border:2px solid #dc2626">
+        <div class="kpi-label" style="color:#dc2626">קורסים ללא מדריך</div>
+        <div class="kpi-value" style="color:#dc2626">${missingInstructorCount}</div>
+      </div>` : ''}
+
     </div>
   `;
 
@@ -673,6 +685,11 @@ function renderSummary(){
     const mgrEndedThisMonth = mgrCourses.filter(r =>
       isCourseEndingInMonth(r, currentYear, currentMonth)
     ).sort((a,b)=>parseDate(a.End)-parseDate(b.End));
+
+    const mgrMissingActive = mgrCourses.filter(r =>
+      isCourseActiveInMonth(r, currentYear, currentMonth) &&
+      (!r.Employee || !r.Employee.trim())
+    );
 
     const col = document.createElement('div'); col.className = 'summary-col';
     col.innerHTML = `
@@ -698,6 +715,14 @@ function renderSummary(){
 
       details.innerHTML = `
         <h3>${mgr}</h3>
+        ${mgrMissingActive.length > 0 ? `
+          <div style="background:#fef2f2;border:1.5px solid #dc2626;border-radius:12px;padding:14px;margin-bottom:16px">
+            <div style="font-weight:800;color:#dc2626;margin-bottom:10px">⚠ קורסים פעילים ללא מדריך: ${mgrMissingActive.length}</div>
+            ${mgrMissingActive.map(r=>`
+              <div style="font-size:13px;padding:5px 0;border-bottom:1px solid #fecaca">
+                ${r.Program || '—'}${r.School ? ` · ${r.School}` : ''}
+              </div>`).join('')}
+          </div>` : ''}
         ${
           mgrEndedThisMonth.length
             ? mgrEndedThisMonth.map(r=>{
@@ -864,6 +889,9 @@ function renderInstructors(){
   summaryHeader.innerHTML = `
     כמות מדריכים: ${names.length}<br>
     כמות קורסים: ${totalCourses}
+    ${missingInstructorCourses.length > 0
+      ? `<br><span style="color:#dc2626;font-weight:800">⚠ חסר מדריך: ${missingInstructorCourses.length} קורסים</span>`
+      : ''}
   `;
 
   view.appendChild(summaryHeader);
