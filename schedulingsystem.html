@@ -180,10 +180,9 @@
 
   <div class="grid">
 
-    <!-- CARD 1: Suggest scheduling -->
     <div class="suggestion-wrapper">
       <div class="card">
-        <div style="font-weight:900;margin-bottom:8px;">הצעת שיבוצים — תאריכים ושעות חלון (120 דק׳)</div>
+        <div style="font-weight:900;margin-bottom:8px;">הצעת שיבוצים</div>
 
         <div class="row">
           <div>
@@ -217,12 +216,10 @@
 
         <button onclick="runSuggestions()">מצא שיבוצים חכמים</button>
 
-        <div class="note" id="rangeNote">—</div>
         <div class="status" id="statusBox2"></div>
       </div>
     </div>
 
-    <!-- CARD 2: Instructors KPI (next week only) -->
     <div class="card">
       <div class="topbar">
         <div>
@@ -248,18 +245,12 @@
         </table>
       </div>
 
-      <div class="note">
-        * ימי עבודה = מספר תאריכים ייחודיים (Distinct) שבהם יש למדריך לפחות קורס אחד בשבוע הבא בלבד.  
-        * המערכת אינה שומרת זיכרון/Cache — כל טעינה/הרצה מבצעת חישוב מחדש מתוך scheduling.json.
-      </div>
-
       <div class="status" id="statusBox1"></div>
     </div>
 
-    <!-- CARD 3: Results -->
     <div class="card">
       <div class="topbar">
-        <div style="font-weight:900;">תוצאות שיבוץ — תאריך + חלון + אפשרויות (Top N)</div>
+        <div style="font-weight:900;">תוצאות שיבוץ</div>
         <div class="small" id="metaInfo">—</div>
       </div>
 
@@ -272,12 +263,6 @@
   </div>
 
 <script>
-/* ===========================
-   Scheduling — Self-contained
-   No cache, no shared state.
-   Each action fetches JSON fresh.
-   =========================== */
-
 function showStatus(id, msg, type){
   const box = document.getElementById(id);
   box.textContent = msg;
@@ -325,9 +310,6 @@ function isWorkdaySunThu(dateObj){
   return d >= 0 && d <= 4; // Sun-Thu
 }
 
-/* ===== Next Week (Sun-Thu) =====
-   "השבוע הבא" = השבוע שמתחיל ביום ראשון הבא (לא השבוע הנוכחי).
-*/
 function getNextWeekDatesISO(){
   const today = new Date();
   const dow = today.getDay(); // 0=Sun
@@ -342,7 +324,6 @@ function getNextWeekDatesISO(){
   return dates;
 }
 
-/* ===== Range for suggestions: TODAY..TODAY+45, Sun-Thu only ===== */
 function getSuggestionDatesISO(){
   const today = new Date();
   const start = new Date(today.getFullYear(), today.getMonth(), today.getDate());
@@ -359,14 +340,12 @@ function getSuggestionDatesISO(){
   return dates;
 }
 
-/* ===== Data Loader (always fresh) ===== */
 async function loadSchedulingDataFresh(){
   const res = await fetch('data/Scheduling/scheduling.json', { cache:'no-store' });
   if(!res.ok) throw new Error('לא ניתן לטעון data/Scheduling/scheduling.json');
   return await res.json();
 }
 
-/* ===== Distance (Haversine) computed on demand ===== */
 function haversine(lat1, lon1, lat2, lon2){
   const R = 6371;
   const toRad = x => x * Math.PI / 180;
@@ -385,13 +364,11 @@ function getDistanceKm(data, fromAuthority, toAuthority){
   return haversine(fromLoc.lat, fromLoc.lng, toLoc.lat, toLoc.lng);
 }
 
-/* ===== Dates matching helper ===== */
 function courseOccursOnDate(course, dateISO){
   const dates = course.Dates || [];
   return dates.includes(dateISO);
 }
 
-/* ===== Collect events for instructor on a date (fresh scan) ===== */
 function getInstructorEventsOnDate(data, employeeID, dateISO){
   const evs = [];
   for(const c of (data.courses || [])){
@@ -406,7 +383,6 @@ function getInstructorEventsOnDate(data, employeeID, dateISO){
   return evs;
 }
 
-/* ===== Compute free windows inside 08:00-15:00 ===== */
 function computeFreeWindows(events){
   const WORK_START = 8*60;
   const WORK_END   = 15*60;
@@ -426,11 +402,6 @@ function computeFreeWindows(events){
   return free;
 }
 
-/* ===== Extract possible slots of duration within free windows =====
-   We return a single "best" slot:
-   Prefer a slot fully inside day (not touching edges) if possible,
-   otherwise earliest slot.
-*/
 function pickBestSlot(freeWindows, durationMin){
   const WORK_START = 8*60;
   const WORK_END   = 15*60;
@@ -448,7 +419,6 @@ function pickBestSlot(freeWindows, durationMin){
   return middle || candidates[0];
 }
 
-/* ===== Instructor KPI: WorkDaysNextWeek (Distinct) + CoursesCount ===== */
 function computeInstructorKPI(data){
   const nextWeek = new Set(getNextWeekDatesISO());
 
@@ -493,7 +463,6 @@ function computeInstructorKPI(data){
   return rows;
 }
 
-/* ===== Scoring (Hard rules + fairness next week) ===== */
 function isHolidayDate(data, dateISO){
   for(const c of (data.courses || [])){
     if(String(c.EventType || '').trim().toUpperCase() !== 'HOLIDAY') continue;
@@ -590,9 +559,6 @@ function scoreCandidate(data, inst, targetAuthority, dateISO, durationMin){
   };
 }
 
-/* ===== Suggestions Builder (no caching) =====
-   For each date in allowed range, compute Top N options
-*/
 function buildSuggestions(data, targetAuthority, durationMin, topN, daysLimit){
   const dates = getSuggestionDatesISO(); // TODAY..+45, Sun-Thu only
 
@@ -627,7 +593,6 @@ function buildSuggestions(data, targetAuthority, durationMin, topN, daysLimit){
     // sort by score desc
     candidates.sort((a,b)=>b.score - a.score);
 
-    // pick Top N (try to diversify: unique EmployeeID)
     const picked = [];
     const used = new Set();
     for(const c of candidates){
@@ -655,7 +620,6 @@ function buildSuggestions(data, targetAuthority, durationMin, topN, daysLimit){
   return results;
 }
 
-/* ===== UI Renderers ===== */
 let _lastInstructorRows = []; // UI-only: not an index for logic; just last rendered rows for filtering
 function renderInstructorTable(rows){
   _lastInstructorRows = rows;
@@ -709,7 +673,7 @@ function renderSuggestions(list){
       <div class="item-header">
         <div>
           <div class="item-title">${row.date} — ${row.slot}</div>
-          <div class="item-sub">אפשרויות: ${row.options.length} (שם + ציון)</div>
+          <div class="item-sub">אפשרויות: ${row.options.length}</div>
         </div>
         <div class="pill">Top</div>
       </div>
@@ -719,16 +683,9 @@ function renderSuggestions(list){
   }
 }
 
-/* ===== Boot (initial load of dropdown + KPI) ===== */
 async function boot(){
   clearStatus('statusBox1');
   clearStatus('statusBox2');
-
-  // range note
-  const todayISO = toISODateLocal(new Date());
-  const maxISO = toISODateLocal(addDays(new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate()), 45));
-  document.getElementById('rangeNote').textContent =
-    `הצעות שיבוץ: רק מהיום (${todayISO}) ועד ${maxISO} (45 ימים), רק א׳–ה׳, בטווח 08:00–15:00.`;
 
   // next week label
   const nw = getNextWeekDatesISO();
@@ -738,12 +695,10 @@ async function boot(){
   try{
     const data = await loadSchedulingDataFresh();
 
-    // meta info
     const gen = data.generatedAt ? new Date(data.generatedAt) : null;
     document.getElementById('metaInfo').textContent =
       gen ? `עודכן: ${gen.toLocaleString('he-IL')}` : `עודכן: —`;
 
-    // authorities dropdown
     const authorities = Object.keys(data.authorityLocations || {}).sort((a,b)=>a.localeCompare(b,'he'));
     const sel = document.getElementById('authoritySelect');
     sel.innerHTML = '';
@@ -754,7 +709,6 @@ async function boot(){
       sel.appendChild(opt);
     }
 
-    // KPI table
     const rows = computeInstructorKPI(data);
     renderInstructorTable(rows);
 
@@ -766,7 +720,6 @@ async function boot(){
   }
 }
 
-/* ===== Run Suggestions (fresh fetch, no cache) ===== */
 async function runSuggestions(){
   clearStatus('statusBox2');
   document.getElementById('resultsList').innerHTML = `<li class="muted">מחשב הצעות…</li>`;
@@ -786,7 +739,7 @@ async function runSuggestions(){
   }
 
   try{
-    const data = await loadSchedulingDataFresh(); // always fresh
+    const data = await loadSchedulingDataFresh();
 
     const suggestions = buildSuggestions(data, targetAuthority, durationMin, topN, daysLimit);
     renderSuggestions(suggestions);
