@@ -403,8 +403,10 @@ function getNextWeekDatesISO(){
 
 function getSuggestionDatesISO(){
   const today = new Date();
-  const start = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-  const end = addDays(start, 45);
+  const base = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+
+  const start = addDays(base, 7);
+  const end   = addDays(base, 30);
 
   const dates = [];
   let cur = start;
@@ -569,7 +571,7 @@ function renderCoursesTable(rows){
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td class="ellipsis"><strong>${r.Employee}</strong></td>
-      <td class="num short"><span class="pill">${r.CoursesCount}</span></td>
+      <td class="num short">${r.CoursesCount}</td>
     `;
     tbody.appendChild(tr);
   }
@@ -666,7 +668,7 @@ function scoreCandidate(data, inst, targetAuthority, dateISO, durationMin){
 }
 
 function buildSuggestions(data, targetAuthority, durationMin, topN, daysLimit){
-  const dates = getSuggestionDatesISO(); // TODAY..+45, Sun-Thu only
+  const dates = getSuggestionDatesISO();
 
   const instructors = (data.instructors || [])
     .filter(i => String(i.Role||'').toLowerCase() === 'instructor');
@@ -735,8 +737,7 @@ function buildSuggestions(data, targetAuthority, durationMin, topN, daysLimit){
         .map(p => ({
           name: p.Employee,
           start: minToTime(p.slotStartMin),
-          end: minToTime(p.slotEndMin),
-          score: p.score
+          end: minToTime(p.slotEndMin)
         }))
     });
 
@@ -751,7 +752,7 @@ function renderSuggestions(list){
   ul.innerHTML = '';
 
   if(list.length === 0){
-    ul.innerHTML = `<li class="muted">לא נמצאו שיבוצים מתאימים בטווח (מהיום ועד 45 ימים קדימה, א׳–ה׳).</li>`;
+    ul.innerHTML = `<li class="muted">לא נמצאו שיבוצים מתאימים בטווח (מהיום +7 ועד היום +30, א׳–ה׳).</li>`;
     return;
   }
 
@@ -759,8 +760,8 @@ function renderSuggestions(list){
     const li = document.createElement('li');
     li.className = 'item';
 
-    const opts = row.options.map((o, idx) =>
-      `<span class="opt"><strong>${idx+1})</strong> ${o.start}–${o.end} — ${o.name}</span>`
+    const opts = row.options.map((o) =>
+      `<span class="opt">${o.start}–${o.end} — ${o.name}</span>`
     ).join('');
 
     li.innerHTML = `
@@ -769,7 +770,6 @@ function renderSuggestions(list){
           <div class="item-title">${row.date}</div>
           <div class="item-sub">אפשרויות: ${row.options.length}</div>
         </div>
-        <div class="pill">Top</div>
       </div>
       <div class="options">${opts}</div>
     `;
@@ -784,9 +784,7 @@ async function boot(){
   try{
     const data = await loadSchedulingDataFresh();
 
-    const gen = data.generatedAt ? new Date(data.generatedAt) : null;
-    document.getElementById('metaInfo').textContent =
-      gen ? `עודכן: ${gen.toLocaleString('he-IL')}` : `עודכן: —`;
+    document.getElementById('metaInfo').textContent = '';
 
     const authorities = Object.keys(data.authorityLocations || {}).sort((a,b)=>a.localeCompare(b,'he'));
     const sel = document.getElementById('authoritySelect');
