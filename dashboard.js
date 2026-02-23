@@ -294,9 +294,11 @@ function initFromRawData(){
   initSummaryMonths();
   currentDate = clampDateToDataRange(new Date());
 
+  const empId = sessionStorage.getItem('dash_empId');
   const name = userRole === 'instructor'
-    ? rawData.find(r => r.Employee && r.Employee.trim())?.Employee
-    : rawData.find(r => r.Manager && r.Manager.trim())?.Manager;
+    ? rawData.find(r => empId && String(r.EmployeeID) === empId && r.Employee?.trim())?.Employee
+      || rawData.find(r => r.Employee?.trim())?.Employee
+    : rawData.find(r => r.Manager?.trim())?.Manager;
   const greetingEl = document.getElementById('greetingName');
   if(greetingEl && name) greetingEl.textContent = `שלום, ${name}`;
 

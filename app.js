@@ -88,6 +88,7 @@ async function login(){
   if(!id || !code) return;
 
   const hash = await sha256(id + code + SALT);
+  sessionStorage.setItem('dash_empId', id);
   showLoader();
 
   try{
