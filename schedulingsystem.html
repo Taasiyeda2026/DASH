@@ -223,10 +223,10 @@
     <div class="card">
       <div class="topbar">
         <div>
-          <div style="font-weight:900;">מצב מדריכים — עומסים בשבוע הבא (א׳–ה׳)</div>
-          <div class="small" id="weekRangeText">—</div>
+          <div style="font-weight:900;">מדריכים — כמות קורסים (כמו במערכת)</div>
+          <div class="small">רשימת מדריכים + מספר קורסים כולל מהדאטה</div>
         </div>
-        <input class="search" id="instructorSearch" placeholder="חיפוש מדריך..." oninput="renderInstructorTableFromLast()"/>
+        <input class="search" id="coursesSearch" placeholder="חיפוש מדריך..." oninput="renderCoursesTableFromLast()"/>
       </div>
 
       <div class="table-wrap">
@@ -234,18 +234,16 @@
           <thead>
             <tr>
               <th>מדריך</th>
-              <th>ימי עבודה שבוע הבא</th>
-              <th>מספר קורסים (כמו במערכת)</th>
-              <th>רשות בית</th>
+              <th>כמות קורסים</th>
             </tr>
           </thead>
-          <tbody id="instructorsBody">
-            <tr><td colspan="4" class="muted">טוען נתונים…</td></tr>
+          <tbody id="coursesBody">
+            <tr><td colspan="2" class="muted">טוען…</td></tr>
           </tbody>
         </table>
       </div>
 
-      <div class="status" id="statusBox1"></div>
+      <div class="status" id="statusBoxCourses"></div>
     </div>
 
     <div class="card">
@@ -403,9 +401,6 @@ function computeFreeWindows(events){
 }
 
 function pickBestSlot(freeWindows, durationMin, dateISO, employeeID){
-  const WORK_START = 8*60;
-  const WORK_END   = 15*60;
-
   const candidates = [];
   for(const [s,e] of freeWindows){
     if((e - s) < durationMin) continue;
@@ -417,64 +412,92 @@ function pickBestSlot(freeWindows, durationMin, dateISO, employeeID){
   }
   if(candidates.length === 0) return null;
 
-  // יצירת seed דטרמיניסטי לפי תאריך + מדריך
-  const seed =
-    Number(employeeID) +
-    new Date(dateISO).getDate();
-
-  const index = seed % candidates.length;
+  const d = new Date(dateISO);
+  const ymd = d.getFullYear()*10000 + (d.getMonth()+1)*100 + d.getDate();
+  const seed = (Number(employeeID) || 0) + ymd;
+  const index = Math.abs(seed) % candidates.length;
 
   return candidates[index];
 }
 
 function computeInstructorStats(data){
   const nextWeek = new Set(getNextWeekDatesISO());
+  const stats = new Map();
 
+  for(const c of (data.courses || [])){
+    if(String(c.EventType || '').trim().toUpperCase() !== 'COURSE') continue;
+
+    const empId = String(c.EmployeeID);
+    if(!stats.has(empId)){
+      stats.set(empId, { coursesCount: 0, daysSet: new Set() });
+    }
+
+    const row = stats.get(empId);
+    row.coursesCount++;
+
+    const ds = c.Dates || [];
+    for(const d of ds){
+      if(typeof d === 'string' && nextWeek.has(d)){
+        row.daysSet.add(d);
+      }
+    }
+  }
+
+  return stats;
+}
+
+let _lastCoursesRows = [];
+
+function computeInstructorCoursesCountRows(data){
   const instructors = (data.instructors || [])
     .filter(i => String(i.Role||'').toLowerCase() === 'instructor');
 
-  // CoursesCount: "כמו במערכת" = count of course rows in data.courses matching EmployeeID
-  // WorkDaysNextWeek: distinct dates within nextWeek
   const rows = instructors.map(inst => {
     const empId = String(inst.EmployeeID);
     let coursesCount = 0;
-    const daysSet = new Set();
 
     for(const c of (data.courses || [])){
       if(String(c.EmployeeID) !== empId) continue;
+      if(String(c.EventType || '').trim().toUpperCase() !== 'COURSE') continue;
       coursesCount++;
-
-      const ds = c.Dates || [];
-      for(const d of ds){
-        if(typeof d === 'string' && nextWeek.has(d)){
-          daysSet.add(d);
-        }
-      }
     }
 
     return {
-      EmployeeID: empId,
       Employee: inst.Employee || '—',
-      HomeAuthority: inst.HomeAuthority || '—',
-      WorkDays: daysSet.size,
-      WorkDaysNextWeek: daysSet.size,
       CoursesCount: coursesCount
     };
   });
 
-  // Sort: WorkDaysNextWeek desc, then CoursesCount desc, then name
-  rows.sort((a,b) =>
-    (b.WorkDaysNextWeek - a.WorkDaysNextWeek) ||
-    (b.CoursesCount - a.CoursesCount) ||
-    String(a.Employee).localeCompare(String(b.Employee), 'he')
-  );
-
+  rows.sort((a,b) => (b.CoursesCount - a.CoursesCount) || String(a.Employee).localeCompare(String(b.Employee), 'he'));
   return rows;
 }
 
-function computeInstructorKPI(data){
-  const rows = computeInstructorStats(data);
-  return rows;
+function renderCoursesTable(rows){
+  _lastCoursesRows = rows;
+
+  const q = (document.getElementById('coursesSearch').value || '').trim().toLowerCase();
+  const filtered = q ? rows.filter(r => String(r.Employee).toLowerCase().includes(q)) : rows;
+
+  const tbody = document.getElementById('coursesBody');
+  tbody.innerHTML = '';
+
+  if(filtered.length === 0){
+    tbody.innerHTML = `<tr><td colspan="2" class="muted">אין תוצאות</td></tr>`;
+    return;
+  }
+
+  for(const r of filtered){
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><strong>${r.Employee}</strong></td>
+      <td><span class="pill">${r.CoursesCount}</span></td>
+    `;
+    tbody.appendChild(tr);
+  }
+}
+
+function renderCoursesTableFromLast(){
+  renderCoursesTable(_lastCoursesRows || []);
 }
 
 function isHolidayDate(data, dateISO){
@@ -519,9 +542,9 @@ function scoreCandidate(data, inst, targetAuthority, dateISO, durationMin){
 
   // WorkDaysNextWeek (fairness) computed fresh on demand (no caching)
   const statsRows = computeInstructorStats(data);
-  const instructorStats = statsRows.find(r => String(r.EmployeeID) === empId);
-  const workDaysNextWeek = instructorStats ? instructorStats.WorkDaysNextWeek : 0;
-  const coursesCountTotal = instructorStats ? instructorStats.CoursesCount : 0;
+  const instructorStats = statsRows.get(empId);
+  const workDaysNextWeek = instructorStats ? instructorStats.daysSet.size : 0;
+  const coursesCountTotal = instructorStats ? instructorStats.coursesCount : 0;
 
   // Score
   let score = 0;
@@ -612,12 +635,23 @@ function buildSuggestions(data, targetAuthority, durationMin, topN, daysLimit){
       if(picked.length >= topN) break;
     }
 
+    if(picked.length === 0){
+      for(const c of candidates){
+        if(usedToday.has(c.EmployeeID)) continue;
+        picked.push(c);
+        usedToday.add(c.EmployeeID);
+        if(picked.length >= topN) break;
+      }
+    }
+    if(picked.length === 0) continue;
+
     usedInPreviousDay.clear();
     for(const p of picked){
       usedInPreviousDay.add(p.EmployeeID);
     }
 
     // choose a single slot label for the day: use best candidate slot (top1)
+    if(picked.length === 0) continue;
     const top1 = picked[0];
     results.push({
       date: dateISO,
@@ -633,38 +667,6 @@ function buildSuggestions(data, targetAuthority, durationMin, topN, daysLimit){
   }
 
   return results;
-}
-
-let _lastInstructorRows = []; // UI-only: not an index for logic; just last rendered rows for filtering
-function renderInstructorTable(rows){
-  _lastInstructorRows = rows;
-
-  const q = (document.getElementById('instructorSearch').value || '').trim().toLowerCase();
-  const filtered = q
-    ? rows.filter(r => String(r.Employee).toLowerCase().includes(q))
-    : rows;
-
-  const tbody = document.getElementById('instructorsBody');
-  tbody.innerHTML = '';
-
-  if(filtered.length === 0){
-    tbody.innerHTML = `<tr><td colspan="4" class="muted">אין תוצאות</td></tr>`;
-    return;
-  }
-
-  for(const r of filtered){
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td><strong>${r.Employee}</strong></td>
-      <td><span class="pill">${r.WorkDays}</span></td>
-      <td><span class="pill">${r.CoursesCount}</span></td>
-      <td>${r.HomeAuthority}</td>
-    `;
-    tbody.appendChild(tr);
-  }
-}
-function renderInstructorTableFromLast(){
-  renderInstructorTable(_lastInstructorRows || []);
 }
 
 function renderSuggestions(list){
@@ -699,13 +701,8 @@ function renderSuggestions(list){
 }
 
 async function boot(){
-  clearStatus('statusBox1');
+  clearStatus('statusBoxCourses');
   clearStatus('statusBox2');
-
-  // next week label
-  const nw = getNextWeekDatesISO();
-  document.getElementById('weekRangeText').textContent =
-    `שבוע הבא: ${nw[0]} עד ${nw[nw.length-1]} (א׳–ה׳ בלבד).`;
 
   try{
     const data = await loadSchedulingDataFresh();
@@ -724,14 +721,13 @@ async function boot(){
       sel.appendChild(opt);
     }
 
-    const rows = computeInstructorKPI(data);
-    renderInstructorTable(rows);
-
-    showStatus('statusBox1', `נטענו ${rows.length} מדריכים.`, 'ok');
+    const rows = computeInstructorCoursesCountRows(data);
+    renderCoursesTable(rows);
+    showStatus('statusBoxCourses', `נטענו ${rows.length} מדריכים.`, 'ok');
 
   }catch(err){
     console.error(err);
-    showStatus('statusBox1', 'שגיאה בטעינת scheduling.json (בדוק נתיב/הרשאות/העלאה).', 'error');
+    showStatus('statusBoxCourses', 'שגיאה בטעינת scheduling.json (בדוק נתיב/הרשאות/העלאה).', 'error');
   }
 }
 
