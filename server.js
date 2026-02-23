@@ -2,8 +2,8 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
-const PORT = 5000;
-const MIME_TYPES = {
+const פורט = 5000;
+const סוגי_קובץ = {
   '.html': 'text/html',
   '.css': 'text/css',
   '.js': 'application/javascript',
@@ -14,22 +14,22 @@ const MIME_TYPES = {
   '.ico': 'image/x-icon',
 };
 
-const server = http.createServer((req, res) => {
-  let filePath = path.join(__dirname, req.url === '/' ? 'index.html' : req.url);
-  const ext = path.extname(filePath).toLowerCase();
-  const contentType = MIME_TYPES[ext] || 'application/octet-stream';
+const שרת = http.createServer((בקשה, תגובה) => {
+  let נתיב_קובץ = path.join(__dirname, בקשה.url === '/' ? 'index.html' : בקשה.url);
+  const סיומת = path.extname(נתיב_קובץ).toLowerCase();
+  const סוג_תוכן = סוגי_קובץ[סיומת] || 'application/octet-stream';
 
-  fs.readFile(filePath, (err, data) => {
-    if (err) {
-      res.writeHead(404, { 'Content-Type': 'text/plain', 'Cache-Control': 'no-cache' });
-      res.end('Not Found');
+  fs.readFile(נתיב_קובץ, (שגיאה, נתונים) => {
+    if (שגיאה) {
+      תגובה.writeHead(404, { 'Content-Type': 'text/plain', 'Cache-Control': 'no-cache' });
+      תגובה.end('לא נמצא');
       return;
     }
-    res.writeHead(200, { 'Content-Type': contentType, 'Cache-Control': 'no-cache, no-store, must-revalidate' });
-    res.end(data);
+    תגובה.writeHead(200, { 'Content-Type': סוג_תוכן, 'Cache-Control': 'no-cache, no-store, must-revalidate' });
+    תגובה.end(נתונים);
   });
 });
 
-server.listen(PORT, '0.0.0.0', () => {
-  console.log(`Server running on http://0.0.0.0:${PORT}`);
+שרת.listen(פורט, '0.0.0.0', () => {
+  console.log(`השרת פועל בכתובת http://0.0.0.0:${פורט}`);
 });
