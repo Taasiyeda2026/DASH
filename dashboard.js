@@ -854,6 +854,13 @@ function renderSummary(){
     </div>
   `;
 
+  const missingCard = wrap.querySelector('.missing-card');
+  if (missingCard) {
+    missingCard.addEventListener('click', () => {
+      openMissingCourses(currentYear, currentMonth);
+    });
+  }
+
   const managers = [...new Set(courses.map(r=>getCourseManager(r)).filter(Boolean))];
   const split = document.createElement('div'); split.className = 'summary-split';
 
@@ -884,13 +891,6 @@ function renderSummary(){
   view.appendChild(wrap);
 
   wrap.addEventListener('click', function(e){
-
-    // === חסר מדריך ===
-    const missing = e.target.closest('.missing-card');
-    if(missing){
-      openMissingCourses(currentYear, currentMonth);
-      return;
-    }
 
     // === מנהל ===
     const managerCol = e.target.closest('[data-manager]');
