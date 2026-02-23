@@ -20,7 +20,14 @@
     margin:0 auto;
     padding:0 10px 20px;
   }
-  h1{margin:0 0 14px 0;font-size:22px}
+  h1{margin:0;font-size:22px}
+  .header-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    margin-bottom:14px;
+  }
   .scheduling-page .grid{
     display:grid;
     grid-template-columns:1fr;
@@ -144,24 +151,29 @@
     display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;
   }
   .search{
-    width:280px;
+    width:230px;
     max-width:100%;
+    height:34px;
+    padding:5px 10px;
+    font-size:14px;
   }
   .back-dashboard-btn{
-    background:#475569;
+    background:#f8b4d9;
     color:#fff;
     border:none;
     width:auto;
     display:inline-flex;
     align-items:center;
     justify-content:center;
-    padding:4px 10px;
-    height:30px;
-    border-radius:6px;
+    padding:6px 12px;
+    height:32px;
+    border-radius:8px;
     font-size:13px;
-    font-weight:400;
+    font-weight:700;
     cursor:pointer;
+    margin-top:0;
   }
+  .back-dashboard-btn:hover{ opacity:.9; background:#f8b4d9; }
 
   @media (min-width:1000px){
     .scheduling-page .grid{
@@ -237,8 +249,8 @@
 
 <body>
   <div class="page-shell scheduling-page">
+  <div class="header-row">
   <h1>📌 מערכת שיבוצים </h1>
-  <div style="margin-bottom:14px;">
     <button class="back-dashboard-btn" onclick="goBackToDashboard()">
       ⬅ חזרה
     </button>
@@ -303,10 +315,6 @@
       <div class="courses-wrapper">
         <div class="card">
         <div class="topbar">
-          <div>
-            <div style="font-weight:900;">מדריכים — כמות קורסים</div>
-            <div class="small">רשימת מדריכים + מספר קורסים </div>
-          </div>
           <input class="search" id="coursesSearch" placeholder="חיפוש מדריך..." oninput="renderCoursesTableFromLast()"/>
         </div>
 
