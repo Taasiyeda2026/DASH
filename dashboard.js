@@ -724,7 +724,7 @@ function renderSummary(){
       </div>
 
       ${missingInstructorCount > 0 ? `
-      <div class="kpi-card" style="border:2px solid #dc2626">
+      <div class="kpi-card" id="missingInstructorCard" style="border:2px solid #dc2626;cursor:pointer">
         <div class="kpi-label" style="color:#dc2626">קורסים ללא מדריך</div>
         <div class="kpi-value" style="color:#dc2626">${missingInstructorCount}</div>
       </div>` : ''}
@@ -816,7 +816,81 @@ function renderSummary(){
 
     split.appendChild(col);
   });
-  wrap.appendChild(split); view.appendChild(wrap);
+  wrap.appendChild(split);
+  view.appendChild(wrap);
+
+  // ===== פתיחת חלון צד לחסר מדריך =====
+  const missingCard = wrap.querySelector('#missingInstructorCard');
+
+  if (missingCard) {
+    missingCard.onclick = () => {
+
+      const missingCourses = rawData.filter(r => {
+
+        if (String(r.EventType || '').trim().toUpperCase() !== 'COURSE')
+          return false;
+
+        if (r.Employee && r.Employee.trim())
+          return false;
+
+        const activeInMonth = r.Dates.some(d =>
+          d &&
+          d.getFullYear() === currentYear &&
+          d.getMonth() === currentMonth
+        );
+
+        const startDate = getCourseStartDate(r);
+        const nextMonthStart = new Date(currentYear, currentMonth + 1, 1);
+        nextMonthStart.setHours(0,0,0,0);
+
+        const isFuture =
+          startDate &&
+          startDate >= nextMonthStart;
+
+        return activeInMonth || isFuture;
+      });
+
+      sideContent.innerHTML = `
+      <h2>קורסים ללא מדריך</h2>
+      <div class="subtitle">${missingCourses.length} קורסים</div>
+      <div style="border-top:1px solid var(--border); margin:10px 0;"></div>
+    `;
+
+      missingCourses.forEach(r => {
+
+        const startDate = getCourseStartDate(r);
+        const end = endDate(r);
+
+        sideContent.innerHTML += `
+        <div class="course-card">
+
+          <div style="font-weight:800;font-size:16px;margin-bottom:6px">
+            ${r.Program || '—'}
+          </div>
+
+          <div>🏫 בית ספר: ${r.School || '—'}</div>
+          <div>🌍 רשות: ${r.Authority || '—'}</div>
+          <div>👨‍💼 מנהל: ${getCourseManager(r) || '—'}</div>
+
+          <div>
+            📅 התחלה: ${
+              startDate ? startDate.toLocaleDateString('he-IL') : '—'
+            }
+          </div>
+
+          <div>
+            🏁 סיום: ${
+              end ? end.toLocaleDateString('he-IL') : '—'
+            }
+          </div>
+
+        </div>
+      `;
+      });
+
+      side.classList.add('open');
+    };
+  }
 }
 
 function getUniqueInstructorMonths(){
