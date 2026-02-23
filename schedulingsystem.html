@@ -26,6 +26,14 @@
     grid-template-columns: 1fr;
     gap:16px;
   }
+  .suggestion-wrapper{
+    display:flex;
+    justify-content:center;
+  }
+  .suggestion-wrapper .card{
+    max-width:520px;
+    width:100%;
+  }
   .card{
     background:#fff;
     padding:18px;
@@ -158,7 +166,49 @@
 
   <div class="grid">
 
-    <!-- CARD 1: Instructors KPI (next week only) -->
+    <!-- CARD 1: Suggest scheduling -->
+    <div class="suggestion-wrapper">
+      <div class="card">
+        <div style="font-weight:900;margin-bottom:8px;">הצעת שיבוצים — תאריכים ושעות חלון (120 דק׳)</div>
+
+        <div class="row">
+          <div>
+            <label>רשות יעד</label>
+            <select id="authoritySelect"></select>
+          </div>
+          <div>
+            <label>כמות ימים להציג</label>
+            <select id="daysLimit">
+              <option value="10">10</option>
+              <option value="20" selected>20</option>
+              <option value="30">30</option>
+              <option value="50">50</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label>אפשרויות לכל תאריך</label>
+            <select id="topN">
+              <option value="3" selected>Top 3</option>
+              <option value="5">Top 5</option>
+            </select>
+          </div>
+          <div>
+            <label>משך קורס (דקות)</label>
+            <input id="durationMin" type="number" value="120" min="30" step="5"/>
+          </div>
+        </div>
+
+        <button onclick="runSuggestions()">מצא שיבוצים חכמים</button>
+
+        <div class="note" id="rangeNote">—</div>
+        <div class="status" id="statusBox2"></div>
+      </div>
+    </div>
+
+    <!-- CARD 2: Instructors KPI (next week only) -->
     <div class="card">
       <div class="topbar">
         <div>
@@ -190,46 +240,6 @@
       </div>
 
       <div class="status" id="statusBox1"></div>
-    </div>
-
-    <!-- CARD 2: Suggest scheduling -->
-    <div class="card">
-      <div style="font-weight:900;margin-bottom:8px;">הצעת שיבוצים — תאריכים ושעות חלון (120 דק׳)</div>
-
-      <div class="row">
-        <div>
-          <label>רשות יעד</label>
-          <select id="authoritySelect"></select>
-        </div>
-        <div>
-          <label>כמות ימים להציג</label>
-          <select id="daysLimit">
-            <option value="10">10</option>
-            <option value="20" selected>20</option>
-            <option value="30">30</option>
-            <option value="50">50</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="row">
-        <div>
-          <label>אפשרויות לכל תאריך</label>
-          <select id="topN">
-            <option value="3" selected>Top 3</option>
-            <option value="5">Top 5</option>
-          </select>
-        </div>
-        <div>
-          <label>משך קורס (דקות)</label>
-          <input id="durationMin" type="number" value="120" min="30" step="5"/>
-        </div>
-      </div>
-
-      <button onclick="runSuggestions()">מצא שיבוצים חכמים</button>
-
-      <div class="note" id="rangeNote">—</div>
-      <div class="status" id="statusBox2"></div>
     </div>
 
     <!-- CARD 3: Results -->
