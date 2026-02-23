@@ -583,7 +583,7 @@ function openSideGrouped(items) {
 }
 
 function applyFilters(){
-  return rawData.filter(r=>(!managerFilter.value||getCourseManager(r)===managerFilter.value)&&(!employeeFilter.value||r.Employee===employeeFilter.value));
+  return rawData.filter(r=>(!managerFilter.value||getManagerForCourseViews(r)===managerFilter.value)&&(!employeeFilter.value||r.Employee===employeeFilter.value));
 }
 
 function getCourseStartDate(r){
@@ -1055,7 +1055,7 @@ function openInstructorModal(name, courses, selectedMonth, selectedYear){
 
   totalWorkDays = maxDays;
   const employmentType = courses[0]?.EmploymentType || '—';
-  const managerName = courses[0]?.InstructorManager || '—';
+  const managerName = getInstructorManager(courses[0]) || '—';
 
   sideContent.innerHTML = `
     <div class="instructor-header">
