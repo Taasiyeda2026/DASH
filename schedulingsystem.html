@@ -419,7 +419,7 @@ function pickBestSlot(freeWindows, durationMin){
   return middle || candidates[0];
 }
 
-function computeInstructorKPI(data){
+function computeInstructorStats(data){
   const nextWeek = new Set(getNextWeekDatesISO());
 
   const instructors = (data.instructors || [])
@@ -448,6 +448,7 @@ function computeInstructorKPI(data){
       EmployeeID: empId,
       Employee: inst.Employee || '—',
       HomeAuthority: inst.HomeAuthority || '—',
+      WorkDays: daysSet.size,
       WorkDaysNextWeek: daysSet.size,
       CoursesCount: coursesCount
     };
@@ -460,6 +461,11 @@ function computeInstructorKPI(data){
     String(a.Employee).localeCompare(String(b.Employee), 'he')
   );
 
+  return rows;
+}
+
+function computeInstructorKPI(data){
+  const rows = computeInstructorStats(data);
   return rows;
 }
 
@@ -504,19 +510,10 @@ function scoreCandidate(data, inst, targetAuthority, dateISO, durationMin){
   if(maxInter > 45) return { ok:false, reason:'InterAuthority>45' }; // Hard fail
 
   // WorkDaysNextWeek (fairness) computed fresh on demand (no caching)
-  const nextWeekSet = new Set(getNextWeekDatesISO());
-  const daysSet = new Set();
-  let coursesCountTotal = 0;
-
-  for(const c of (data.courses || [])){
-    if(String(c.EmployeeID) !== empId) continue;
-    coursesCountTotal++;
-    const ds = c.Dates || [];
-    for(const d of ds){
-      if(typeof d === 'string' && nextWeekSet.has(d)) daysSet.add(d);
-    }
-  }
-  const workDaysNextWeek = daysSet.size;
+  const statsRows = computeInstructorStats(data);
+  const instructorStats = statsRows.find(r => String(r.EmployeeID) === empId);
+  const workDaysNextWeek = instructorStats ? instructorStats.WorkDaysNextWeek : 0;
+  const coursesCountTotal = instructorStats ? instructorStats.CoursesCount : 0;
 
   // Score
   let score = 0;
@@ -641,7 +638,7 @@ function renderInstructorTable(rows){
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td><strong>${r.Employee}</strong></td>
-      <td><span class="pill">${r.WorkDaysNextWeek}</span></td>
+      <td><span class="pill">${r.WorkDays}</span></td>
       <td><span class="pill">${r.CoursesCount}</span></td>
       <td>${r.HomeAuthority}</td>
     `;
