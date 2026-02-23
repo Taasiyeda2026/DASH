@@ -293,6 +293,13 @@ function initFromRawData(){
   initFilters();
   initSummaryMonths();
   currentDate = clampDateToDataRange(new Date());
+
+  const name = userRole === 'instructor'
+    ? rawData.find(r => r.Employee && r.Employee.trim())?.Employee
+    : rawData.find(r => r.Manager && r.Manager.trim())?.Manager;
+  const greetingEl = document.getElementById('greetingName');
+  if(greetingEl && name) greetingEl.textContent = `שלום, ${name}`;
+
   window.mode='week';
   render();
 }
