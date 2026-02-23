@@ -294,9 +294,7 @@ function initFromRawData(){
   initSummaryMonths();
   currentDate = clampDateToDataRange(new Date());
 
-  const name = userRole === 'instructor'
-    ? rawData.find(r => r.Employee && r.Employee.trim())?.Employee
-    : rawData.find(r => r.Manager && r.Manager.trim())?.Manager;
+  const name = sessionStorage.getItem('dash_name') || '';
   const greetingEl = document.getElementById('greetingName');
   if(greetingEl && name) greetingEl.textContent = `שלום, ${name}`;
 

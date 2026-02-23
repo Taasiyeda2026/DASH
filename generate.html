@@ -1,0 +1,340 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>יצירת קבצי JSON</title>
+
+<!-- SheetJS – קריאת אקסל -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<!-- JSZip – יצירת ZIP -->
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+<!-- FileSaver – הורדת קובץ -->
+<script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{
+  min-height:100vh;
+  background:linear-gradient(135deg,#0f172a 0%,#1e3a5f 45%,#1e40af 100%);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Segoe UI',Arial,sans-serif;direction:rtl;color:#f1f5f9;
+}
+
+.card{
+  background:rgba(255,255,255,0.07);
+  backdrop-filter:blur(12px);
+  border:1px solid rgba(255,255,255,0.15);
+  border-radius:20px;
+  padding:40px 36px;
+  width:100%;max-width:520px;
+  box-shadow:0 20px 60px rgba(0,0,0,0.4);
+}
+
+h1{
+  font-size:1.5rem;font-weight:700;
+  text-align:center;margin-bottom:8px;
+  color:#e2e8f0;
+}
+.subtitle{
+  text-align:center;font-size:.85rem;
+  color:#94a3b8;margin-bottom:32px;
+}
+
+.field{margin-bottom:20px;}
+label{
+  display:block;font-size:.82rem;font-weight:600;
+  color:#93c5fd;margin-bottom:8px;letter-spacing:.3px;
+}
+
+/* drop zones */
+.drop-zone{
+  border:2px dashed rgba(147,197,253,0.35);
+  border-radius:12px;padding:20px 16px;
+  text-align:center;cursor:pointer;
+  transition:border-color .2s,background .2s;
+  background:rgba(255,255,255,0.04);
+  position:relative;
+}
+.drop-zone:hover,.drop-zone.dragover{
+  border-color:#60a5fa;background:rgba(96,165,250,0.08);
+}
+.drop-zone input[type=file]{
+  position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;
+}
+.drop-icon{font-size:1.6rem;display:block;margin-bottom:6px;}
+.drop-label{font-size:.85rem;color:#94a3b8;}
+.drop-name{
+  font-size:.82rem;font-weight:600;color:#34d399;
+  margin-top:6px;display:none;
+}
+
+/* salt field */
+.salt-row{display:flex;gap:10px;align-items:center;}
+.salt-input{
+  flex:1;background:rgba(255,255,255,0.07);
+  border:1px solid rgba(255,255,255,0.15);border-radius:10px;
+  padding:10px 14px;color:#f1f5f9;font-size:.9rem;
+  outline:none;direction:ltr;text-align:left;
+  font-family:monospace;
+}
+.salt-input:focus{border-color:#60a5fa;}
+.toggle-btn{
+  background:none;border:1px solid rgba(255,255,255,0.15);
+  border-radius:8px;padding:10px 12px;cursor:pointer;
+  color:#94a3b8;font-size:.8rem;white-space:nowrap;
+  transition:border-color .2s,color .2s;
+}
+.toggle-btn:hover{border-color:#60a5fa;color:#60a5fa;}
+
+/* generate button */
+.btn-generate{
+  width:100%;padding:14px;margin-top:28px;
+  background:linear-gradient(135deg,#2563eb,#1d4ed8);
+  border:none;border-radius:12px;color:#fff;
+  font-size:1rem;font-weight:700;cursor:pointer;
+  letter-spacing:.4px;
+  box-shadow:0 4px 20px rgba(37,99,235,0.4);
+  transition:opacity .2s,transform .1s;
+}
+.btn-generate:hover:not(:disabled){opacity:.88;transform:translateY(-1px);}
+.btn-generate:disabled{opacity:.4;cursor:not-allowed;}
+
+/* status / log */
+.status-box{
+  margin-top:22px;border-radius:12px;
+  padding:14px 16px;font-size:.82rem;line-height:1.7;
+  display:none;
+}
+.status-box.info{background:rgba(37,99,235,0.18);border:1px solid rgba(96,165,250,0.3);color:#bfdbfe;}
+.status-box.success{background:rgba(5,150,105,0.18);border:1px solid rgba(52,211,153,0.3);color:#6ee7b7;}
+.status-box.error{background:rgba(185,28,28,0.18);border:1px solid rgba(248,113,113,0.3);color:#fca5a5;}
+
+.spinner{
+  display:inline-block;width:14px;height:14px;
+  border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;
+  border-radius:50%;animation:spin .7s linear infinite;
+  vertical-align:middle;margin-left:6px;
+}
+@keyframes spin{to{transform:rotate(360deg);}}
+</style>
+</head>
+<body>
+
+<div class="card">
+  <h1>⚙️ יוצר קבצי JSON</h1>
+  <p class="subtitle">העלה את קבצי האקסל וקבל ZIP מוכן להעלאה לשרת</p>
+
+  <!-- main.xlsx -->
+  <div class="field">
+    <label>📊 קובץ נתונים ראשי — main.xlsx</label>
+    <div class="drop-zone" id="zone-main">
+      <input type="file" accept=".xlsx,.xls" id="file-main" />
+      <span class="drop-icon">📂</span>
+      <span class="drop-label">לחץ או גרור קובץ אקסל לכאן</span>
+      <div class="drop-name" id="name-main"></div>
+    </div>
+  </div>
+
+  <!-- codes.xlsx -->
+  <div class="field">
+    <label>🔑 קובץ קודים — codes.xlsx</label>
+    <div class="drop-zone" id="zone-codes">
+      <input type="file" accept=".xlsx,.xls" id="file-codes" />
+      <span class="drop-icon">📂</span>
+      <span class="drop-label">לחץ או גרור קובץ אקסל לכאן</span>
+      <div class="drop-name" id="name-codes"></div>
+    </div>
+  </div>
+
+  <!-- SALT -->
+  <div class="field">
+    <label>🔒 SALT (מפתח הצפנה)</label>
+    <div class="salt-row">
+      <input class="salt-input" type="password" id="salt-input" value="MY_SECRET_2026" />
+      <button class="toggle-btn" id="salt-toggle" onclick="toggleSalt()">הצג</button>
+    </div>
+  </div>
+
+  <button class="btn-generate" id="btn-gen" onclick="generate()" disabled>
+    ✨ צור ZIP וירד
+  </button>
+
+  <div class="status-box" id="status"></div>
+</div>
+
+<script>
+// ─── File pickers ────────────────────────────────────────
+const fileMain  = document.getElementById('file-main');
+const fileCodes = document.getElementById('file-codes');
+
+function setupZone(inputId, nameId, zoneId) {
+  const inp  = document.getElementById(inputId);
+  const name = document.getElementById(nameId);
+  const zone = document.getElementById(zoneId);
+
+  inp.addEventListener('change', () => {
+    if (inp.files[0]) {
+      name.textContent = inp.files[0].name;
+      name.style.display = 'block';
+    }
+    checkReady();
+  });
+
+  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+  zone.addEventListener('drop', e => {
+    e.preventDefault(); zone.classList.remove('dragover');
+    const dt = e.dataTransfer;
+    if (dt.files[0]) {
+      inp.files = dt.files; // may not work in all browsers – fallback below
+      // fallback: store file directly
+      inp._droppedFile = dt.files[0];
+      name.textContent = dt.files[0].name;
+      name.style.display = 'block';
+      checkReady();
+    }
+  });
+}
+
+function getFile(inputId) {
+  const inp = document.getElementById(inputId);
+  return inp._droppedFile || (inp.files && inp.files[0]) || null;
+}
+
+setupZone('file-main',  'name-main',  'zone-main');
+setupZone('file-codes', 'name-codes', 'zone-codes');
+
+function checkReady() {
+  const ok = getFile('file-main') && getFile('file-codes');
+  document.getElementById('btn-gen').disabled = !ok;
+}
+
+// ─── Salt toggle ─────────────────────────────────────────
+function toggleSalt() {
+  const inp = document.getElementById('salt-input');
+  const btn = document.getElementById('salt-toggle');
+  if (inp.type === 'password') { inp.type = 'text';     btn.textContent = 'הסתר'; }
+  else                         { inp.type = 'password'; btn.textContent = 'הצג';  }
+}
+
+// ─── SHA-256 via Web Crypto ───────────────────────────────
+async function sha256hex(str) {
+  const buf   = new TextEncoder().encode(str);
+  const hash  = await crypto.subtle.digest('SHA-256', buf);
+  return Array.from(new Uint8Array(hash))
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join('');
+}
+
+// ─── Read Excel → JSON ────────────────────────────────────
+function readExcel(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      try {
+        const wb   = XLSX.read(e.target.result, { type: 'array' });
+        const ws   = wb.Sheets[wb.SheetNames[0]];
+        const data = XLSX.utils.sheet_to_json(ws);
+        resolve(data);
+      } catch(err) { reject(err); }
+    };
+    reader.onerror = reject;
+    reader.readAsArrayBuffer(file);
+  });
+}
+
+// ─── Status helper ───────────────────────────────────────
+function showStatus(msg, type = 'info') {
+  const box = document.getElementById('status');
+  box.innerHTML  = msg;
+  box.className  = `status-box ${type}`;
+  box.style.display = 'block';
+}
+
+// ─── Main logic ──────────────────────────────────────────
+async function generate() {
+  const btn  = document.getElementById('btn-gen');
+  const SALT = document.getElementById('salt-input').value.trim();
+
+  if (!SALT) { showStatus('⚠️ יש להזין SALT.', 'error'); return; }
+
+  btn.disabled = true;
+  showStatus('<span class="spinner"></span> מעבד קבצים...', 'info');
+
+  try {
+    // 1. Parse Excel files
+    const [mainData, codesData] = await Promise.all([
+      readExcel(getFile('file-main')),
+      readExcel(getFile('file-codes'))
+    ]);
+
+    showStatus('<span class="spinner"></span> יוצר קבצי JSON...', 'info');
+
+    const zip = new JSZip();
+    const instructorsFolder = zip.folder('data/instructors');
+    const adminsFolder      = zip.folder('data/admins');
+
+    let countInstr = 0, countAdmin = 0, countSkipped = 0;
+
+    // Helper: add Dates array to a course row
+    function addDates(course) {
+      const dates = [];
+      for (let i = 1; i <= 16; i++) {
+        const val = course[`Date${i}`];
+        if (val !== undefined && val !== null && val !== '') dates.push(val);
+      }
+      return { ...course, Dates: dates };
+    }
+
+    // 2. Process each row in codes
+    for (const row of codesData) {
+      const EmployeeID = String(row.EmployeeID ?? '').trim();
+      const EntryCode  = String(row.EntryCode  ?? '').trim();
+      const Role       = String(row.Role       ?? '').trim().toLowerCase();
+
+      if (!EmployeeID || !EntryCode || !Role) { countSkipped++; continue; }
+
+      const hash = await sha256hex(EmployeeID + EntryCode + SALT);
+
+      if (Role === 'instructor') {
+        const courses = mainData
+          .filter(r => String(r.EmployeeID).trim() === EmployeeID)
+          .map(addDates);
+        instructorsFolder.file(`${hash}.json`, JSON.stringify(courses, null, 2));
+        countInstr++;
+
+      } else if (Role === 'admin') {
+        const courses = mainData.map(addDates);
+        adminsFolder.file(`${hash}.json`, JSON.stringify(courses, null, 2));
+        countAdmin++;
+
+      } else {
+        countSkipped++;
+      }
+    }
+
+    // 3. Generate and download ZIP
+    showStatus('<span class="spinner"></span> אורז קובץ ZIP...', 'info');
+    const blob = await zip.generateAsync({ type: 'blob' });
+    saveAs(blob, 'data.zip');
+
+    showStatus(
+      `✅ הצלחה!<br>
+       מדריכים: <strong>${countInstr}</strong> קבצים<br>
+       מנהלים: <strong>${countAdmin}</strong> קבצים
+       ${countSkipped ? `<br>⚠️ דולגו: <strong>${countSkipped}</strong> שורות חסרות` : ''}
+       <br><br>📦 קובץ ZIP הורד — העלה את תיקיית <code>data/</code> לשרת.`,
+      'success'
+    );
+
+  } catch (err) {
+    console.error(err);
+    showStatus(`❌ שגיאה: ${err.message}`, 'error');
+  } finally {
+    btn.disabled = false;
+  }
+}
+</script>
+</body>
+</html>
