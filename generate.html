@@ -283,8 +283,18 @@ async function generate() {
         const val = course[`Date${i}`];
         if (val !== undefined && val !== null && val !== '') dates.push(val);
       }
-      return { ...course, Dates: dates };
+      return { ...course, Dates: dates, CourseManager: String(course.CourseManager ?? '').trim() };
     }
+
+
+    const instructorManagersByEmployeeId = new Map(
+      codesData
+        .filter(r => String(r.Role ?? '').trim().toLowerCase() === 'instructor')
+        .map(r => [
+          String(r.EmployeeID ?? '').trim(),
+          String(r.InstructorManager ?? '').trim()
+        ])
+    );
 
     // 2. Process each row in codes
     for (const row of codesData) {
@@ -292,7 +302,7 @@ async function generate() {
       const EntryCode       = String(row.EntryCode       ?? '').trim();
       const Role            = String(row.Role            ?? '').trim().toLowerCase();
       const EmploymentType  = String(row.EmploymentType  ?? '').trim();
-      const Manager         = String(row.Manager         ?? '').trim();
+      const InstructorManager = String(row.InstructorManager ?? '').trim();
 
       if (!EmployeeID || !EntryCode || !Role) { countSkipped++; continue; }
 
@@ -301,12 +311,15 @@ async function generate() {
       if (Role === 'instructor') {
         const courses = mainData
           .filter(r => String(r.EmployeeID).trim() === EmployeeID)
-          .map(r => ({ ...addDates(r), EmploymentType, Manager }));
+          .map(r => ({ ...addDates(r), EmploymentType, InstructorManager }));
         instructorsFolder.file(`${hash}.json`, JSON.stringify(courses, null, 2));
         countInstr++;
 
       } else if (Role === 'admin') {
-        const courses = mainData.map(addDates);
+        const courses = mainData.map(course => ({
+          ...addDates(course),
+          InstructorManager: instructorManagersByEmployeeId.get(String(course.EmployeeID ?? '').trim()) || ''
+        }));
         adminsFolder.file(`${hash}.json`, JSON.stringify(courses, null, 2));
         countAdmin++;
 

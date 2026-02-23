@@ -115,6 +115,19 @@ function isCourse(r){
   return String(r.EventType || '').trim().toUpperCase() === 'COURSE';
 }
 
+
+function getCourseManager(r){
+  return String(r.CourseManager ?? '').trim();
+}
+
+function getInstructorManager(r){
+  return String(r.InstructorManager ?? '').trim();
+}
+
+function getManagerForCourseViews(r){
+  return userRole === 'instructor' ? getInstructorManager(r) : getCourseManager(r);
+}
+
 function isCourseActiveInMonth(r, year, month){
   return isCourse(r) &&
     r.Dates.some(d =>
@@ -303,7 +316,7 @@ function initFromRawData(){
 }
 
 function initFilters(){
-  const managers=[...new Set(rawData.map(r=>r.Manager).filter(Boolean))];
+  const managers=[...new Set(rawData.map(r=>getCourseManager(r)).filter(Boolean))];
   const employees=[...new Set(rawData.map(r=>r.Employee).filter(Boolean))];
   managerFilter.innerHTML='<option value="">כל המנהלים</option>'+managers.map(v=>`<option>${v}</option>`).join('');
   employeeFilter.innerHTML='<option value="">כל המדריכים</option>'+employees.map(v=>`<option>${v}</option>`).join('');
@@ -544,7 +557,7 @@ function openSideGrouped(items) {
   const first = items[0];
   sideContent.innerHTML = `
     <h2>${first.Program}</h2>
-    <div class='subtitle'>מנהל: ${first.Manager || '—'}</div>
+    <div class='subtitle'>מנהל: ${getManagerForCourseViews(first) || '—'}</div>
     <div style="border-top:1px solid var(--border); margin-top:10px; padding-top:10px;"></div>
   `;
 
@@ -570,7 +583,7 @@ function openSideGrouped(items) {
 }
 
 function applyFilters(){
-  return rawData.filter(r=>(!managerFilter.value||r.Manager===managerFilter.value)&&(!employeeFilter.value||r.Employee===employeeFilter.value));
+  return rawData.filter(r=>(!managerFilter.value||getCourseManager(r)===managerFilter.value)&&(!employeeFilter.value||r.Employee===employeeFilter.value));
 }
 
 function getCourseStartDate(r){
@@ -674,11 +687,11 @@ function renderSummary(){
     </div>
   `;
 
-  const managers = [...new Set(courses.map(r=>r.Manager).filter(Boolean))];
+  const managers = [...new Set(courses.map(r=>getCourseManager(r)).filter(Boolean))];
   const split = document.createElement('div'); split.className = 'summary-split';
 
   managers.forEach(mgr=>{
-    const mgrCourses = courses.filter(r=>r.Manager === mgr);
+    const mgrCourses = courses.filter(r=>getCourseManager(r) === mgr);
     const mgrActive = mgrCourses.filter(r =>
       isCourseActiveInMonth(r, currentYear, currentMonth)
     ).length;
@@ -796,7 +809,7 @@ function renderInstructors(){
 
   titleEl.textContent = "מדריכים";
 
-  const managers=[...new Set(rawData.map(r=>r.Manager).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'he'));
+  const managers=[...new Set(rawData.map(r=>getInstructorManager(r)).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'he'));
   const selectedManager = renderInstructors.selectedManager || '';
 
   const controls = document.createElement('div');
@@ -859,7 +872,7 @@ function renderInstructors(){
     if(!isCourse(r)) return;
     if(!isCourseActiveInMonth(r, selectedYear, selectedMonth)) return;
 
-    if(selectedManager && r.Manager !== selectedManager) return;
+    if(selectedManager && getInstructorManager(r) !== selectedManager) return;
 
     allActiveCourses.push(r);
 
@@ -1042,7 +1055,7 @@ function openInstructorModal(name, courses, selectedMonth, selectedYear){
 
   totalWorkDays = maxDays;
   const employmentType = courses[0]?.EmploymentType || '—';
-  const managerName = courses[0]?.Manager || '—';
+  const managerName = courses[0]?.InstructorManager || '—';
 
   sideContent.innerHTML = `
     <div class="instructor-header">

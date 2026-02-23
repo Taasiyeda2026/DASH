@@ -65,6 +65,7 @@ h1{font-size:22px;font-weight:700;color:#1e293b;margin-bottom:6px}
         <div class="schema-item"><span class="schema-key">EmployeeID</span><span class="schema-req">*</span></div>
         <div class="schema-item"><span class="schema-key">Employee</span><span class="schema-req">*</span></div>
         <div class="schema-item"><span class="schema-key">Program, School, Authority</span></div>
+        <div class="schema-item"><span class="schema-key">CourseManager</span></div>
         <div class="schema-item"><span class="schema-key">EventType, StartTime, EndTime</span></div>
         <div class="schema-item"><span class="schema-key">Date1 – Date16</span></div>
         <div class="schema-item"><span class="schema-key">End, MonthStart, MonthEnd</span></div>
@@ -74,7 +75,7 @@ h1{font-size:22px;font-weight:700;color:#1e293b;margin-bottom:6px}
         <div class="schema-item"><span class="schema-key">EmployeeID</span><span class="schema-req">*</span></div>
         <div class="schema-item"><span class="schema-key">EntryCode</span><span class="schema-req">*</span></div>
         <div class="schema-item"><span class="schema-key">Role</span><span class="schema-req">*</span> <span style="color:#64748b">(instructor / admin)</span></div>
-        <div class="schema-item"><span class="schema-key">Employee, Manager</span></div>
+        <div class="schema-item"><span class="schema-key">Employee, InstructorManager</span></div>
         <div class="schema-item"><span class="schema-key">EmploymentType</span></div>
         <div class="schema-item"><span class="schema-key">HomeAuthority</span></div>
       </div>
@@ -226,6 +227,15 @@ document.getElementById('generateBtn').addEventListener('click', async ()=>{
     }
   });
 
+  const instructorManagersByEmployeeId = new Map(
+    codesData
+      .filter(r => String(r.Role ?? '').trim().toLowerCase() === 'instructor')
+      .map(r => [
+        String(r.EmployeeID ?? '').trim(),
+        String(r.InstructorManager ?? '').trim()
+      ])
+  );
+
   let instructorCount = 0, adminCount = 0, skipped = 0;
   const total = codesData.length;
 
@@ -248,12 +258,18 @@ document.getElementById('generateBtn').addEventListener('click', async ()=>{
     const hash = await sha256(EmployeeID + EntryCode + SALT);
 
     if(Role === 'instructor'){
+      const instructorManager = String(row.InstructorManager ?? '').trim();
+
       const courses = mainData
         .filter(r => Number(r.EmployeeID) === Number(EmployeeID))
         .map(course => {
           const dates = [];
           for(let i=1;i<=16;i++){ if(course[`Date${i}`]) dates.push(course[`Date${i}`]); }
-          return {...course, Dates: dates};
+          return {
+            ...course,
+            Dates: dates,
+            InstructorManager: instructorManager
+          };
         });
 
       const name = NameField || courses[0]?.Employee || '';
@@ -265,7 +281,12 @@ document.getElementById('generateBtn').addEventListener('click', async ()=>{
       const allCourses = mainData.map(course => {
         const dates = [];
         for(let i=1;i<=16;i++){ if(course[`Date${i}`]) dates.push(course[`Date${i}`]); }
-        return {...course, Dates: dates};
+        const employeeId = String(course.EmployeeID ?? '').trim();
+        return {
+          ...course,
+          Dates: dates,
+          InstructorManager: instructorManagersByEmployeeId.get(employeeId) || ''
+        };
       });
 
       const name = NameField || '';
@@ -293,7 +314,7 @@ document.getElementById('generateBtn').addEventListener('click', async ()=>{
     .map(r => ({
       EmployeeID:     String(r.EmployeeID     ?? '').trim(),
       Employee:       String(r.Employee       ?? '').trim(),
-      Manager:        String(r.Manager        ?? '').trim(),
+      InstructorManager: String(r.InstructorManager ?? '').trim(),
       EmploymentType: String(r.EmploymentType ?? '').trim(),
       HomeAuthority:  String(r.HomeAuthority  ?? '').trim(),
       Role:           'instructor'
@@ -305,7 +326,11 @@ document.getElementById('generateBtn').addEventListener('click', async ()=>{
     for(let i = 1; i <= 16; i++){
       if(course[`Date${i}`] != null && course[`Date${i}`] !== '') dates.push(course[`Date${i}`]);
     }
-    return { ...course, Dates: dates };
+    return {
+      ...course,
+      Dates: dates,
+      CourseManager: String(course.CourseManager ?? '').trim()
+    };
   });
 
   const schedulingJson = {
