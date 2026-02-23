@@ -54,6 +54,8 @@ const summaryMonth=document.getElementById('summaryMonth');
 if(userRole === 'instructor'){
   btnSummary.style.display = 'none';
   btnInstructors.style.display = 'none';
+  btnMonth.style.display = 'none';
+  btnWeek.style.display = 'none';
   filtersEl.style.display = 'none';
   window.mode = 'month';
 }
