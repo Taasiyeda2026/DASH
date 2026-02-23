@@ -724,7 +724,8 @@ function renderSummary(){
       </div>
 
       ${missingInstructorCount > 0 ? `
-      <div class="kpi-card" id="missingInstructorCard" style="border:2px solid #dc2626;cursor:pointer">
+      <div class="kpi-card missing-card"
+           style="border:2px solid #dc2626; cursor:pointer;">
         <div class="kpi-label" style="color:#dc2626">קורסים ללא מדריך</div>
         <div class="kpi-value" style="color:#dc2626">${missingInstructorCount}</div>
       </div>` : ''}
@@ -819,11 +820,11 @@ function renderSummary(){
   wrap.appendChild(split);
   view.appendChild(wrap);
 
-  // ===== פתיחת חלון צד לחסר מדריך =====
-  const missingCard = wrap.querySelector('#missingInstructorCard');
+  // חיבור לחיצה לחסר מדריך
+  const missingCard = wrap.querySelector('.missing-card');
 
   if (missingCard) {
-    missingCard.onclick = () => {
+    missingCard.addEventListener('click', () => {
 
       const missingCourses = rawData.filter(r => {
 
@@ -851,10 +852,10 @@ function renderSummary(){
       });
 
       sideContent.innerHTML = `
-      <h2>קורסים ללא מדריך</h2>
-      <div class="subtitle">${missingCourses.length} קורסים</div>
-      <div style="border-top:1px solid var(--border); margin:10px 0;"></div>
-    `;
+        <h2>קורסים ללא מדריך</h2>
+        <div class="subtitle">${missingCourses.length} קורסים</div>
+        <div style="border-top:1px solid var(--border); margin:10px 0;"></div>
+      `;
 
       missingCourses.forEach(r => {
 
@@ -862,34 +863,21 @@ function renderSummary(){
         const end = endDate(r);
 
         sideContent.innerHTML += `
-        <div class="course-card">
-
-          <div style="font-weight:800;font-size:16px;margin-bottom:6px">
-            ${r.Program || '—'}
+          <div class="course-card">
+            <div style="font-weight:800;font-size:16px;margin-bottom:6px">
+              ${r.Program || '—'}
+            </div>
+            <div>🏫 בית ספר: ${r.School || '—'}</div>
+            <div>🌍 רשות: ${r.Authority || '—'}</div>
+            <div>👨‍💼 מנהל: ${getCourseManager(r) || '—'}</div>
+            <div>📅 התחלה: ${startDate ? startDate.toLocaleDateString('he-IL') : '—'}</div>
+            <div>🏁 סיום: ${end ? end.toLocaleDateString('he-IL') : '—'}</div>
           </div>
-
-          <div>🏫 בית ספר: ${r.School || '—'}</div>
-          <div>🌍 רשות: ${r.Authority || '—'}</div>
-          <div>👨‍💼 מנהל: ${getCourseManager(r) || '—'}</div>
-
-          <div>
-            📅 התחלה: ${
-              startDate ? startDate.toLocaleDateString('he-IL') : '—'
-            }
-          </div>
-
-          <div>
-            🏁 סיום: ${
-              end ? end.toLocaleDateString('he-IL') : '—'
-            }
-          </div>
-
-        </div>
-      `;
+        `;
       });
 
       side.classList.add('open');
-    };
+    });
   }
 }
 
