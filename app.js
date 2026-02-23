@@ -123,11 +123,14 @@ async function login(){
 }
 
 function startApp(jsonData, role, hash){
-  rawData = Array.isArray(jsonData) ? jsonData : [];
+  const records = Array.isArray(jsonData) ? jsonData : (jsonData.data || []);
+  const name = !Array.isArray(jsonData) ? (jsonData.name || '') : '';
+  rawData = records;
   userRole = role;
 
   sessionStorage.setItem('dash_hash', hash);
   sessionStorage.setItem('dash_role', role);
+  if(name) sessionStorage.setItem('dash_name', name);
 
   document.getElementById('loginScreen').style.display='none';
   document.getElementById('app').style.display='block';
