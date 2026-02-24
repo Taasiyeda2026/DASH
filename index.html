@@ -2,7 +2,7 @@
 <html lang="he" dir="rtl">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 
 <!-- ביטול Cache מלא -->
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
@@ -21,6 +21,31 @@
 <meta name="apple-mobile-web-app-title" content="דשבורד" />
 
 <style>
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+body {
+  -webkit-text-size-adjust: 100%;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+button, input, select {
+  width: 100%;
+  max-width: 100%;
+}
 
 /* ===== LOGIN PAGE ===== */
 .login-page{
@@ -94,8 +119,8 @@
 :root{
   --bg:#f8fafc;--card:#ffffff;--border:#e2e8f0;--text:#0f172a;--muted:#64748b;--danger:#dc2626;
 }
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-body{margin:0;font-family:system-ui,Arial;background:var(--bg);color:var(--text);overflow-x:hidden}
+*{-webkit-tap-highlight-color:transparent;}
+body{font-family:system-ui,Arial;background:var(--bg);color:var(--text)}
 
 /* ===== MOBILE TOUCH OPTIMIZATIONS ===== */
 
@@ -116,7 +141,7 @@ button,select,a,[onclick]{touch-action:manipulation;}
   button{min-height:44px;}
   select{min-height:44px;}
   .side .close,.side-close{width:44px !important;height:44px !important;font-size:22px !important;}
-  .nav-arrows #prev,.nav-arrows #next{min-width:44px;min-height:44px;}
+  .nav-arrows #prev,.nav-arrows #next{width:44px;min-height:44px;}
   /* תחושת לחיצה לכרטיסי מדריכים */
   #view div[style*="cursor: pointer"]:active{
     transform:scale(0.96) !important;
@@ -125,11 +150,11 @@ button,select,a,[onclick]{touch-action:manipulation;}
   }
 }
 header{background:#fff;border-bottom:1px solid var(--border)}
-.header-inner{max-width:1200px;margin:auto;padding:14px;display:flex;gap:12px;align-items:center}
+.header-inner{width:100%;max-width:1200px;margin:0 auto;padding:14px;display:flex;gap:12px;align-items:center}
 .app-logo{height:40px}
 
 .controls{display:flex;gap:8px;justify-content:center;align-items:center;flex-wrap:wrap;margin:10px}
-.instructors-count-title{max-width:1200px;margin:18px auto 0;padding:0 10px;text-align:right;font-size:16px;font-weight:700;}
+.instructors-count-title{width:100%;max-width:1200px;margin:18px auto 0;padding:0 10px;text-align:right;font-size:16px;font-weight:700;}
 select,button{height:32px;border:1px solid var(--border);border-radius:8px;background:#fff;padding:0 10px;cursor:pointer}
 .today-star {
   width: 38px;
@@ -201,15 +226,16 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
 .nav{position:sticky;top:0;background:#fff;border-bottom:1px solid var(--border);z-index:10;display:flex;gap:8px;justify-content:center;align-items:center;flex-wrap:wrap;margin:0;padding:10px}
 .nav-modes{display:flex;gap:8px;align-items:center}
 .nav-arrows{display:flex;gap:8px;align-items:center}
-.nav-arrows #title{min-width:240px;text-align:center;font-weight:700;font-size:15px;white-space:nowrap;}
+.nav-arrows #title{width:100%;max-width:240px;text-align:center;font-weight:700;font-size:15px;white-space:nowrap;}
 
 #view{
+  width: 100%;
   max-width: 1200px;
   margin: 0 auto;
   padding: 24px 20px 150px 20px;
 }
 
-.grid{max-width:1200px;margin:auto;padding:10px;display:grid;grid-template-columns:repeat(7,1fr);gap:12px;grid-auto-rows: 1fr;}
+.grid{width:100%;max-width:1200px;margin:0 auto;padding:10px;display:grid;grid-template-columns:repeat(7,1fr);gap:12px;grid-auto-rows: 1fr;}
 .day{background:var(--card);border-radius:12px;padding:8px;min-height:140px;border:1px solid var(--border); display: flex; flex-direction: column; gap: 4px;}
 .day.today{
   border:2px solid #3b82f6 !important;
@@ -225,7 +251,7 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
 .event-hour{font-size:10px; color:#0f172a; font-weight:600; background:rgba(255,255,255,0.65); backdrop-filter:blur(2px); padding:2px 6px; border-radius:6px; align-self:flex-start; margin-bottom:4px;}
 
 /* side panel */
-.side{position:fixed;top:0;left:0;width:380px;max-width:92%;height:100%;background:#fff;box-shadow:-6px 0 24px rgba(0,0,0,.18);transform:translateX(-100%);transition:.28s ease;z-index:50;padding:0;overflow:hidden;display:flex;flex-direction:column;}
+.side,.side-panel{position:fixed;top:0;left:0;width:320px;max-width:100%;height:100%;background:#fff;box-shadow:-6px 0 24px rgba(0,0,0,.18);transform:translateX(-100%);transition:.28s ease;z-index:50;padding:0;overflow:hidden;display:flex;flex-direction:column;}
 .side.open{transform:translateX(0)}
 .side .close,
 .side-close{position:relative;top:auto;left:auto;flex-shrink:0;align-self:flex-start;margin:14px 0 4px 14px;z-index:1000;background:#fff;border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;border:none;box-shadow:0 1px 6px rgba(0,0,0,0.12);}
@@ -317,7 +343,7 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
 }
 
 /* --- שינויים בעמוד הסיכום --- */
-.summary-wrap{max-width:1200px;margin:auto;padding:10px;display:grid;gap:16px}
+.summary-wrap{width:100%;max-width:1200px;margin:0 auto;padding:10px;display:grid;gap:16px}
 .summary-top{background:#fff;border:1px solid var(--border);border-radius:16px;padding:20px;text-align:center}
 
 .summary-split{
@@ -358,8 +384,9 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
 /* ===== SUMMARY KPI ===== */
 
 .summary-wrap{
+  width:100%;
   max-width:1200px;
-  margin:auto;
+  margin:0 auto;
   padding:30px 20px;
   display:grid;
   gap:30px;
@@ -600,7 +627,7 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
   #btnSummary,
   #btnInstructors{
     flex: 0 1 auto !important;
-    min-width: 120px;
+    width: 100%;
     height: 38px;
     font-size: 14px;
     border-radius: 14px;
@@ -658,7 +685,8 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
   }
 
   /* פאנל צד - מסך מלא במובייל */
-  .side {
+  .side,
+  .side-panel {
     width: 100% !important;
     max-width: 100% !important;
   }
@@ -714,7 +742,8 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
     overflow-wrap:anywhere;
   }
 
-  .side{
+  .side,
+  .side-panel{
     width:100%;
     max-width:100%;
   }
@@ -738,6 +767,13 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
 
   .course-card{
     padding:14px;
+  }
+}
+
+@media (max-width: 768px) {
+  .side,
+  .side-panel {
+    width: 100%;
   }
 }
 </style>
