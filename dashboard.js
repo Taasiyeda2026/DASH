@@ -666,19 +666,19 @@ function renderMobileWeekView(){
       if(sameDay(dd, date)) dailyItems.push({ ...r, meetingIdx: idx+1, selectedDate: dd });
     }));
 
-    // קיבוץ
+    // קיבוץ — זהה ל-buildDay()
     const groupsMap = {};
     dailyItems.forEach(ev => {
       if(ev.EventType === 'HOLIDAY'){
         const key = `holiday-${ev.Program}`;
-        if(!groupsMap[key]) groupsMap[key] = { type:'holiday', items:[ev] };
+        if(!groupsMap[key]) groupsMap[key] = { type:'holiday', time:'00:00', items:[ev] };
       } else {
         const key = `${ev.Employee}-${ev.Program}`;
         if(!groupsMap[key]) groupsMap[key] = { type:'course', time: ev.StartTime||'99:99', items:[] };
         groupsMap[key].items.push(ev);
       }
     });
-    const groups = Object.values(groupsMap).sort((a,b) => (a.time||'').localeCompare(b.time||''));
+    const groups = Object.values(groupsMap).sort((a,b) => a.time.localeCompare(b.time));
 
     const cell = document.createElement('div');
     cell.className = 'mwg-cell' + (isToday ? ' mwg-today' : '') + (groups.length > 0 ? ' mwg-has-events' : '');
@@ -723,10 +723,24 @@ function renderMobileWeekView(){
   view.appendChild(wrap);
 }
 
-function openDayDetail(date, items){
+function openDayDetail(date, dailyPool){
   const dayTitle = date.toLocaleDateString('he-IL', { weekday:'long', day:'numeric', month:'long' });
 
-  if(items.length === 0){
+  // אותו קיבוץ בדיוק כמו buildDay()
+  const groupsMap = {};
+  dailyPool.forEach(ev => {
+    if(ev.EventType === 'HOLIDAY'){
+      const key = `holiday-${ev.Program}`;
+      if(!groupsMap[key]) groupsMap[key] = { type:'holiday', time:'00:00', items:[ev] };
+    } else {
+      const key = `${ev.Employee}-${ev.Program}`;
+      if(!groupsMap[key]) groupsMap[key] = { type:'course', time: ev.StartTime||'99:99', items:[] };
+      groupsMap[key].items.push(ev);
+    }
+  });
+  const groups = Object.values(groupsMap).sort((a,b) => a.time.localeCompare(b.time));
+
+  if(groups.length === 0){
     sideContent.innerHTML = `
       <h2>${dayTitle}</h2>
       <div class="subtitle" style="color:#94a3b8">אין פעילויות ביום זה</div>`;
@@ -734,53 +748,47 @@ function openDayDetail(date, items){
     return;
   }
 
-  // קיבוץ לפי תוכנית-מדריך
-  const groupsMap = {};
-  items.forEach(ev => {
-    if(ev.EventType === 'HOLIDAY'){
-      const key = `holiday-${ev.Program}`;
-      if(!groupsMap[key]) groupsMap[key] = { type:'holiday', items:[ev] };
-    } else {
-      const key = `${ev.Employee}-${ev.Program}`;
-      if(!groupsMap[key]) groupsMap[key] = { type:'course', time: ev.StartTime||'99:99', items:[] };
-      groupsMap[key].items.push(ev);
-    }
-  });
-  const groups = Object.values(groupsMap).sort((a,b) => (a.time||'').localeCompare(b.time||''));
-
   sideContent.innerHTML = `
     <h2>${dayTitle}</h2>
     <div class="subtitle">${groups.length} פעילות${groups.length !== 1 ? 'ות' : ''}</div>
     <div style="border-top:1px solid var(--border);margin:10px 0 14px;"></div>
   `;
 
+  // אותו פורמט בדיוק כמו openSideGrouped — כולל badge מפגש + כל שדות הנתונים
   groups.forEach(g => {
     const first = g.items[0];
+
     if(g.type === 'holiday'){
       sideContent.innerHTML += `
         <div class="group-item" style="background:#fef2f2;border-color:#fca5a5">
           <div style="font-weight:800;color:#dc2626;font-size:15px">🎌 ${first.Program}</div>
         </div>`;
-    } else {
-      const hasEmp = !!(first.Employee && first.Employee.trim());
-      const empDisplay = hasEmp
-        ? first.Employee
-        : `<span style="color:var(--danger);font-weight:700">חסר מדריך</span>`;
-      const timeRange = (first.StartTime||first.EndTime) ? `${first.StartTime}–${first.EndTime}` : '';
-      const colorDot = `<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${getEmployeeColor(first.Employee)};margin-left:6px;flex-shrink:0;vertical-align:middle"></span>`;
+      return;
+    }
+
+    // כל meeting באותה קבוצה (בד"כ 1 ביום, אבל תומך בריבוי)
+    g.items.forEach(item => {
+      const end = endDate(item);
+      const timeRange = (item.StartTime || item.EndTime)
+        ? `${item.StartTime} – ${item.EndTime}`
+        : '—';
+      const empDisplay = (item.Employee && item.Employee.trim())
+        ? item.Employee
+        : `<span style="color:var(--danger);font-weight:bold;">חסר מדריך</span>`;
 
       sideContent.innerHTML += `
         <div class="group-item">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-            <div style="font-weight:800;font-size:15px">${colorDot}${first.Program}</div>
-            ${timeRange ? `<div style="background:#334155;color:#fff;padding:2px 8px;border-radius:6px;font-size:12px;font-weight:700;flex-shrink:0">${timeRange}</div>` : ''}
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+            <div class="badge">מפגש ${item.meetingIdx}</div>
+            <div style="background:#334155;color:#fff;padding:2px 8px;border-radius:6px;font-size:12px;font-weight:bold;">${timeRange}</div>
           </div>
+          <div style="font-weight:800;font-size:15px;margin-bottom:8px;">${item.Program}</div>
           <div class="row"><span class="label">מדריך</span><span class="value">${empDisplay}</span></div>
-          <div class="row"><span class="label">בית ספר</span><span class="value">${first.School||'—'}</span></div>
-          <div class="row"><span class="label">רשות</span><span class="value">${first.Authority||'—'}</span></div>
-          ${g.items.length > 1 ? `<div class="row"><span class="label">מפגש</span><span class="value">${g.items[0].meetingIdx} מתוך ${g.items.length}</span></div>` : ''}
+          <div class="row"><span class="label">בית ספר</span><span class="value">${item.School||'—'}</span></div>
+          <div class="row"><span class="label">רשות</span><span class="value">${item.Authority||'—'}</span></div>
+          <div class="row"><span class="label">סיום קורס</span><span class="value">${end ? end.toLocaleDateString('he-IL') : '—'}</span></div>
         </div>`;
-    }
+    });
   });
 
   openSidePanel();
