@@ -2,23 +2,34 @@
 <html lang="he" dir="rtl">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>מערכת שיבוצים חכמה</title>
 
 <style>
   *{box-sizing:border-box}
+  html, body{
+    margin:0;
+    padding:0;
+    overflow-x:hidden;
+    width:100%;
+  }
+  html{
+    -webkit-text-size-adjust:100%;
+  }
   body{
     font-family: Arial, sans-serif;
     background:#f4f6f9;
-    margin:0;
-    padding:24px 16px;
     color:#0f172a;
+  }
+  .app-wrapper{
+    max-width:480px;
+    margin:0 auto;
+    padding:16px;
   }
   .page-shell{
     width:100%;
-    max-width:1120px;
     margin:0 auto;
-    padding:0 10px 20px;
+    padding:0;
   }
   h1{margin:0;font-size:22px}
   .header-row{
@@ -80,6 +91,12 @@
     cursor:pointer;
   }
   button:hover{background:#1e40af}
+  button{
+    width:100%;
+    padding:12px;
+    font-size:16px;
+    border-radius:8px;
+  }
   .note{
     margin-top:10px;
     font-size:12px;
@@ -111,13 +128,17 @@
   tr:hover td{background:#fafcff}
   .small{font-size:12px;color:#64748b;font-weight:700}
   /* suggestions list */
-  .list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:10px}
-  .item{
-    border:1px solid #e2e8f0;
-    border-radius:12px;
-    padding:12px;
-    background:#fff;
+  .list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:0;min-height:200px}
+  .result-card{
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+    padding:12px 0;
+    border-bottom:1px solid #eee;
+    font-size:14px;
+    line-height:1.4;
   }
+  .result-card div{word-break:break-word;}
   .item-header{
     display:flex;
     align-items:flex-start;
@@ -175,15 +196,8 @@
   }
   .back-dashboard-btn:hover{ opacity:.9; background:#f8b4d9; }
 
-  @media (min-width:1000px){
-    .scheduling-page .grid{
-      grid-template-columns:1fr 1fr;
-    }
-  }
-
   @media (max-width: 640px){
-    body{padding:14px 10px;}
-    .page-shell{padding:0 4px 14px;}
+    .app-wrapper{padding:12px;}
     .card{padding:14px;}
   }
 
@@ -195,7 +209,7 @@
 
   /* הכי חשוב: קומפקטיות */
   .scheduling-page table{
-    width: auto;
+    width: 100%;
     border-collapse: collapse;
     table-layout: auto;
     font-size: 12px;
@@ -244,10 +258,13 @@
     overflow: hidden;
     text-overflow: ellipsis;
   }
+
+  .loading-placeholder{height:80px;}
 </style>
 </head>
 
 <body>
+  <div class="app-wrapper">
   <div class="page-shell scheduling-page">
   <div class="header-row">
   <h1>📌 מערכת שיבוצים </h1>
@@ -306,7 +323,7 @@
         </div>
 
         <div class="list" id="resultsList">
-          <div class="muted">לחץ “מצא שיבוץ” כדי להציג תוצאות.</div>
+          <div class="loading-placeholder muted">לחץ “מצא שיבוץ” כדי להציג תוצאות.</div>
         </div>
       </div>
     </div>
@@ -337,6 +354,7 @@
       </div>
     </div>
 
+  </div>
   </div>
   </div>
 
