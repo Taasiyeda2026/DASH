@@ -210,6 +210,22 @@
     .card{padding:14px;}
   }
 
+  @media (max-width: 480px){
+    .scheduling-page .row{
+      grid-template-columns: 1fr;
+    }
+    .topbar{
+      flex-direction: column;
+      align-items: stretch;
+      gap: 8px;
+    }
+    .search{
+      width: 100%;
+    }
+    h1{font-size:18px;}
+    .header-row{flex-wrap:wrap;}
+  }
+
   /* Scheduling table - compact mode */
   .scheduling-page .table-wrap{
     max-width: 100%;

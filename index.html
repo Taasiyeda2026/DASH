@@ -764,7 +764,7 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
 @media(max-width:600px){
 
   #view > div[style*="grid-template-columns: repeat(auto-fill,minmax(180px,1fr))"]{
-    grid-template-columns: repeat(4,minmax(0,1fr)) !important;
+    grid-template-columns: repeat(3,minmax(0,1fr)) !important;
     gap: 4px !important;
   }
 
@@ -809,6 +809,74 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
 
 #app-wrapper{
   transform-origin: top center;
+}
+
+/* ===== MOBILE MONTH ACCORDION (.week – used by renderMobileMonth) ===== */
+.week {
+  margin-bottom: 14px;
+}
+.week-header {
+  background: #fff;
+  padding: 14px 16px;
+  border-radius: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.07);
+  user-select: none;
+  -webkit-user-select: none;
+}
+.week-content {
+  display: none;
+  margin-top: 8px;
+}
+.week.open .week-content {
+  display: block;
+}
+
+/* ===== HEADER MOBILE – wrap & hide redundant title ===== */
+@media(max-width:800px) {
+  .header-inner {
+    flex-wrap: wrap;
+  }
+  .header-inner > strong {
+    display: none;
+  }
+}
+
+/* ===== MANAGER OVERLAY & KPI CARDS – mobile ===== */
+@media(max-width:600px) {
+  .manager-details-overlay {
+    width: calc(100% - 24px);
+    max-width: calc(100% - 24px);
+    padding: 20px 16px;
+    max-height: 88vh;
+  }
+  .summary-top {
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  }
+}
+
+/* ===== VERY SMALL SCREENS (≤400px) ===== */
+@media(max-width:400px) {
+  #greetingName {
+    display: none !important;
+  }
+  .header-inner {
+    padding: 8px 10px !important;
+    gap: 6px !important;
+  }
+  .kpi-value {
+    font-size: 32px;
+  }
+  .kpi-label {
+    font-size: 12px;
+  }
+  .nav-arrows #title {
+    font-size: 11px !important;
+  }
+  .event {
+    font-size: 13px !important;
+  }
 }
 </style>
 </head>
