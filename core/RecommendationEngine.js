@@ -258,6 +258,8 @@ export function buildGlobalRecommendations(data, targetAuthority, durationMin, t
   const normalized = normalizeCourseDatesToISO(data);
   const instructors = (normalized.instructors || []).filter((i) => String(i.Role || '').toLowerCase() === 'instructor');
   const suggestionDates = getSuggestionDates();
+  const candidates = [];
+  const uniqueSlots = new Set();
 
   const debugStats = {
     rejectedByDateWindow: 0,
@@ -269,8 +271,6 @@ export function buildGlobalRecommendations(data, targetAuthority, durationMin, t
     rejectedByFutureConflict: 0,
     validCandidates: 0
   };
-
-  const bestByInstructor = new Map();
 
   for (const dateISO of suggestionDates) {
     const dateObj = parseISODate(dateISO);
@@ -362,10 +362,19 @@ export function buildGlobalRecommendations(data, targetAuthority, durationMin, t
         future
       };
 
+      const uniqueKey = `${employeeID}_${dateISO}_${candidate.start}_${candidate.end}`;
+      if (uniqueSlots.has(uniqueKey)) continue;
+      uniqueSlots.add(uniqueKey);
+
       debugStats.validCandidates += 1;
-      const prev = bestByInstructor.get(employeeID);
-      if (!prev || candidate.score > prev.score) bestByInstructor.set(employeeID, candidate);
+      candidates.push(candidate);
     }
+  }
+
+  const bestByInstructor = new Map();
+  for (const candidate of candidates) {
+    const prev = bestByInstructor.get(candidate.employeeID);
+    if (!prev || candidate.score > prev.score) bestByInstructor.set(candidate.employeeID, candidate);
   }
 
   if (DEBUG) {
