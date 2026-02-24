@@ -117,6 +117,11 @@ function updateSchedulingButtonVisibility(){
   const btn = document.getElementById('btnScheduling');
   if(!btn) return;
 
+  if(!window.ENABLE_SCHEDULING){
+    btn.style.display = 'none';
+    return;
+  }
+
   const id = String(window.EmployeeID || '').trim();
 
   if(id === '6000' || id === '8000'){

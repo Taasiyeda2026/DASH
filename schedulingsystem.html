@@ -4,6 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>מערכת שיבוצים חכמה</title>
+<script src="feature-flags.js"></script>
 
 <style>
   *{box-sizing:border-box}
@@ -264,6 +265,11 @@
 </head>
 
 <body>
+<script>
+if (!window.ENABLE_SCHEDULING) {
+  window.location.replace('index.html');
+}
+</script>
   <div class="app-wrapper">
   <div class="page-shell scheduling-page">
   <div class="header-row">
