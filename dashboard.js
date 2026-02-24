@@ -729,14 +729,16 @@ function renderMobileMonth(){
 
     const ws = new Date(weekStart);
     box.addEventListener('click', () => openMobileWeekDetail(ws, data));
+    if(containsToday) box.dataset.today = 'true';
     container.appendChild(box);
     cursor.setDate(cursor.getDate() + 7);
   }
 
   view.appendChild(container);
 
-  // פתיחה אוטומטית של שבוע TODAY
-  if(todayWeekStart) openMobileWeekDetail(todayWeekStart, data);
+  // גלול לשבוע TODAY בלי להחליף את התצוגה
+  const todayBox = container.querySelector('[data-today="true"]');
+  if(todayBox) setTimeout(() => todayBox.scrollIntoView({ behavior:'smooth', block:'center' }), 80);
 }
 
 function openMobileWeekDetail(weekStart, data){
@@ -749,6 +751,16 @@ function openMobileWeekDetail(weekStart, data){
 
   const container = document.createElement('div');
   container.style.cssText = 'display:flex;flex-direction:column;gap:12px;padding:10px 10px 80px;';
+
+  // כפתור חזרה לרשימת השבועות
+  const backBtn = document.createElement('button');
+  backBtn.textContent = '← חזרה לחודש';
+  backBtn.style.cssText = 'background:none;border:none;color:#3b82f6;font-size:14px;font-weight:700;text-align:right;padding:4px 2px 8px;cursor:pointer;align-self:flex-end;';
+  backBtn.addEventListener('click', () => {
+    view.innerHTML = '';
+    renderMobileMonth();
+  });
+  container.appendChild(backBtn);
 
   for(let i = 0; i < 7; i++){
     const date = new Date(weekStart);
