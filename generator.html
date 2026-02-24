@@ -261,7 +261,7 @@ document.getElementById('generateBtn').addEventListener('click', async ()=>{
     const EmployeeID = String(row.EmployeeID ?? '').trim();
     const EntryCode  = String(row.EntryCode  ?? '').trim();
     const Role       = String(row.Role       ?? '').trim().toLowerCase();
-    const NameField  = row.Name ? String(row.Name).trim() : '';
+    const NameField  = row.Employee ? String(row.Employee).trim() : '';
 
     progressBar.style.width = Math.round(((idx+1)/total)*100)+'%';
     progressLabel.textContent = `מעבד ${idx+1} מתוך ${total}…`;
@@ -296,7 +296,7 @@ document.getElementById('generateBtn').addEventListener('click', async ()=>{
         });
       });
 
-      const name = NameField || '';
+      const name = NameField || EmployeeID;
       adminsFolder.file(`${hash}.json`, JSON.stringify({name, data: allCourses}, null, 2));
       log.innerHTML += `<div class="log-row log-ok"><span class="icon">✓</span> מנהל: <strong>${name||EmployeeID}</strong> — ${allCourses.length} קורסים</div>`;
       adminCount++;
