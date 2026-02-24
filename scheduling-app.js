@@ -1,5 +1,5 @@
 import { buildGlobalRecommendations } from './core/RecommendationEngine.js';
-import { renderSuggestions } from './core/RenderEngine.js';
+import { renderResults } from './core/RenderEngine.js';
 
 const DEBUG = true;
 
@@ -99,7 +99,7 @@ export async function runSuggestions(){
   try {
     const data = await loadSchedulingData();
     const { recommendations, debugStats } = buildGlobalRecommendations(data, targetAuthority, durationMin, topN);
-    renderSuggestions(recommendations);
+    renderResults(recommendations);
     if (DEBUG) console.table(debugStats);
     showStatus('statusBox2', `נמצאו ${recommendations.length} המלצות גלובליות.`, 'ok');
   } catch (err) {

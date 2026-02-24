@@ -18,17 +18,15 @@ export function renderSuggestions(list){
           <div class="item-sub">${c.dateISO} | ${c.start}–${c.end}</div>
         </div>
       </div>
-      <div class="options">
-        <span class="opt">מרחק: ${c.distHome.toFixed(1)} ק"מ</span>
-        <span class="opt">זמן נסיעה: ${Math.round(c.daily.travelMin)} דק׳</span>
-        <span class="opt">אירועים היום: ${c.daily.eventsCount}</span>
-        <span class="opt">עומס שבועי: ${c.weekly.workDays}</span>
-        <span class="opt">עומס חודשי: ${c.monthly.coursesCount}</span>
-        <span class="opt">עומס עתידי: ${c.future.futureCourses}/${c.future.futureWorkDays}</span>
-        <span class="opt">ציון: ${c.score}</span>
-        <span class="opt">איכות: ${c.quality}</span>
+      <div style="color:#555;">
+        ${c.dateISO || c.date} | ${c.start}–${c.end}
+      </div>
+      <div style="font-weight:600;">
+        ${Number(c.distHome).toFixed(1)} ק"מ
       </div>
     `;
     container.appendChild(card);
   });
 }
+
+export const renderSuggestions = renderResults;
