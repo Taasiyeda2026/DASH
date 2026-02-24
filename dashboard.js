@@ -29,6 +29,36 @@ function normalizeData(data){
   }));
 }
 
+function sortByDateAndTime(list) {
+  return [...list].sort((a, b) => {
+    const aDate = a.date instanceof Date ? a.date : new Date(a.date);
+    const bDate = b.date instanceof Date ? b.date : new Date(b.date);
+
+    if (aDate.getTime() !== bDate.getTime()) {
+      return aDate - bDate;
+    }
+
+    const [aH, aM] = String(a.start || '99:99').split(':').map(Number);
+    const [bH, bM] = String(b.start || '99:99').split(':').map(Number);
+
+    return (aH * 60 + aM) - (bH * 60 + bM);
+  });
+}
+
+function getEarliestDate(dates) {
+  const validDates = (dates || []).filter(Boolean);
+  if(validDates.length === 0) return null;
+  return new Date(Math.min(...validDates.map(d => d.getTime())));
+}
+
+function toDateAndTimeSortable(item, date, start) {
+  return {
+    ...item,
+    date,
+    start: start || '99:99'
+  };
+}
+
 rawData = normalizeData(rawData);
 
 let schedulingJson = null;
@@ -564,7 +594,7 @@ function buildDay(date,data){
 
   const dailyPool = [];
   data.forEach(r => r.Dates.forEach((dd, i) => {
-    if(sameDay(dd, date)) dailyPool.push({ ...r, meetingIdx: i + 1 });
+    if(sameDay(dd, date)) dailyPool.push({ ...r, meetingIdx: i + 1, selectedDate: dd });
   }));
 
   const groupsMap = {};
@@ -608,14 +638,20 @@ function buildDay(date,data){
 }
 
 function openSideGrouped(items) {
-  const first = items[0];
+  const sortedItems = sortByDateAndTime(
+    items.map(item => toDateAndTimeSortable(item, item.selectedDate || getEarliestDate(item.Dates), item.StartTime))
+  );
+
+  if(sortedItems.length === 0) return;
+
+  const first = sortedItems[0];
   sideContent.innerHTML = `
     <h2>${first.Program}</h2>
     <div class='subtitle'>מנהל: ${getManagerForCourseViews(first) || '—'}</div>
     <div style="border-top:1px solid var(--border); margin-top:10px; padding-top:10px;"></div>
   `;
 
-  items.forEach(item => {
+  sortedItems.forEach(item => {
     const end = endDate(item);
     const timeRange = (item.StartTime || item.EndTime) ? `${item.StartTime} – ${item.EndTime}` : '—';
     const empDisplay = (item.Employee && item.Employee.trim()) ? item.Employee : `<span style="color:var(--danger); font-weight:bold;">חסר מדריך</span>`;
@@ -675,13 +711,17 @@ function openMissingCourses(year, month){
     return activeInMonth || isFuture;
   });
 
+  const sortedMissingCourses = sortByDateAndTime(
+    missingCourses.map(r => toDateAndTimeSortable(r, getCourseStartDate(r), r.StartTime))
+  );
+
   sideContent.innerHTML = `
     <h2>קורסים ללא מדריך</h2>
-    <div class="subtitle">${missingCourses.length} קורסים</div>
+    <div class="subtitle">${sortedMissingCourses.length} קורסים</div>
     <div style="border-top:1px solid var(--border); margin:10px 0;"></div>
   `;
 
-  missingCourses.forEach(r => {
+  sortedMissingCourses.forEach(r => {
 
     const startDate = getCourseStartDate(r);
     const end = endDate(r);
@@ -1167,7 +1207,11 @@ function openInstructorModal(name, courses, selectedMonth, selectedYear){
 
   const weeks = {};
 
-  courses.forEach(r=>{
+  const sortedCourses = sortByDateAndTime(
+    courses.map(r => toDateAndTimeSortable(r, getEarliestDate(r.Dates), r.StartTime))
+  );
+
+  sortedCourses.forEach(r=>{
 
     if(!isCourse(r)) return;
 
@@ -1223,19 +1267,21 @@ function openInstructorModal(name, courses, selectedMonth, selectedYear){
         <div class="instructor-badges">
           <span class="badge type">${employmentType}</span>
           <span class="badge days">${totalWorkDays} ימי עבודה בשבוע</span>
-          <span class="badge courses">${courses.length} קורסים</span>
+          <span class="badge courses">${sortedCourses.length} קורסים</span>
           <span class="badge">מנהל: ${managerName}</span>
           ${authorityRow}
         </div>
       </div>
     `;
 
-  courses.forEach(r=>{
+  sortedCourses.forEach(r=>{
 
     const end = endDate(r);
 
-    const startDate = r.Dates && r.Dates[0]
-      ? r.Dates[0].toLocaleDateString('he-IL')
+    const courseStartDate = getEarliestDate(r.Dates);
+
+    const startDate = courseStartDate
+      ? courseStartDate.toLocaleDateString('he-IL')
       : '—';
 
     const endDateFormatted = end
