@@ -29,4 +29,3 @@ export function renderSuggestions(list){
   });
 }
 
-export const renderSuggestions = renderResults;
