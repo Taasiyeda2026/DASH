@@ -1,6 +1,23 @@
 const SALT = "MY_SECRET_2026";
 let rawData = [];
 let userRole = null;
+window.currentUserRole = null;
+
+function fitToScreenIfInstructor(){
+  if(window.currentUserRole !== 'instructor') return;
+
+  const wrapper = document.getElementById('app-wrapper');
+  if(!wrapper) return;
+
+  const screenHeight = window.innerHeight;
+  const contentHeight = wrapper.scrollHeight;
+  const scale = Math.min(1, screenHeight / contentHeight);
+
+  wrapper.style.transform = `scale(${scale})`;
+}
+
+window.addEventListener('load', fitToScreenIfInstructor);
+window.addEventListener('resize', fitToScreenIfInstructor);
 
 async function sha256(text){
   const encoder = new TextEncoder();
@@ -127,6 +144,7 @@ function startApp(jsonData, role, hash){
   const name = !Array.isArray(jsonData) ? (jsonData.name || '') : '';
   rawData = records;
   userRole = role;
+  window.currentUserRole = role;
 
   sessionStorage.setItem('dash_hash', hash);
   sessionStorage.setItem('dash_role', role);
@@ -144,6 +162,7 @@ function startApp(jsonData, role, hash){
     };
   }
 
+  fitToScreenIfInstructor();
   loadDashboard();
 }
 
