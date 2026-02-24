@@ -87,7 +87,7 @@ async function boot(){
 
 export async function runSuggestions(){
   clearStatus('statusBox2');
-  document.getElementById('resultsList').innerHTML = '<li class="muted">מחשב הצעות…</li>';
+  document.getElementById('resultsList').innerHTML = '<div class="loading-placeholder muted">מחשב הצעות…</div>';
 
   const targetAuthority = document.getElementById('authoritySelect').value;
   const topN = Number(document.getElementById('topN').value);
