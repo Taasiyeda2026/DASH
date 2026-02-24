@@ -1,5 +1,5 @@
 import { buildGlobalRecommendations } from './core/RecommendationEngine.js';
-import { renderSuggestions } from './core/RenderEngine.js';
+import { renderResults } from './core/RenderEngine.js';
 
 const DEBUG = true;
 
@@ -87,7 +87,7 @@ async function boot(){
 
 export async function runSuggestions(){
   clearStatus('statusBox2');
-  document.getElementById('resultsList').innerHTML = '<li class="muted">מחשב הצעות…</li>';
+  document.getElementById('resultsList').innerHTML = '<div class="muted">מחשב הצעות…</div>';
 
   const targetAuthority = document.getElementById('authoritySelect').value;
   const topN = Number(document.getElementById('topN').value);
@@ -99,7 +99,7 @@ export async function runSuggestions(){
   try {
     const data = await loadSchedulingData();
     const { recommendations, debugStats } = buildGlobalRecommendations(data, targetAuthority, durationMin, topN);
-    renderSuggestions(recommendations);
+    renderResults(recommendations);
     if (DEBUG) console.table(debugStats);
     showStatus('statusBox2', `נמצאו ${recommendations.length} המלצות גלובליות.`, 'ok');
   } catch (err) {
