@@ -153,7 +153,7 @@ Object.defineProperty(window, 'mode', {
   },
   configurable: false
 });
-const isMobile = () => window.innerWidth <= 768;
+const isMobile = () => window.innerWidth < 800;
 let openWeekId = null;
 let currentDate=new Date(); currentDate.setHours(0,0,0,0);
 const dayNames=['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];
@@ -460,20 +460,17 @@ function render(){
     filtersEl.style.display = 'flex';
   }
 
-  if(isMobile() && (window.mode === 'month' || window.mode === 'week')){
-    renderMobileMonth();
-  }
-  else if(window.mode==='summary'){
+  if(window.mode==='summary'){
     renderSummary();
   }
   else if(window.mode==='week'){
-    renderWeek();
+    renderWeekView();
   }
   else if(window.mode==='instructors'){
     renderInstructors();
   }
   else{
-    renderMonth();
+    renderMonthView();
   }
 
   updateNavButtons();
@@ -486,7 +483,23 @@ function render(){
   }
 }
 
-function renderMonth(){
+function renderMonthView(){
+  if(isMobile()){
+    renderMobileMonth();
+    return;
+  }
+  renderDesktopMonth();
+}
+
+function renderWeekView(){
+  if(isMobile()){
+    renderMobileMonth();
+    return;
+  }
+  renderDesktopWeek();
+}
+
+function renderDesktopMonth(){
   titleEl.textContent=currentDate.toLocaleString('he-IL',{month:'long',year:'numeric'});
   const data=applyFilters();
   const grid=document.createElement('div'); grid.className='grid';
@@ -497,7 +510,7 @@ function renderMonth(){
   view.appendChild(grid);
 }
 
-function renderWeek(){
+function renderDesktopWeek(){
   const s=new Date(currentDate); s.setDate(s.getDate()-s.getDay());
   const e=new Date(s); e.setDate(e.getDate()+6);
   titleEl.textContent=`${s.toLocaleDateString('he-IL')} – ${e.toLocaleDateString('he-IL')}`;
