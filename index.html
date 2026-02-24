@@ -734,23 +734,25 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
 
 
 @media (max-width: 768px){
-  .week-header{
-    font-weight:800;
-    font-size:15px;
-    text-align:center;
+  .mobile-week{
+    margin-bottom:14px;
+  }
+
+  .mobile-week-header{
     background:#fff;
-    border-radius:18px;
     padding:16px;
-    box-shadow:0 6px 16px rgba(0,0,0,0.06);
+    border-radius:16px;
+    font-weight:700;
     cursor:pointer;
+    box-shadow:0 6px 16px rgba(0,0,0,0.06);
   }
 
-  .week-content{
+  .mobile-week-content{
     display:none;
-    padding-top:10px;
+    margin-top:8px;
   }
 
-  .week.open .week-content{
+  .mobile-week.open .mobile-week-content{
     display:block;
   }
 }

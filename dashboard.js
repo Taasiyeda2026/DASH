@@ -492,11 +492,12 @@ function renderMonthView(){
 }
 
 function renderWeekView(){
-  if(isMobile()){
-    renderMobileMonth();
-    return;
+  if (window.innerWidth <= 768) {
+    renderMobileWeekView();
+    initMobileAccordion();
+  } else {
+    renderDesktopWeekView();
   }
-  renderDesktopWeek();
 }
 
 function renderDesktopMonth(){
@@ -510,7 +511,7 @@ function renderDesktopMonth(){
   view.appendChild(grid);
 }
 
-function renderDesktopWeek(){
+function renderDesktopWeekView(){
   const s=new Date(currentDate); s.setDate(s.getDate()-s.getDay());
   const e=new Date(s); e.setDate(e.getDate()+6);
   titleEl.textContent=`${s.toLocaleDateString('he-IL')} – ${e.toLocaleDateString('he-IL')}`;
@@ -521,6 +522,79 @@ function renderDesktopWeek(){
     grid.appendChild(buildDay(cur,data));
   }
   view.appendChild(grid);
+}
+
+function renderMobileWeekView(){
+  const y = currentDate.getFullYear();
+  const m = currentDate.getMonth();
+  titleEl.textContent = new Date(y,m,1).toLocaleString('he-IL',{month:'long',year:'numeric'});
+
+  const data = applyFilters();
+  const first = new Date(y,m,1);
+  const last  = new Date(y,m+1,0);
+
+  const start = new Date(first);
+  start.setDate(first.getDate() - first.getDay());
+  start.setHours(0,0,0,0);
+
+  const container = document.createElement('div');
+  let cursor = new Date(start);
+  let weekNumber = 1;
+
+  while(cursor <= last){
+    const weekStart = new Date(cursor);
+
+    const weekWrap = document.createElement('div');
+    weekWrap.className = 'mobile-week';
+
+    const weekHeader = document.createElement('div');
+    weekHeader.className = 'mobile-week-header';
+    weekHeader.textContent = `שבוע ${weekNumber}`;
+
+    const weekContent = document.createElement('div');
+    weekContent.className = 'mobile-week-content';
+
+    for(let i=0;i<7;i++){
+      const date = new Date(weekStart);
+      date.setDate(weekStart.getDate()+i);
+      weekContent.appendChild(buildDay(date,data));
+    }
+
+    weekWrap.appendChild(weekHeader);
+    weekWrap.appendChild(weekContent);
+    container.appendChild(weekWrap);
+
+    cursor.setDate(cursor.getDate()+7);
+    weekNumber++;
+  }
+
+  view.appendChild(container);
+}
+
+function initMobileAccordion(){
+
+  if (window.innerWidth > 768) return;
+
+  const weeks = document.querySelectorAll('.mobile-week');
+
+  weeks.forEach(week => {
+
+    const header = week.querySelector('.mobile-week-header');
+    if (!header) return;
+
+    header.addEventListener('click', () => {
+
+      const isOpen = week.classList.contains('open');
+
+      weeks.forEach(w => w.classList.remove('open'));
+
+      if (!isOpen) {
+        week.classList.add('open');
+      }
+
+    });
+
+  });
 }
 
 
