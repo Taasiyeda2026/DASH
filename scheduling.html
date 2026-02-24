@@ -4,11 +4,17 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scheduling</title>
+<script src="feature-flags.js"></script>
 </head>
 <body>
 <script>
 window.EmployeeID = window.EmployeeID || sessionStorage.getItem('dash_empId') || '';
 (function guardSchedulingAccess(){
+  if (!window.ENABLE_SCHEDULING) {
+    location.replace('index.html');
+    return;
+  }
+
   const id = String(window.EmployeeID || '').trim();
   if (id !== '6000' && id !== '8000') {
     document.body.innerHTML =
