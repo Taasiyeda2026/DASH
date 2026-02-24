@@ -948,65 +948,38 @@ function openManagerOverlay(mgr, year, month){
     (!r.Employee || !r.Employee.trim())
   );
 
-  document.querySelectorAll('.manager-overlay-bg, .manager-details-overlay')
-    .forEach(el=>el.remove());
-
-  const overlayBg = document.createElement('div');
-  overlayBg.className = 'manager-overlay-bg';
-  document.body.appendChild(overlayBg);
-
-  const details = document.createElement('div');
-  details.className = 'manager-details-overlay';
-
-  function closeManagerOverlay(){
-    overlayBg.remove();
-    details.remove();
-  }
-
-  // כפתור סגירה
-  const closeBtn = document.createElement('button');
-  closeBtn.className = 'overlay-close-btn';
-  closeBtn.textContent = '×';
-  closeBtn.onclick = closeManagerOverlay;
-  details.appendChild(closeBtn);
-
-  details.innerHTML += `
-    <h3>${mgr}</h3>
+  sideContent.innerHTML = `
+    <h2>${mgr}</h2>
+    <div class="subtitle">קורסים מסתיימים החודש: ${mgrEndedThisMonth.length}</div>
+    <div style="border-top:1px solid var(--border);margin:10px 0 14px;"></div>
     ${mgrMissingActive.length > 0 ? `
       <div style="background:#fef2f2;border:1.5px solid #dc2626;border-radius:12px;padding:14px;margin-bottom:16px">
-        <div style="font-weight:800;color:#dc2626;margin-bottom:10px">⚠ קורסים פעילים ללא מדריך: ${mgrMissingActive.length}</div>
+        <div style="font-weight:800;color:#dc2626;margin-bottom:8px">⚠ קורסים פעילים ללא מדריך: ${mgrMissingActive.length}</div>
         ${mgrMissingActive.map(r=>`
           <div style="font-size:13px;padding:5px 0;border-bottom:1px solid #fecaca">
             ${r.Program || '—'}${r.School ? ` · ${r.School}` : ''}
           </div>`).join('')}
       </div>` : ''}
-    ${
-      mgrEndedThisMonth.length
-        ? mgrEndedThisMonth.map(r=>{
-            const empName = (r.Employee && r.Employee.trim())
-              ? r.Employee
-              : `<span style="color:#dc2626;font-weight:700">חסר מדריך</span>`;
-
-            return `
-              <div class="manager-course-card">
-                <div class="manager-course-title">${r.Program}</div>
-                <div class="manager-course-meta">
-                  👤 מדריך: ${empName}<br>
-                  🏫 בית ספר: ${r.School || '—'}<br>
-                  🌍 רשות: ${r.Authority || '—'}<br>
-                  📅 תאריך סיום: ${parseDate(r.End).toLocaleDateString('he-IL')}
-                </div>
+    ${mgrEndedThisMonth.length
+      ? mgrEndedThisMonth.map(r=>{
+          const empName = (r.Employee && r.Employee.trim())
+            ? r.Employee
+            : `<span style="color:#dc2626;font-weight:700">חסר מדריך</span>`;
+          return `
+            <div class="group-item">
+              <div style="font-weight:800;font-size:15px;margin-bottom:6px">${r.Program}</div>
+              <div style="font-size:13px;color:#475569;line-height:1.7">
+                👤 מדריך: ${empName}<br>
+                🏫 בית ספר: ${r.School || '—'}<br>
+                🌍 רשות: ${r.Authority || '—'}<br>
+                📅 סיום: ${parseDate(r.End).toLocaleDateString('he-IL')}
               </div>
-            `;
-          }).join('')
-        : '<div style="color:#94a3b8">אין קורסים המסתיימים החודש</div>'
+            </div>`;
+        }).join('')
+      : '<div style="color:#94a3b8;text-align:center;padding:20px 0">אין קורסים המסתיימים החודש</div>'
     }
   `;
-
-  document.body.appendChild(details);
-
-  overlayBg.onclick = closeManagerOverlay;
-  overlayBg.addEventListener('touchend', e=>{ e.preventDefault(); closeManagerOverlay(); }, { passive: false });
+  openSidePanel();
 }
 
 function renderSummary(){
