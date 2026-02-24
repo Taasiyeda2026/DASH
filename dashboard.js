@@ -492,7 +492,7 @@ function renderMonthView(){
 }
 
 function renderWeekView(){
-  if (window.innerWidth <= 768) {
+  if (isMobile()) {
     renderMobileWeekView();
     initMobileAccordion();
   } else {
