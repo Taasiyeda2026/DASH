@@ -641,157 +641,19 @@ function renderMobileWeekView(){
   const weekEnd = new Date(weekStart);
   weekEnd.setDate(weekStart.getDate() + 6);
 
-  // כותרת: טווח תאריכים
-  const fmt = { day:'numeric', month:'long' };
-  titleEl.textContent = `${weekStart.toLocaleDateString('he-IL', fmt)} – ${weekEnd.toLocaleDateString('he-IL', fmt)}`;
+  titleEl.textContent = `${weekStart.toLocaleDateString('he-IL')} – ${weekEnd.toLocaleDateString('he-IL')}`;
 
-  const data   = applyFilters();
-  const today  = new Date(); today.setHours(0,0,0,0);
-  const shortDayNames = ["א'","ב'","ג'","ד'","ה'","ו'","ש'"];
-
-  const wrap = document.createElement('div');
-  wrap.className = 'mwg-wrap';
-
-  const grid = document.createElement('div');
-  grid.className = 'mwg-grid';
+  const data = applyFilters();
+  const container = document.createElement('div');
+  container.style.cssText = 'display:flex;flex-direction:column;gap:12px;padding:10px 10px 80px;';
 
   for(let i = 0; i < 7; i++){
     const date = new Date(weekStart);
     date.setDate(weekStart.getDate() + i);
-    const isToday = sameDay(date, today);
-
-    // איסוף אירועי היום
-    const dailyItems = [];
-    data.forEach(r => r.Dates.forEach((dd, idx) => {
-      if(sameDay(dd, date)) dailyItems.push({ ...r, meetingIdx: idx+1, selectedDate: dd });
-    }));
-
-    // קיבוץ — זהה ל-buildDay()
-    const groupsMap = {};
-    dailyItems.forEach(ev => {
-      if(ev.EventType === 'HOLIDAY'){
-        const key = `holiday-${ev.Program}`;
-        if(!groupsMap[key]) groupsMap[key] = { type:'holiday', time:'00:00', items:[ev] };
-      } else {
-        const key = `${ev.Employee}-${ev.Program}`;
-        if(!groupsMap[key]) groupsMap[key] = { type:'course', time: ev.StartTime||'99:99', items:[] };
-        groupsMap[key].items.push(ev);
-      }
-    });
-    const groups = Object.values(groupsMap).sort((a,b) => a.time.localeCompare(b.time));
-
-    const cell = document.createElement('div');
-    cell.className = 'mwg-cell' + (isToday ? ' mwg-today' : '') + (groups.length > 0 ? ' mwg-has-events' : '');
-
-    // שם יום
-    const nameEl = document.createElement('div');
-    nameEl.className = 'mwg-day-name';
-    nameEl.textContent = shortDayNames[i];
-    cell.appendChild(nameEl);
-
-    // מספר תאריך
-    const numEl = document.createElement('div');
-    numEl.className = 'mwg-day-num' + (isToday ? ' mwg-today-num' : '');
-    numEl.textContent = date.getDate();
-    cell.appendChild(numEl);
-
-    // נקודות אירועים
-    if(groups.length > 0){
-      const dotsEl = document.createElement('div');
-      dotsEl.className = 'mwg-dots';
-      groups.slice(0, 3).forEach(g => {
-        const dot = document.createElement('span');
-        dot.className = 'mwg-dot';
-        dot.style.background = g.type === 'holiday' ? '#ef4444' : getEmployeeColor(g.items[0].Employee);
-        dotsEl.appendChild(dot);
-      });
-      if(groups.length > 3){
-        const more = document.createElement('span');
-        more.className = 'mwg-dot-more';
-        more.textContent = `+${groups.length - 3}`;
-        dotsEl.appendChild(more);
-      }
-      cell.appendChild(dotsEl);
-    }
-
-    // לחיצה → פירוט יומי
-    cell.addEventListener('click', () => openDayDetail(date, dailyItems));
-    grid.appendChild(cell);
+    container.appendChild(buildDay(date, data));
   }
 
-  wrap.appendChild(grid);
-  view.appendChild(wrap);
-}
-
-function openDayDetail(date, dailyPool){
-  const dayTitle = date.toLocaleDateString('he-IL', { weekday:'long', day:'numeric', month:'long' });
-
-  // אותו קיבוץ בדיוק כמו buildDay()
-  const groupsMap = {};
-  dailyPool.forEach(ev => {
-    if(ev.EventType === 'HOLIDAY'){
-      const key = `holiday-${ev.Program}`;
-      if(!groupsMap[key]) groupsMap[key] = { type:'holiday', time:'00:00', items:[ev] };
-    } else {
-      const key = `${ev.Employee}-${ev.Program}`;
-      if(!groupsMap[key]) groupsMap[key] = { type:'course', time: ev.StartTime||'99:99', items:[] };
-      groupsMap[key].items.push(ev);
-    }
-  });
-  const groups = Object.values(groupsMap).sort((a,b) => a.time.localeCompare(b.time));
-
-  if(groups.length === 0){
-    sideContent.innerHTML = `
-      <h2>${dayTitle}</h2>
-      <div class="subtitle" style="color:#94a3b8">אין פעילויות ביום זה</div>`;
-    openSidePanel();
-    return;
-  }
-
-  sideContent.innerHTML = `
-    <h2>${dayTitle}</h2>
-    <div class="subtitle">${groups.length} פעילות${groups.length !== 1 ? 'ות' : ''}</div>
-    <div style="border-top:1px solid var(--border);margin:10px 0 14px;"></div>
-  `;
-
-  // אותו פורמט בדיוק כמו openSideGrouped — כולל badge מפגש + כל שדות הנתונים
-  groups.forEach(g => {
-    const first = g.items[0];
-
-    if(g.type === 'holiday'){
-      sideContent.innerHTML += `
-        <div class="group-item" style="background:#fef2f2;border-color:#fca5a5">
-          <div style="font-weight:800;color:#dc2626;font-size:15px">🎌 ${first.Program}</div>
-        </div>`;
-      return;
-    }
-
-    // כל meeting באותה קבוצה (בד"כ 1 ביום, אבל תומך בריבוי)
-    g.items.forEach(item => {
-      const end = endDate(item);
-      const timeRange = (item.StartTime || item.EndTime)
-        ? `${item.StartTime} – ${item.EndTime}`
-        : '—';
-      const empDisplay = (item.Employee && item.Employee.trim())
-        ? item.Employee
-        : `<span style="color:var(--danger);font-weight:bold;">חסר מדריך</span>`;
-
-      sideContent.innerHTML += `
-        <div class="group-item">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-            <div class="badge">מפגש ${item.meetingIdx}</div>
-            <div style="background:#334155;color:#fff;padding:2px 8px;border-radius:6px;font-size:12px;font-weight:bold;">${timeRange}</div>
-          </div>
-          <div style="font-weight:800;font-size:15px;margin-bottom:8px;">${item.Program}</div>
-          <div class="row"><span class="label">מדריך</span><span class="value">${empDisplay}</span></div>
-          <div class="row"><span class="label">בית ספר</span><span class="value">${item.School||'—'}</span></div>
-          <div class="row"><span class="label">רשות</span><span class="value">${item.Authority||'—'}</span></div>
-          <div class="row"><span class="label">סיום קורס</span><span class="value">${end ? end.toLocaleDateString('he-IL') : '—'}</span></div>
-        </div>`;
-    });
-  });
-
-  openSidePanel();
+  view.appendChild(container);
 }
 
 function initMobileAccordion(){
@@ -822,72 +684,76 @@ function initMobileAccordion(){
 
 
 function renderMobileMonth(){
-
   const y = currentDate.getFullYear();
   const m = currentDate.getMonth();
+  titleEl.textContent = new Date(y,m,1).toLocaleString('he-IL',{month:'long',year:'numeric'});
 
-  titleEl.textContent =
-    new Date(y,m,1).toLocaleString('he-IL',{month:'long',year:'numeric'});
-
-  const data = applyFilters();
-
+  const data  = applyFilters();
   const first = new Date(y,m,1);
   const last  = new Date(y,m+1,0);
-
   const start = new Date(first);
   start.setDate(first.getDate() - first.getDay());
   start.setHours(0,0,0,0);
 
-  const container = document.createElement('div');
-  container.style.display = 'flex';
-  container.style.flexDirection = 'column';
-  container.style.gap = '14px';
-  container.style.padding = '10px';
+  const today = new Date(); today.setHours(0,0,0,0);
 
+  const container = document.createElement('div');
+  container.style.cssText = 'display:flex;flex-direction:column;gap:14px;padding:10px 10px 80px;';
+
+  let todayWeekStart = null;
   let cursor = new Date(start);
-  const weekIds = [];
 
   while(cursor <= last){
-
     const weekStart = new Date(cursor);
     const weekEnd   = new Date(cursor);
-    weekEnd.setDate(weekStart.getDate()+6);
+    weekEnd.setDate(weekStart.getDate() + 6);
 
-    const weekId = `${weekStart.getFullYear()}-${String(weekStart.getMonth()+1).padStart(2,'0')}-W${Math.ceil(weekStart.getDate()/7)}`;
-    weekIds.push(weekId);
+    const containsToday = today >= weekStart && today <= weekEnd;
+    if(containsToday) todayWeekStart = new Date(weekStart);
 
-    const weekWrap = document.createElement('div');
-    weekWrap.id = `week-${weekId}`;
-    weekWrap.className = 'week';
+    const box = document.createElement('div');
+    box.style.cssText = `
+      background:#fff;
+      border-radius:18px;
+      padding:16px;
+      box-shadow:0 6px 16px rgba(0,0,0,0.06);
+      cursor:pointer;
+      border:${containsToday ? '2px solid #3b82f6' : '1px solid #e2e8f0'};
+      -webkit-tap-highlight-color:transparent;
+    `;
+    box.innerHTML = `
+      <div style="font-weight:800;font-size:15px;text-align:center;color:${containsToday ? '#2563eb' : '#0f172a'}">
+        ${weekStart.toLocaleDateString('he-IL')} – ${weekEnd.toLocaleDateString('he-IL')}
+      </div>
+    `;
 
-    const weekHeader = document.createElement('div');
-    weekHeader.className = 'week-header';
-    weekHeader.textContent = `${weekStart.toLocaleDateString('he-IL')} – ${weekEnd.toLocaleDateString('he-IL')}`;
-    weekHeader.addEventListener('click', ()=>toggleWeek(weekId));
-
-    const weekContent = document.createElement('div');
-    weekContent.className = 'week-content';
-
-    for(let i=0;i<7;i++){
-      const date = new Date(weekStart);
-      date.setDate(weekStart.getDate()+i);
-      weekContent.appendChild(buildDay(date,data));
-    }
-
-    weekWrap.appendChild(weekHeader);
-    weekWrap.appendChild(weekContent);
-    container.appendChild(weekWrap);
-
-    cursor.setDate(cursor.getDate()+7);
+    const ws = new Date(weekStart);
+    box.addEventListener('click', () => openMobileWeekDetail(ws, data));
+    container.appendChild(box);
+    cursor.setDate(cursor.getDate() + 7);
   }
 
-  if(openWeekId && !weekIds.includes(openWeekId)){
-    openWeekId = null;
-  }
+  view.appendChild(container);
 
-  if(openWeekId){
-    const openWeekEl = container.querySelector(`#week-${openWeekId}`);
-    if(openWeekEl) openWeekEl.classList.add('open');
+  // פתיחה אוטומטית של שבוע TODAY
+  if(todayWeekStart) openMobileWeekDetail(todayWeekStart, data);
+}
+
+function openMobileWeekDetail(weekStart, data){
+  view.innerHTML = '';
+  closeSidePanel();
+
+  const weekEnd = new Date(weekStart);
+  weekEnd.setDate(weekStart.getDate() + 6);
+  titleEl.textContent = `${weekStart.toLocaleDateString('he-IL')} – ${weekEnd.toLocaleDateString('he-IL')}`;
+
+  const container = document.createElement('div');
+  container.style.cssText = 'display:flex;flex-direction:column;gap:12px;padding:10px 10px 80px;';
+
+  for(let i = 0; i < 7; i++){
+    const date = new Date(weekStart);
+    date.setDate(weekStart.getDate() + i);
+    container.appendChild(buildDay(date, data));
   }
 
   view.appendChild(container);
