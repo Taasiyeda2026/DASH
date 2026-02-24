@@ -24,6 +24,24 @@ async function loadSchedulingData(){
 
 let lastCourseRows = [];
 
+function populateAuthorities(list){
+  const select = document.getElementById('authoritySelect');
+  const placeholder = select.querySelector('option[value=""]');
+
+  select.innerHTML = '';
+  if (placeholder) {
+    select.appendChild(placeholder);
+    placeholder.selected = true;
+  }
+
+  list.forEach((auth) => {
+    const option = document.createElement('option');
+    option.value = auth;
+    option.textContent = auth;
+    select.appendChild(option);
+  });
+}
+
 function computeInstructorRows(data){
   const map = new Map();
   for (const c of (data.courses || [])) {
@@ -67,14 +85,7 @@ async function boot(){
     const data = await loadSchedulingData();
     const authorities = Object.keys(data.authorityLocations || {}).sort((a, b) => a.localeCompare(b, 'he'));
 
-    const sel = document.getElementById('authoritySelect');
-    sel.innerHTML = '';
-    authorities.forEach((a) => {
-      const opt = document.createElement('option');
-      opt.value = a;
-      opt.textContent = a;
-      sel.appendChild(opt);
-    });
+    populateAuthorities(authorities);
 
     lastCourseRows = computeInstructorRows(data);
     renderCoursesTable(lastCourseRows);
@@ -86,14 +97,15 @@ async function boot(){
 }
 
 export async function runSuggestions(){
+  const targetAuthority = document.getElementById('authoritySelect').value;
+  if (!targetAuthority) return;
+
   clearStatus('statusBox2');
   document.getElementById('resultsList').innerHTML = '<li class="muted">מחשב הצעות…</li>';
 
-  const targetAuthority = document.getElementById('authoritySelect').value;
   const topN = Number(document.getElementById('topN').value);
   const durationMin = Number(document.getElementById('durationMin').value);
 
-  if (!targetAuthority) return showStatus('statusBox2', 'יש לבחור רשות יעד.', 'error');
   if (!Number.isFinite(durationMin) || durationMin < 30) return showStatus('statusBox2', 'משך קורס לא תקין.', 'error');
 
   try {
