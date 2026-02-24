@@ -634,7 +634,6 @@ function renderDesktopWeekView(){
 }
 
 function renderMobileWeekView(){
-  // שבוע אחד בלבד – ניווט שבועי עם כפתורי prev/next
   const weekStart = new Date(currentDate);
   weekStart.setDate(currentDate.getDate() - currentDate.getDay());
   weekStart.setHours(0,0,0,0);
@@ -642,20 +641,149 @@ function renderMobileWeekView(){
   const weekEnd = new Date(weekStart);
   weekEnd.setDate(weekStart.getDate() + 6);
 
-  const fmt = { day: 'numeric', month: 'long' };
+  // כותרת: טווח תאריכים
+  const fmt = { day:'numeric', month:'long' };
   titleEl.textContent = `${weekStart.toLocaleDateString('he-IL', fmt)} – ${weekEnd.toLocaleDateString('he-IL', fmt)}`;
 
-  const data = applyFilters();
-  const container = document.createElement('div');
-  container.style.cssText = 'padding:8px 8px 80px;';
+  const data   = applyFilters();
+  const today  = new Date(); today.setHours(0,0,0,0);
+  const shortDayNames = ["א'","ב'","ג'","ד'","ה'","ו'","ש'"];
+
+  const wrap = document.createElement('div');
+  wrap.className = 'mwg-wrap';
+
+  const grid = document.createElement('div');
+  grid.className = 'mwg-grid';
 
   for(let i = 0; i < 7; i++){
     const date = new Date(weekStart);
     date.setDate(weekStart.getDate() + i);
-    container.appendChild(buildDay(date, data));
+    const isToday = sameDay(date, today);
+
+    // איסוף אירועי היום
+    const dailyItems = [];
+    data.forEach(r => r.Dates.forEach((dd, idx) => {
+      if(sameDay(dd, date)) dailyItems.push({ ...r, meetingIdx: idx+1, selectedDate: dd });
+    }));
+
+    // קיבוץ
+    const groupsMap = {};
+    dailyItems.forEach(ev => {
+      if(ev.EventType === 'HOLIDAY'){
+        const key = `holiday-${ev.Program}`;
+        if(!groupsMap[key]) groupsMap[key] = { type:'holiday', items:[ev] };
+      } else {
+        const key = `${ev.Employee}-${ev.Program}`;
+        if(!groupsMap[key]) groupsMap[key] = { type:'course', time: ev.StartTime||'99:99', items:[] };
+        groupsMap[key].items.push(ev);
+      }
+    });
+    const groups = Object.values(groupsMap).sort((a,b) => (a.time||'').localeCompare(b.time||''));
+
+    const cell = document.createElement('div');
+    cell.className = 'mwg-cell' + (isToday ? ' mwg-today' : '') + (groups.length > 0 ? ' mwg-has-events' : '');
+
+    // שם יום
+    const nameEl = document.createElement('div');
+    nameEl.className = 'mwg-day-name';
+    nameEl.textContent = shortDayNames[i];
+    cell.appendChild(nameEl);
+
+    // מספר תאריך
+    const numEl = document.createElement('div');
+    numEl.className = 'mwg-day-num' + (isToday ? ' mwg-today-num' : '');
+    numEl.textContent = date.getDate();
+    cell.appendChild(numEl);
+
+    // נקודות אירועים
+    if(groups.length > 0){
+      const dotsEl = document.createElement('div');
+      dotsEl.className = 'mwg-dots';
+      groups.slice(0, 3).forEach(g => {
+        const dot = document.createElement('span');
+        dot.className = 'mwg-dot';
+        dot.style.background = g.type === 'holiday' ? '#ef4444' : getEmployeeColor(g.items[0].Employee);
+        dotsEl.appendChild(dot);
+      });
+      if(groups.length > 3){
+        const more = document.createElement('span');
+        more.className = 'mwg-dot-more';
+        more.textContent = `+${groups.length - 3}`;
+        dotsEl.appendChild(more);
+      }
+      cell.appendChild(dotsEl);
+    }
+
+    // לחיצה → פירוט יומי
+    cell.addEventListener('click', () => openDayDetail(date, dailyItems));
+    grid.appendChild(cell);
   }
 
-  view.appendChild(container);
+  wrap.appendChild(grid);
+  view.appendChild(wrap);
+}
+
+function openDayDetail(date, items){
+  const dayTitle = date.toLocaleDateString('he-IL', { weekday:'long', day:'numeric', month:'long' });
+
+  if(items.length === 0){
+    sideContent.innerHTML = `
+      <h2>${dayTitle}</h2>
+      <div class="subtitle" style="color:#94a3b8">אין פעילויות ביום זה</div>`;
+    openSidePanel();
+    return;
+  }
+
+  // קיבוץ לפי תוכנית-מדריך
+  const groupsMap = {};
+  items.forEach(ev => {
+    if(ev.EventType === 'HOLIDAY'){
+      const key = `holiday-${ev.Program}`;
+      if(!groupsMap[key]) groupsMap[key] = { type:'holiday', items:[ev] };
+    } else {
+      const key = `${ev.Employee}-${ev.Program}`;
+      if(!groupsMap[key]) groupsMap[key] = { type:'course', time: ev.StartTime||'99:99', items:[] };
+      groupsMap[key].items.push(ev);
+    }
+  });
+  const groups = Object.values(groupsMap).sort((a,b) => (a.time||'').localeCompare(b.time||''));
+
+  sideContent.innerHTML = `
+    <h2>${dayTitle}</h2>
+    <div class="subtitle">${groups.length} פעילות${groups.length !== 1 ? 'ות' : ''}</div>
+    <div style="border-top:1px solid var(--border);margin:10px 0 14px;"></div>
+  `;
+
+  groups.forEach(g => {
+    const first = g.items[0];
+    if(g.type === 'holiday'){
+      sideContent.innerHTML += `
+        <div class="group-item" style="background:#fef2f2;border-color:#fca5a5">
+          <div style="font-weight:800;color:#dc2626;font-size:15px">🎌 ${first.Program}</div>
+        </div>`;
+    } else {
+      const hasEmp = !!(first.Employee && first.Employee.trim());
+      const empDisplay = hasEmp
+        ? first.Employee
+        : `<span style="color:var(--danger);font-weight:700">חסר מדריך</span>`;
+      const timeRange = (first.StartTime||first.EndTime) ? `${first.StartTime}–${first.EndTime}` : '';
+      const colorDot = `<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${getEmployeeColor(first.Employee)};margin-left:6px;flex-shrink:0;vertical-align:middle"></span>`;
+
+      sideContent.innerHTML += `
+        <div class="group-item">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+            <div style="font-weight:800;font-size:15px">${colorDot}${first.Program}</div>
+            ${timeRange ? `<div style="background:#334155;color:#fff;padding:2px 8px;border-radius:6px;font-size:12px;font-weight:700;flex-shrink:0">${timeRange}</div>` : ''}
+          </div>
+          <div class="row"><span class="label">מדריך</span><span class="value">${empDisplay}</span></div>
+          <div class="row"><span class="label">בית ספר</span><span class="value">${first.School||'—'}</span></div>
+          <div class="row"><span class="label">רשות</span><span class="value">${first.Authority||'—'}</span></div>
+          ${g.items.length > 1 ? `<div class="row"><span class="label">מפגש</span><span class="value">${g.items[0].meetingIdx} מתוך ${g.items.length}</span></div>` : ''}
+        </div>`;
+    }
+  });
+
+  openSidePanel();
 }
 
 function initMobileAccordion(){
