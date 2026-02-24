@@ -2,7 +2,7 @@
 <html lang="he" dir="rtl">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>מערכת שיבוצים חכמה</title>
 <script src="feature-flags.js"></script>
 
@@ -11,19 +11,21 @@
   html, body{
     margin:0;
     padding:0;
-    overflow-x:hidden;
     width:100%;
-  }
-  html{
-    -webkit-text-size-adjust:100%;
+    max-width:100%;
+    overflow-x:hidden;
   }
   body{
+    -webkit-text-size-adjust:100%;
     font-family: Arial, sans-serif;
     background:#f4f6f9;
     color:#0f172a;
   }
+  img{max-width:100%;height:auto}
+  button,input,select{width:100%;max-width:100%}
   .app-wrapper{
-    max-width:480px;
+    width:100%;
+    max-width:1200px;
     margin:0 auto;
     padding:16px;
   }
@@ -42,8 +44,8 @@
   }
   .scheduling-page .grid{
     display:grid;
-    grid-template-columns:1fr;
-    gap:20px;
+    grid-template-columns:280px 1fr;
+    gap:16px;
   }
   .col{
     display:flex;
@@ -116,7 +118,7 @@
   .status.ok{background:#eff6ff;border:1px solid #bfdbfe;color:#1d4ed8}
 
   /* tables */
-  .table-wrap{overflow:auto;border:1px solid #e2e8f0;border-radius:12px}
+  .table-wrap,.table-wrapper{width:100%;overflow-x:auto;border:1px solid #e2e8f0;border-radius:12px}
   table{width:100%;border-collapse:collapse}
   th,td{
     padding:10px 12px;
@@ -196,6 +198,12 @@
     margin-top:0;
   }
   .back-dashboard-btn:hover{ opacity:.9; background:#f8b4d9; }
+
+  @media (max-width: 992px){
+    .scheduling-page .grid{
+      grid-template-columns:1fr;
+    }
+  }
 
   @media (max-width: 640px){
     .app-wrapper{padding:12px;}
@@ -343,7 +351,7 @@ if (!window.ENABLE_SCHEDULING) {
           <input class="search" id="coursesSearch" placeholder="חיפוש מדריך..." oninput="renderCoursesTableFromLast()"/>
         </div>
 
-        <div class="table-wrap">
+        <div class="table-wrap table-wrapper">
           <table>
             <thead>
               <tr>
