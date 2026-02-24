@@ -154,6 +154,11 @@ function startApp(jsonData, role, hash){
   document.getElementById('loginScreen').style.display='none';
   document.getElementById('app').style.display='block';
 
+  // החזרת גלילה לראש הדף לאחר כניסה (במובייל הדפדפן יכול להישאר גלול למטה)
+  window.scrollTo(0, 0);
+  document.documentElement.scrollTop = 0;
+  document.body.scrollTop = 0;
+
   const logoutBtn = document.getElementById('logoutBtn');
   if(logoutBtn){
     logoutBtn.onclick = ()=>{
