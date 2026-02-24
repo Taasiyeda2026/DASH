@@ -806,9 +806,14 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
     width: 100%;
   }
 }
+
+#app-wrapper{
+  transform-origin: top center;
+}
 </style>
 </head>
 <body>
+<div id="app-wrapper">
 <div id="loginScreen"></div>
 <div id="app" style="display:none">
 <header>
@@ -850,6 +855,7 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
 <div class="side" id="side">
   <button class="close" id="closeSide">×</button>
   <div id="sideContent"></div>
+</div>
 </div>
 </div>
 
