@@ -375,6 +375,28 @@ function getDataDateRange(){
   return { min, max };
 }
 
+function updatePageUserName(user){
+  const header = document.getElementById('pageEmployeeHeader') || document.getElementById('greetingName');
+  if(!header) return;
+
+  if(!user){
+    header.textContent = '';
+    return;
+  }
+
+  if(user.Role === 'instructor'){
+    header.textContent = user.Employee || '';
+    return;
+  }
+
+  if(user.Role === 'manager' || user.Role === 'admin'){
+    header.textContent = user.Manager || user.Name || user.Employee || '';
+    return;
+  }
+
+  header.textContent = user.Employee || user.Manager || user.Name || '';
+}
+
 async function initFromRawData(){
   dataRange = getDataDateRange();
   window.dataRange = dataRange;
@@ -384,9 +406,13 @@ async function initFromRawData(){
 
   const sessionName = sessionStorage.getItem('dash_name') || '';
   const currentUser = rawData.find(r => String(r.EmployeeID || '').trim() === String(window.EmployeeID || '').trim());
-  const name = sessionName || (currentUser?.Employee || '');
-  const greetingEl = document.getElementById('greetingName');
-  if(greetingEl) greetingEl.textContent = name ? `שלום, ${name}` : '';
+  const currentUserForHeader = {
+    ...(currentUser || {}),
+    Role: userRole,
+    Name: sessionName || currentUser?.Name || '',
+    Manager: currentUser?.Manager || sessionName || ''
+  };
+  updatePageUserName(currentUserForHeader);
 
   updateSchedulingButtonVisibility();
 
