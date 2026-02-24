@@ -153,8 +153,8 @@ Object.defineProperty(window, 'mode', {
   },
   configurable: false
 });
-let mobileWeekOpen = false;
-let mobileWeekStart = null;
+const isMobile = () => window.innerWidth <= 768;
+let openWeekId = null;
 let currentDate=new Date(); currentDate.setHours(0,0,0,0);
 const dayNames=['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];
 
@@ -453,8 +453,6 @@ function render(){
   enforceInstructorMode();
   view.innerHTML='';
   side.classList.remove('open');
-  mobileWeekOpen = false;
-  mobileWeekStart = null;
 
   if(userRole === 'instructor' || window.mode === 'summary' || window.mode === 'instructors'){
     filtersEl.style.display = 'none';
@@ -462,9 +460,7 @@ function render(){
     filtersEl.style.display = 'flex';
   }
 
-  const isMobile = window.innerWidth < 800;
-
-  if(isMobile && (window.mode === 'month' || window.mode === 'week')){
+  if(isMobile() && (window.mode === 'month' || window.mode === 'week')){
     renderMobileMonth();
   }
   else if(window.mode==='summary'){
@@ -539,6 +535,7 @@ function renderMobileMonth(){
   container.style.padding = '10px';
 
   let cursor = new Date(start);
+  const weekIds = [];
 
   while(cursor <= last){
 
@@ -546,74 +543,65 @@ function renderMobileMonth(){
     const weekEnd   = new Date(cursor);
     weekEnd.setDate(weekStart.getDate()+6);
 
-    const box = document.createElement('div');
-    box.style.background = '#fff';
-    box.style.borderRadius = '18px';
-    box.style.padding = '16px';
-    box.style.boxShadow = '0 6px 16px rgba(0,0,0,0.06)';
-    box.style.cursor = 'pointer';
+    const weekId = `${weekStart.getFullYear()}-${String(weekStart.getMonth()+1).padStart(2,'0')}-W${Math.ceil(weekStart.getDate()/7)}`;
+    weekIds.push(weekId);
 
-    box.innerHTML = `
-      <div style="font-weight:800;font-size:15px;text-align:center">
-        ${weekStart.toLocaleDateString('he-IL')} – ${weekEnd.toLocaleDateString('he-IL')}
-      </div>
-    `;
+    const weekWrap = document.createElement('div');
+    weekWrap.id = `week-${weekId}`;
+    weekWrap.className = 'week';
 
-    box.onclick = ()=>{
+    const weekHeader = document.createElement('div');
+    weekHeader.className = 'week-header';
+    weekHeader.textContent = `${weekStart.toLocaleDateString('he-IL')} – ${weekEnd.toLocaleDateString('he-IL')}`;
+    weekHeader.addEventListener('click', ()=>toggleWeek(weekId));
 
-      // אם כבר פתוח אותו שבוע → סגור
-      if(
-        mobileWeekOpen &&
-        mobileWeekStart &&
-        mobileWeekStart.getTime() === weekStart.getTime()
-      ){
-        mobileWeekOpen = false;
-        mobileWeekStart = null;
-        renderMobileMonth();
-        return;
-      }
+    const weekContent = document.createElement('div');
+    weekContent.className = 'week-content';
 
-      // אחרת → פתח
-      mobileWeekOpen = true;
-      mobileWeekStart = weekStart;
+    for(let i=0;i<7;i++){
+      const date = new Date(weekStart);
+      date.setDate(weekStart.getDate()+i);
+      weekContent.appendChild(buildDay(date,data));
+    }
 
-      renderMobileWeekDetail(weekStart, data);
-    };
-
-    container.appendChild(box);
+    weekWrap.appendChild(weekHeader);
+    weekWrap.appendChild(weekContent);
+    container.appendChild(weekWrap);
 
     cursor.setDate(cursor.getDate()+7);
+  }
+
+  if(openWeekId && !weekIds.includes(openWeekId)){
+    openWeekId = null;
+  }
+
+  if(openWeekId){
+    const openWeekEl = container.querySelector(`#week-${openWeekId}`);
+    if(openWeekEl) openWeekEl.classList.add('open');
   }
 
   view.appendChild(container);
 }
 
-function renderMobileWeekDetail(weekStart, data){
+function toggleWeek(weekId) {
+  if (!isMobile()) return;
 
-  mobileWeekOpen = true;
-  mobileWeekStart = weekStart;
+  const clicked = document.getElementById(`week-${weekId}`);
+  if (!clicked) return;
 
-  view.innerHTML='';
-
-  const weekEnd = new Date(weekStart);
-  weekEnd.setDate(weekStart.getDate()+6);
-
-  titleEl.textContent =
-    `${weekStart.toLocaleDateString('he-IL')} – ${weekEnd.toLocaleDateString('he-IL')}`;
-
-  const container = document.createElement('div');
-  container.style.display='flex';
-  container.style.flexDirection='column';
-  container.style.gap='12px';
-  container.style.padding='10px';
-
-  for(let i=0;i<7;i++){
-    const date = new Date(weekStart);
-    date.setDate(weekStart.getDate()+i);
-    container.appendChild(buildDay(date,data));
+  if (openWeekId === weekId) {
+    clicked.classList.remove('open');
+    openWeekId = null;
+    return;
   }
 
-  view.appendChild(container);
+  if (openWeekId !== null) {
+    const previous = document.getElementById(`week-${openWeekId}`);
+    if (previous) previous.classList.remove('open');
+  }
+
+  clicked.classList.add('open');
+  openWeekId = weekId;
 }
 
 function buildDay(date,data){
@@ -1492,8 +1480,7 @@ document.addEventListener('click', (e)=>{
 initFromRawData();
 
 window.addEventListener('popstate', (e)=>{
-  const isMobile = window.innerWidth < 800;
-  if(isMobile && (window.mode === 'month' || window.mode === 'week')){
+  if(isMobile() && (window.mode === 'month' || window.mode === 'week')){
     side.classList.remove('open');
     view.innerHTML = '';
     renderMobileMonth();
