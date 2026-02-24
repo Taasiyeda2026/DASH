@@ -688,11 +688,37 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
     min-height: 52px !important;
   }
 
-  /* פאנל צד - מסך מלא במובייל */
-  .side,
-  .side-panel {
+  /* פאנל צד – bottom sheet במובייל */
+  .side, .side-panel {
+    top: auto !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
     width: 100% !important;
     max-width: 100% !important;
+    height: 88vh !important;
+    transform: translateY(110%) !important;
+    border-radius: 20px 20px 0 0 !important;
+    box-shadow: 0 -6px 32px rgba(0,0,0,.22) !important;
+    transition: transform .32s cubic-bezier(.32,.72,0,1) !important;
+  }
+  .side.open, .side-panel.open {
+    transform: translateY(0) !important;
+  }
+  /* drag handle */
+  .side::before {
+    content: '';
+    display: block;
+    width: 40px;
+    height: 4px;
+    background: #cbd5e1;
+    border-radius: 2px;
+    margin: 10px auto 4px;
+    flex-shrink: 0;
+  }
+  .side .close, .side-close {
+    align-self: center !important;
+    margin: 4px auto 8px !important;
   }
 
   .instructors-grid,
@@ -772,12 +798,6 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
     overflow-wrap:anywhere;
   }
 
-  .side,
-  .side-panel{
-    width:100%;
-    max-width:100%;
-  }
-
   .instructor-header{
     padding:14px;
   }
@@ -800,16 +820,45 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
   }
 }
 
-@media (max-width: 768px) {
-  .side,
-  .side-panel {
-    width: 100%;
-  }
-}
-
 #app-wrapper{
   transform-origin: top center;
 }
+
+/* ===== SIDE PANEL BACKDROP (mobile bottom sheet) ===== */
+#side-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(15,23,42,.45);
+  z-index: 49;
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+}
+#side-backdrop.active { display: block; }
+
+/* ===== MANAGER OVERLAY CLOSE BUTTON ===== */
+.overlay-close-btn {
+  position: absolute;
+  top: 12px;
+  left: 14px;
+  background: #f1f5f9;
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #64748b;
+  z-index: 2;
+  flex-shrink: 0;
+  padding: 0;
+}
+.overlay-close-btn:hover { background: #e2e8f0; }
+.manager-details-overlay { position: relative; }
 
 /* ===== MOBILE MONTH ACCORDION (.week – used by renderMobileMonth) ===== */
 .week {
@@ -1058,12 +1107,14 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
 
 <div id="view"></div>
 
+</div>
+</div>
+
 <div class="side" id="side">
   <button class="close" id="closeSide">×</button>
   <div id="sideContent"></div>
 </div>
-</div>
-</div>
+<div id="side-backdrop"></div>
 
 <script src="feature-flags.js"></script>
 <script src="app.js"></script>

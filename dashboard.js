@@ -452,7 +452,7 @@ function render(){
 
   enforceInstructorMode();
   view.innerHTML='';
-  side.classList.remove('open');
+  closeSidePanel();
 
   if(userRole === 'instructor' || window.mode === 'summary' || window.mode === 'instructors'){
     filtersEl.style.display = 'none';
@@ -604,7 +604,6 @@ function renderInstructorGridMonth(){
 function renderWeekView(){
   if (isMobile()) {
     renderMobileWeekView();
-    initMobileAccordion();
   } else {
     renderDesktopWeekView();
   }
@@ -635,47 +634,25 @@ function renderDesktopWeekView(){
 }
 
 function renderMobileWeekView(){
-  const y = currentDate.getFullYear();
-  const m = currentDate.getMonth();
-  titleEl.textContent = new Date(y,m,1).toLocaleString('he-IL',{month:'long',year:'numeric'});
+  // שבוע אחד בלבד – ניווט שבועי עם כפתורי prev/next
+  const weekStart = new Date(currentDate);
+  weekStart.setDate(currentDate.getDate() - currentDate.getDay());
+  weekStart.setHours(0,0,0,0);
+
+  const weekEnd = new Date(weekStart);
+  weekEnd.setDate(weekStart.getDate() + 6);
+
+  const fmt = { day: 'numeric', month: 'long' };
+  titleEl.textContent = `${weekStart.toLocaleDateString('he-IL', fmt)} – ${weekEnd.toLocaleDateString('he-IL', fmt)}`;
 
   const data = applyFilters();
-  const first = new Date(y,m,1);
-  const last  = new Date(y,m+1,0);
-
-  const start = new Date(first);
-  start.setDate(first.getDate() - first.getDay());
-  start.setHours(0,0,0,0);
-
   const container = document.createElement('div');
-  let cursor = new Date(start);
-  let weekNumber = 1;
+  container.style.cssText = 'padding:8px 8px 80px;';
 
-  while(cursor <= last){
-    const weekStart = new Date(cursor);
-
-    const weekWrap = document.createElement('div');
-    weekWrap.className = 'mobile-week';
-
-    const weekHeader = document.createElement('div');
-    weekHeader.className = 'mobile-week-header';
-    weekHeader.textContent = `שבוע ${weekNumber}`;
-
-    const weekContent = document.createElement('div');
-    weekContent.className = 'mobile-week-content';
-
-    for(let i=0;i<7;i++){
-      const date = new Date(weekStart);
-      date.setDate(weekStart.getDate()+i);
-      weekContent.appendChild(buildDay(date,data));
-    }
-
-    weekWrap.appendChild(weekHeader);
-    weekWrap.appendChild(weekContent);
-    container.appendChild(weekWrap);
-
-    cursor.setDate(cursor.getDate()+7);
-    weekNumber++;
+  for(let i = 0; i < 7; i++){
+    const date = new Date(weekStart);
+    date.setDate(weekStart.getDate() + i);
+    container.appendChild(buildDay(date, data));
   }
 
   view.appendChild(container);
@@ -885,7 +862,7 @@ function openSideGrouped(items) {
       </div>
     `;
   });
-  side.classList.add('open');
+  openSidePanel();
 }
 
 function applyFilters(){
@@ -956,7 +933,7 @@ function openMissingCourses(year, month){
     `;
   });
 
-  side.classList.add('open');
+  openSidePanel();
 }
 
 function openManagerOverlay(mgr, year, month){
@@ -981,7 +958,19 @@ function openManagerOverlay(mgr, year, month){
   const details = document.createElement('div');
   details.className = 'manager-details-overlay';
 
-  details.innerHTML = `
+  function closeManagerOverlay(){
+    overlayBg.remove();
+    details.remove();
+  }
+
+  // כפתור סגירה
+  const closeBtn = document.createElement('button');
+  closeBtn.className = 'overlay-close-btn';
+  closeBtn.textContent = '×';
+  closeBtn.onclick = closeManagerOverlay;
+  details.appendChild(closeBtn);
+
+  details.innerHTML += `
     <h3>${mgr}</h3>
     ${mgrMissingActive.length > 0 ? `
       <div style="background:#fef2f2;border:1.5px solid #dc2626;border-radius:12px;padding:14px;margin-bottom:16px">
@@ -1016,10 +1005,6 @@ function openManagerOverlay(mgr, year, month){
 
   document.body.appendChild(details);
 
-  function closeManagerOverlay(){
-    overlayBg.remove();
-    details.remove();
-  }
   overlayBg.onclick = closeManagerOverlay;
   overlayBg.addEventListener('touchend', e=>{ e.preventDefault(); closeManagerOverlay(); }, { passive: false });
 }
@@ -1532,7 +1517,7 @@ function openInstructorModal(name, courses, selectedMonth, selectedYear){
     `;
   });
 
-  side.classList.add('open');
+  openSidePanel();
 }
 
 document.getElementById('prev').onclick = ()=>{
@@ -1649,15 +1634,22 @@ managerFilter.onchange=render;
 employeeFilter.onchange=render;
 document.getElementById('clearFilters').onclick=()=>{managerFilter.value='';employeeFilter.value='';render();};
 summaryMonth.onchange=render;
-document.getElementById('closeSide').onclick=()=>side.classList.remove('open');
+const sideBackdrop = document.getElementById('side-backdrop');
 
-document.addEventListener('click', (e)=>{
-  if(side.classList.contains('open') && !side.contains(e.target)){
-    side.classList.remove('open');
-  }
-});
+function openSidePanel(){
+  side.classList.add('open');
+  if(isMobile()) sideBackdrop.classList.add('active');
+}
+function closeSidePanel(){
+  side.classList.remove('open');
+  sideBackdrop.classList.remove('active');
+}
 
-/* ===== סגירת פאנל בהחלקה (swipe) במובייל ===== */
+document.getElementById('closeSide').onclick = closeSidePanel;
+sideBackdrop.addEventListener('click', closeSidePanel);
+sideBackdrop.addEventListener('touchend', e=>{ e.preventDefault(); closeSidePanel(); }, { passive: false });
+
+/* ===== סגירת bottom-sheet בהחלקה למטה (swipe down) ===== */
 (function(){
   let _tx = 0, _ty = 0;
   side.addEventListener('touchstart', e=>{
@@ -1665,11 +1657,11 @@ document.addEventListener('click', (e)=>{
     _ty = e.touches[0].clientY;
   }, { passive: true });
   side.addEventListener('touchend', e=>{
-    const dx = e.changedTouches[0].clientX - _tx;
-    const dy = Math.abs(e.changedTouches[0].clientY - _ty);
-    // החלקה שמאלה (סגירה) — לפחות 60px ואופקית יותר מאנכית
-    if(dx < -60 && dy < Math.abs(dx) * 0.8){
-      side.classList.remove('open');
+    const dx = Math.abs(e.changedTouches[0].clientX - _tx);
+    const dy = e.changedTouches[0].clientY - _ty;
+    // החלקה למטה (סגירה) — לפחות 60px ואנכית יותר מאופקית
+    if(dy > 60 && dx < dy * 0.8){
+      closeSidePanel();
     }
   }, { passive: true });
 })();
@@ -1678,7 +1670,7 @@ initFromRawData();
 
 window.addEventListener('popstate', (e)=>{
   if(isMobile() && (window.mode === 'month' || window.mode === 'week')){
-    side.classList.remove('open');
+    closeSidePanel();
     view.innerHTML = '';
     renderMobileMonth();
   }
