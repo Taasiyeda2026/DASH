@@ -484,11 +484,121 @@ function render(){
 }
 
 function renderMonthView(){
+  if(userRole === 'instructor'){
+    renderInstructorGridMonth();
+    return;
+  }
   if(isMobile()){
     renderMobileMonth();
     return;
   }
   renderDesktopMonth();
+}
+
+function renderInstructorGridMonth(){
+  const y = currentDate.getFullYear();
+  const m = currentDate.getMonth();
+  titleEl.textContent = new Date(y,m,1).toLocaleString('he-IL',{month:'long',year:'numeric'});
+
+  const data = applyFilters();
+  const today = new Date(); today.setHours(0,0,0,0);
+
+  const wrap = document.createElement('div');
+  wrap.className = 'instructor-cal-wrap';
+
+  // שורת כותרות ימים
+  const headerRow = document.createElement('div');
+  headerRow.className = 'instructor-cal-header-row';
+  ["א'","ב'","ג'","ד'","ה'","ו'","ש'"].forEach(name => {
+    const h = document.createElement('div');
+    h.textContent = name;
+    headerRow.appendChild(h);
+  });
+  wrap.appendChild(headerRow);
+
+  const grid = document.createElement('div');
+  grid.className = 'instructor-cal-grid';
+
+  const first = new Date(y,m,1);
+  const last  = new Date(y,m+1,0);
+
+  // תאים ריקים לפני תחילת החודש
+  for(let i = 0; i < first.getDay(); i++){
+    const empty = document.createElement('div');
+    empty.className = 'instructor-cal-cell ic-empty';
+    grid.appendChild(empty);
+  }
+
+  for(let d = 1; d <= last.getDate(); d++){
+    const date = new Date(y,m,d);
+    const isToday = sameDay(date, today);
+
+    // איסוף כל האירועים של היום
+    const dailyItems = [];
+    data.forEach(r => r.Dates.forEach((dd, idx) => {
+      if(sameDay(dd, date)) dailyItems.push({ ...r, meetingIdx: idx+1, selectedDate: dd });
+    }));
+
+    // קיבוץ לפי תוכנית (זהה ל-buildDay)
+    const groupsMap = {};
+    dailyItems.forEach(ev => {
+      if(ev.EventType === 'HOLIDAY'){
+        const key = `holiday-${ev.Program}`;
+        if(!groupsMap[key]) groupsMap[key] = { type:'holiday', items:[ev] };
+      } else {
+        const key = `${ev.Employee}-${ev.Program}`;
+        if(!groupsMap[key]) groupsMap[key] = { type:'course', time: ev.StartTime||'99:99', items:[] };
+        groupsMap[key].items.push(ev);
+      }
+    });
+    const groups = Object.values(groupsMap)
+      .sort((a,b) => (a.time||'').localeCompare(b.time||''));
+
+    const cell = document.createElement('div');
+    cell.className = 'instructor-cal-cell' +
+      (isToday ? ' ic-today' : '') +
+      (groups.length > 0 ? ' ic-has-events' : '');
+
+    // מספר יום
+    const numWrap = document.createElement('div');
+    numWrap.className = 'instructor-cal-day-num' + (isToday ? ' ic-today-num' : '');
+    numWrap.textContent = d;
+    cell.appendChild(numWrap);
+
+    // פילים של אירועים (מקסימום 3)
+    const maxPills = 3;
+    groups.slice(0, maxPills).forEach(g => {
+      const firstItem = g.items[0];
+      const pill = document.createElement('div');
+      pill.className = 'instructor-cal-pill';
+      pill.style.background = g.type === 'holiday'
+        ? '#fee2e2'
+        : getEmployeeColor(firstItem.Employee);
+      const txt = firstItem.Program || '';
+      pill.textContent = txt.length > 10 ? txt.slice(0,9)+'…' : txt;
+      cell.appendChild(pill);
+    });
+
+    if(groups.length > maxPills){
+      const more = document.createElement('div');
+      more.className = 'instructor-cal-more';
+      more.textContent = `+${groups.length - maxPills}`;
+      cell.appendChild(more);
+    }
+
+    // לחיצה → פתח פאנל צד
+    if(groups.length > 0){
+      cell.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openSideGrouped(dailyItems);
+      });
+    }
+
+    grid.appendChild(cell);
+  }
+
+  wrap.appendChild(grid);
+  view.appendChild(wrap);
 }
 
 function renderWeekView(){
