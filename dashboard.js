@@ -219,6 +219,7 @@ const employeeColors = {
   "קרן גורביץ": "#F2FCFD",
   "אביגדור שרון": "#DDFFFA"
 };
+window.employeeColors = employeeColors;
 
 function getEmployeeColor(name) {
   if (!name || name.trim() === "") return "#ffffff";
@@ -279,9 +280,24 @@ function getNotesForCourseItem(item){
   return { message, reminder, general };
 }
 
-function getNotesTitleColor(name){
-  if(!name || !name.trim()) return '#f1f5f9';
-  return employeeColors[name.trim()] || '#f1f5f9';
+function applyNotesBoxColor(){
+  const boxes = document.querySelectorAll('.notes-box');
+  if(!boxes.length) return;
+
+  const name =
+    (window.currentUserName ||
+     window.currentUser?.name ||
+     window.currentUser?.Employee ||
+     '').trim();
+
+  const baseColor =
+    (window.employeeColors && name && window.employeeColors[name])
+      ? window.employeeColors[name]
+      : '#f8fafc';
+
+  boxes.forEach(box => {
+    box.style.backgroundColor = baseColor;
+  });
 }
 
 function renderNotesBlock(notes, employeeName){
@@ -304,8 +320,8 @@ function renderNotesBlock(notes, employeeName){
   if(!sections) return '';
 
   return `
-    <div class="notes-box">
-      <div class="notes-title" style="color:${getNotesTitleColor(employeeName)};">פתקים</div>
+    <div class="notes-box" id="notesBox">
+      <div class="notes-title">פתקים</div>
       <div class="notes-content">
         ${sections}
       </div>
@@ -547,6 +563,8 @@ async function initFromRawData(){
     Name: sessionName || currentUser?.Name || '',
     Manager: currentUser?.Manager || sessionName || ''
   };
+  window.currentUser = currentUserForHeader;
+  window.currentUserName = currentUserForHeader.Employee || currentUserForHeader.Name || '';
   updatePageUserName(currentUserForHeader);
 
   updateSchedulingButtonVisibility();
@@ -622,6 +640,7 @@ async function initFromRawData(){
   }
 
   render();
+  applyNotesBoxColor();
 }
 
 function initFilters(){
@@ -678,6 +697,8 @@ function render(){
   } else {
     goCalendar.style.display = 'inline-flex';
   }
+
+  applyNotesBoxColor();
 }
 
 function renderMonthView(){
@@ -1117,6 +1138,7 @@ function openSideGrouped(items) {
       </div>
     `;
   });
+  applyNotesBoxColor();
   openSidePanel();
 }
 
