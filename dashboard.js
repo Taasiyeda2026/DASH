@@ -586,7 +586,7 @@ function renderInstructorGridMonth(){
     cell.className = 'instructor-cal-cell' +
       (isShabbat ? ' ic-shabbat' : '') +
       (isToday ? ' ic-today' : '') +
-      (groups.length > 0 ? ' ic-has-events' : '');
+      (groups.some(g => g.type !== 'holiday') ? ' ic-has-events' : '');
 
     // מספר יום
     const numWrap = document.createElement('div');
