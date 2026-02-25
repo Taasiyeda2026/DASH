@@ -9,6 +9,11 @@ function fitToScreenIfInstructor(){
   const wrapper = document.getElementById('app-wrapper');
   if(!wrapper) return;
 
+  if(window.innerWidth <= 800){
+    wrapper.style.transform = '';
+    return;
+  }
+
   const screenHeight = window.innerHeight;
   const contentHeight = wrapper.scrollHeight;
   const scale = Math.min(1, screenHeight / contentHeight);

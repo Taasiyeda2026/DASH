@@ -780,6 +780,7 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
     border-radius: 20px 20px 0 0 !important;
     box-shadow: 0 -6px 32px rgba(0,0,0,.22) !important;
     transition: transform .32s cubic-bezier(.32,.72,0,1) !important;
+    z-index: 1100 !important;
   }
   .side.open, .side-panel.open {
     transform: translateY(0) !important;
@@ -944,6 +945,9 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
   -webkit-backdrop-filter: blur(2px);
 }
 #side-backdrop.active { display: block; }
+@media(max-width:800px) {
+  #side-backdrop { z-index: 1050; }
+}
 
 /* ===== MANAGER OVERLAY CLOSE BUTTON ===== */
 .overlay-close-btn {
