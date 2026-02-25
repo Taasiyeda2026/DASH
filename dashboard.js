@@ -1514,10 +1514,8 @@ function openInstructorModal(name, courses, selectedMonth, selectedYear){
         </div>
 
         <div>
-          <span style="font-weight:700;color:#0f172a;">
-            תאריכי פעילות
-          </span>
-          (${startDate}) - (${endDateFormatted})
+          <div style="font-weight:700;color:#0f172a;">תאריכי פעילות</div>
+          <div>(${startDate}) - (${endDateFormatted})</div>
         </div>
       </div>
     `;
