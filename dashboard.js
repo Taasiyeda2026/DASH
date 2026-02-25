@@ -571,8 +571,10 @@ function renderInstructorGridMonth(){
     const groups = Object.values(groupsMap)
       .sort((a,b) => (a.time||'').localeCompare(b.time||''));
 
+    const isShabbat = date.getDay() === 6;
     const cell = document.createElement('div');
     cell.className = 'instructor-cal-cell' +
+      (isShabbat ? ' ic-shabbat' : '') +
       (isToday ? ' ic-today' : '') +
       (groups.length > 0 ? ' ic-has-events' : '');
 
@@ -582,9 +584,9 @@ function renderInstructorGridMonth(){
     numWrap.textContent = d;
     cell.appendChild(numWrap);
 
-    // פילים של אירועים (מקסימום 3)
+    // פילים של אירועים (מקסימום 3) – לא בשבת
     const maxPills = 3;
-    groups.slice(0, maxPills).forEach(g => {
+    if(!isShabbat) groups.slice(0, maxPills).forEach(g => {
       const firstItem = g.items[0];
       const pill = document.createElement('div');
       pill.className = 'instructor-cal-pill';
@@ -596,7 +598,7 @@ function renderInstructorGridMonth(){
       cell.appendChild(pill);
     });
 
-    if(groups.length > maxPills){
+    if(!isShabbat && groups.length > maxPills){
       const more = document.createElement('div');
       more.className = 'instructor-cal-more';
       more.textContent = `+${groups.length - maxPills}`;

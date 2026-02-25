@@ -941,7 +941,7 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
 }
 .instructor-cal-header-row {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(6, 1fr) 24px;
   gap: 2px;
   margin-bottom: 3px;
 }
@@ -952,10 +952,28 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
   color: #94a3b8;
   padding: 2px 0 5px;
 }
+.instructor-cal-header-row > div:last-child {
+  font-size: 9px;
+  color: #cbd5e1;
+}
 .instructor-cal-grid {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(6, 1fr) 24px;
   gap: 2px;
+}
+.instructor-cal-cell.ic-shabbat {
+  min-height: 0;
+  background: #f8fafc;
+  border-color: #f1f5f9;
+  padding: 3px 1px;
+  justify-content: flex-start;
+  align-items: center;
+}
+.instructor-cal-cell.ic-shabbat .instructor-cal-day-num {
+  font-size: 9px;
+  color: #cbd5e1;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
 }
 .instructor-cal-cell {
   background: #fff;
