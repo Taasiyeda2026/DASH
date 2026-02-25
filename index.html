@@ -1003,6 +1003,11 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
     background: #fff;
   }
 
+  /* offset scrollIntoView so today card isn't hidden under the sticky header */
+  .today {
+    scroll-margin-top: 160px;
+  }
+
   .header-inner {
     flex-wrap: wrap;
   }
