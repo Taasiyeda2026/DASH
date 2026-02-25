@@ -683,6 +683,11 @@ function renderMobileWeekView(){
   }
 
   view.appendChild(container);
+
+  requestAnimationFrame(() => {
+    const todayEl = container.querySelector('.today');
+    if(todayEl) todayEl.scrollIntoView({ block: 'start', behavior: 'auto' });
+  });
 }
 
 function initMobileAccordion(){
