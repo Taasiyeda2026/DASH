@@ -571,7 +571,7 @@ async function initFromRawData(){
   updateSchedulingButtonVisibility();
   updateEndDatesButtonVisibility();
 
-  window.mode='month';
+  window.mode='week';
 
   if(userRole === 'instructor'){
     await loadSchedulingJson();
@@ -1831,6 +1831,21 @@ function openInstructorModal(name, courses, selectedMonth, selectedYear){
 
   const courseOnlyRecords = courses.filter(r => isCourse(r));
 
+  const instructorEmpID = courseOnlyRecords?.[0]?.EmployeeID;
+  const dailyRecords = instructorEmpID ? rawData.filter(r => {
+    const type = String(r.EventType || '').trim().toUpperCase();
+    const isDaily = type === 'WORKSHOP' || type === 'TOUR';
+    const inMonth = r.Dates?.some(d =>
+      d.getFullYear() === year &&
+      d.getMonth() === month
+    );
+    return isDaily && inMonth && r.EmployeeID == instructorEmpID;
+  }).sort((a, b) => {
+    const da = getEarliestDate(a.Dates) || new Date(0);
+    const db = getEarliestDate(b.Dates) || new Date(0);
+    return da - db;
+  }) : [];
+
   const sortedCourses = sortByDateAndTime(
     courseOnlyRecords.map(r => toDateAndTimeSortable(r, getEarliestDate(r.Dates), r.StartTime))
   );
@@ -1892,6 +1907,7 @@ function openInstructorModal(name, courses, selectedMonth, selectedYear){
           <span class="badge type">${employmentType}</span>
           <span class="badge days">${totalWorkDays} ימי עבודה בשבוע</span>
           <span class="badge courses">${sortedCourses.length} קורסים</span>
+          ${dailyRecords.length > 0 ? `<span class="badge" style="background:#d1fae5;color:#065f46;">${dailyRecords.length} סדנאות/סיורים</span>` : ''}
           <span class="badge">מנהל: ${managerName}</span>
           ${authorityRow}
         </div>
@@ -1937,6 +1953,44 @@ function openInstructorModal(name, courses, selectedMonth, selectedYear){
       </div>
     `;
   });
+
+  if(dailyRecords.length > 0){
+    sideContent.innerHTML += `
+      <div style="font-weight:800;font-size:15px;margin:16px 0 8px;color:#065f46;border-top:1px solid var(--border);padding-top:14px;">
+        סדנאות וסיורים
+      </div>
+    `;
+    dailyRecords.forEach(r => {
+      const type = String(r.EventType || '').trim().toUpperCase();
+      const typeLabel = type === 'TOUR' ? 'סיור' : 'סדנה';
+      const activityDate = getEarliestDate(r.Dates);
+      const activityDateText = activityDate ? activityDate.toLocaleDateString('he-IL') : '—';
+      const timeRange = (r.StartTime || r.EndTime) ? `${r.StartTime || ''} – ${r.EndTime || ''}` : '—';
+      sideContent.innerHTML += `
+        <div class="course-card">
+          <div style="
+            font-weight:800;
+            font-size:16px;
+            padding:8px 12px;
+            border-radius:10px;
+            background:#d1fae5;
+            color:#065f46;
+          ">
+            ${r.Program || typeLabel}
+            <span style="font-size:12px;font-weight:600;margin-right:6px;">(${typeLabel})</span>
+          </div>
+          <div>
+            <span style="font-weight:700;color:#0f172a;">בית ספר:</span> ${r.School || '—'}<br>
+            <span style="font-weight:700;color:#0f172a;">רשות:</span> ${r.Authority || '—'}
+          </div>
+          <div>
+            <div style="font-weight:700;color:#0f172a;">תאריך</div>
+            <div>${activityDateText}${timeRange !== '—' ? ' | ' + timeRange : ''}</div>
+          </div>
+        </div>
+      `;
+    });
+  }
 
   openSidePanel();
 }
