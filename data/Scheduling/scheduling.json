@@ -4965,5 +4965,19 @@
       ],
       "CourseManager": ""
     }
+  ],
+  "events": [
+    {
+      "Program": "שם האירוע",
+      "EventType": "EVENT",
+      "Employee": "שם מדריך 1",
+      "Dates": [
+        46350
+      ],
+      "StartTime": 0.375,
+      "EndTime": 0.708,
+      "CourseManager": "שם המנהל",
+      "Note": ""
+    }
   ]
 }
