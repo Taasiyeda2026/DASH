@@ -50,6 +50,10 @@ function showLogin(){
             <label class="login-label">קוד אישי</label>
             <input id="empCode" class="login-input" type="password" placeholder="הכנס קוד אישי" autocomplete="current-password" />
           </div>
+          <div class="login-remember">
+            <input type="checkbox" id="rememberMe" class="remember-checkbox" />
+            <label for="rememberMe" class="remember-label">זכור אותי</label>
+          </div>
           <button class="login-btn" onclick="login()">
             <span class="login-btn-text">כניסה</span>
             <span class="login-btn-icon">←</span>
@@ -105,13 +109,14 @@ async function login(){
   if(!id || !code) return;
 
   const hash = await sha256(id + code + SALT);
+  const remember = document.getElementById('rememberMe')?.checked ?? false;
   sessionStorage.setItem('dash_empId', id);
   showLoader();
 
   try{
     try{
       const json = await fetchJsonWithErrors(`./data/instructors/${hash}.json`);
-      startApp(json, 'instructor', hash);
+      startApp(json, 'instructor', hash, remember);
       return;
     }catch(e){
       if(e.message !== 'not_found') throw e;
@@ -119,7 +124,7 @@ async function login(){
 
     try{
       const json = await fetchJsonWithErrors(`./data/admins/${hash}.json`);
-      startApp(json, 'admin', hash);
+      startApp(json, 'admin', hash, remember);
       return;
     }catch(e){
       if(e.message === 'not_found'){
@@ -139,16 +144,19 @@ async function login(){
   }
 }
 
-function startApp(jsonData, role, hash){
+function startApp(jsonData, role, hash, remember){
   const records = Array.isArray(jsonData) ? jsonData : (jsonData.data || []);
   const name = !Array.isArray(jsonData) ? (jsonData.name || '') : '';
   rawData = records;
   userRole = role;
   window.currentUserRole = role;
 
-  sessionStorage.setItem('dash_hash', hash);
-  sessionStorage.setItem('dash_role', role);
-  if(name) sessionStorage.setItem('dash_name', name);
+  if(remember !== null){
+    const store = remember ? localStorage : sessionStorage;
+    store.setItem('dash_hash', hash);
+    store.setItem('dash_role', role);
+    if(name) store.setItem('dash_name', name);
+  }
   window.EmployeeID = sessionStorage.getItem('dash_empId') || '';
 
   document.getElementById('loginScreen').style.display='none';
@@ -163,6 +171,9 @@ function startApp(jsonData, role, hash){
   if(logoutBtn){
     logoutBtn.onclick = ()=>{
       sessionStorage.clear();
+      localStorage.removeItem('dash_hash');
+      localStorage.removeItem('dash_role');
+      localStorage.removeItem('dash_name');
       location.reload();
     };
   }
@@ -178,8 +189,8 @@ function loadDashboard(){
 }
 
 async function resumeSession(){
-  const hash = sessionStorage.getItem('dash_hash');
-  const role = sessionStorage.getItem('dash_role');
+  const hash = localStorage.getItem('dash_hash') || sessionStorage.getItem('dash_hash');
+  const role = localStorage.getItem('dash_role') || sessionStorage.getItem('dash_role');
   if(!hash || !role) return false;
 
   const path = role === 'admin'
@@ -189,10 +200,13 @@ async function resumeSession(){
   showLoader();
   try{
     const json = await fetchJsonWithErrors(path);
-    startApp(json, role, hash);
+    startApp(json, role, hash, null);
     return true;
   }catch(_e){
     sessionStorage.clear();
+    localStorage.removeItem('dash_hash');
+    localStorage.removeItem('dash_role');
+    localStorage.removeItem('dash_name');
     return false;
   }finally{
     hideLoader();
