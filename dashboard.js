@@ -1185,10 +1185,27 @@ function openSideGrouped(items) {
   `;
 
   sortedItems.forEach(item => {
+    const type = eventTypeOf(item);
+    const isDaily = type === 'WORKSHOP' || type === 'TOUR';
     const end = endDate(item);
     const timeRange = (item.StartTime || item.EndTime) ? `${item.StartTime} – ${item.EndTime}` : '—';
     const empDisplay = (item.Employee && item.Employee.trim()) ? item.Employee : `<span style="color:var(--danger); font-weight:bold;">חסר מדריך</span>`;
     const notesHtml = renderNotesBlock(getNotesForCourseItem(item), item.Employee || '');
+    const activityDate = item.selectedDate || getEarliestDate(item.Dates);
+    const activityDateText = activityDate ? activityDate.toLocaleDateString('he-IL') : '—';
+
+    if(isDaily){
+      sideContent.innerHTML += `
+        <div class="group-item">
+          <div class='row'><span class='label'>תאריך</span><span class='value'>${activityDateText}</span></div>
+          <div class='row'><span class='label'>רשות</span><span class='value'>${item.Authority || '—'}</span></div>
+          <div class='row'><span class='label'>בית ספר</span><span class='value'>${item.School || '—'}</span></div>
+          <div class='row'><span class='label'>שעות</span><span class='value'>${timeRange}</span></div>
+          <div class='row'><span class='label'>מדריך</span><span class='value'>${empDisplay}</span></div>
+        </div>
+      `;
+      return;
+    }
 
     sideContent.innerHTML += `
       <div class="group-item">
@@ -1462,7 +1479,7 @@ function renderSummary(){
       </div>
 
       <div class="kpi-card">
-        <div class="kpi-label">סדנאות וסיורים החודש</div>
+        <div class="kpi-label">סדנאות וסיורים</div>
         <div class="kpi-value">${dailyCount}</div>
       </div>
 
@@ -1785,7 +1802,7 @@ function renderInstructors(){
         קורסים פעילים
       </div>
       <div style="font-size:12px;color:#0f766e;margin-top:8px;font-weight:700">
-        ${dailyWorkshopsContent}
+        סדנאות/סיורים: ${instructorDailyCountByName[name] || 0}
       </div>
     `;
 
@@ -1812,8 +1829,10 @@ function openInstructorModal(name, courses, selectedMonth, selectedYear){
 
   const weeks = {};
 
+  const courseOnlyRecords = courses.filter(r => isCourse(r));
+
   const sortedCourses = sortByDateAndTime(
-    courses.map(r => toDateAndTimeSortable(r, getEarliestDate(r.Dates), r.StartTime))
+    courseOnlyRecords.map(r => toDateAndTimeSortable(r, getEarliestDate(r.Dates), r.StartTime))
   );
 
   sortedCourses.forEach(r=>{
@@ -1857,13 +1876,13 @@ function openInstructorModal(name, courses, selectedMonth, selectedYear){
   });
 
   totalWorkDays = maxDays;
-  const employmentType = getEmploymentTypeForEmployeeId(courses?.[0]?.EmployeeID);
-    const managerName = getInstructorManager(courses[0]) || '—';
+  const employmentType = getEmploymentTypeForEmployeeId(courseOnlyRecords?.[0]?.EmployeeID);
+    const managerName = getInstructorManager(courseOnlyRecords[0]) || '—';
 
     // הוספת שורת רשות אם מדובר ב"חסר מדריך"
     let authorityRow = '';
-    if (name === "חסר מדריך" && courses[0]?.Authority) {
-      authorityRow = `<span class="badge" style="background:#f1f5f9;color:#475569;border:1px solid #cbd5e1;">רשות: ${courses[0].Authority}</span>`;
+    if (name === "חסר מדריך" && courseOnlyRecords[0]?.Authority) {
+      authorityRow = `<span class="badge" style="background:#f1f5f9;color:#475569;border:1px solid #cbd5e1;">רשות: ${courseOnlyRecords[0].Authority}</span>`;
     }
 
     sideContent.innerHTML = `
