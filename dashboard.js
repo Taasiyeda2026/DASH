@@ -272,8 +272,11 @@ function getNotesForCourseItem(item){
 
   const toArray = (v) => Array.isArray(v) ? v.filter(Boolean) : [];
   const message = toArray(noteData.message);
-  const reminder = toArray(noteData.reminder);
   const general = toArray(noteData.general);
+
+  const totalSessions = Array.isArray(item.Dates) ? item.Dates.length : 0;
+  const isLastSession = totalSessions > 0 && sessionNumber >= totalSessions;
+  const reminder = isLastSession ? [] : toArray(noteData.reminder);
 
   if(!message.length && !reminder.length && !general.length) return null;
 
