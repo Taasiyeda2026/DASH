@@ -615,11 +615,12 @@ function renderInstructorGridMonth(){
       cell.appendChild(more);
     }
 
-    // לחיצה → פתח פאנל צד
-    if(groups.length > 0){
+    // לחיצה → פתח פאנל צד (לא לחגים)
+    const nonHolidayItems = dailyItems.filter(item => String(item.EventType || '').trim().toUpperCase() !== 'HOLIDAY');
+    if(nonHolidayItems.length > 0){
       cell.addEventListener('click', (e) => {
         e.stopPropagation();
-        openSideGrouped(dailyItems);
+        openSideGrouped(nonHolidayItems);
       });
     }
 
