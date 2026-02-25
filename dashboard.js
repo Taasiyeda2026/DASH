@@ -1151,12 +1151,27 @@ function applyFilters(){
 }
 
 function getCourseStartDate(r){
-  if(!r.Dates || !r.Dates.length) return null;
+  if(!Array.isArray(r.Dates) || r.Dates.length === 0) return null;
+  return new Date(Math.min(...r.Dates.map(d => d.getTime())));
+}
 
-  const validDates = r.Dates.filter(d => d);
-  if(validDates.length === 0) return null;
+function getCourseEndDate(r){
+  if(!Array.isArray(r.Dates) || r.Dates.length === 0) return null;
+  return new Date(Math.max(...r.Dates.map(d => d.getTime())));
+}
 
-  return new Date(Math.min(...validDates.map(d => d.getTime())));
+function isCourseActiveByRange(r, currentYear, currentMonth){
+  if(!isCourse(r)) return false;
+
+  const startDate = getCourseStartDate(r);
+  const endDate = getCourseEndDate(r);
+
+  if(!startDate || !endDate) return false;
+
+  const monthStart = new Date(currentYear, currentMonth, 1);
+  const monthEnd = new Date(currentYear, currentMonth + 1, 0);
+
+  return startDate <= monthEnd && endDate >= monthStart;
 }
 
 function openMissingCourses(year, month){
@@ -1225,7 +1240,7 @@ function openManagerOverlay(mgr, year, month){
   ).sort((a,b)=>parseDate(a.End)-parseDate(b.End));
 
   const mgrMissingActive = mgrCourses.filter(r =>
-    isCourseActiveInMonth(r, year, month) &&
+    isCourseActiveByRange(r, year, month) &&
     (!r.Employee || !r.Employee.trim())
   );
 
@@ -1295,11 +1310,7 @@ function renderSummary(){
     if(String(r.EventType || '').trim().toUpperCase() !== 'COURSE')
       return false;
 
-    return r.Dates.some(d =>
-      d &&
-      d.getFullYear() === currentYear &&
-      d.getMonth() === currentMonth
-    );
+    return isCourseActiveByRange(r, currentYear, currentMonth);
   }).length;
 
   const nextMonthStart = new Date(currentYear, currentMonth + 1, 1);
@@ -1387,7 +1398,7 @@ function renderSummary(){
   managers.forEach(mgr=>{
     const mgrCourses = courses.filter(r=>getCourseManager(r) === mgr);
     const mgrActive = mgrCourses.filter(r =>
-      isCourseActiveInMonth(r, currentYear, currentMonth)
+      isCourseActiveByRange(r, currentYear, currentMonth)
     ).length;
     const mgrEndedThisMonth = mgrCourses.filter(r =>
       isCourseEndingInMonth(r, currentYear, currentMonth)
@@ -1519,7 +1530,7 @@ function renderInstructors(){
 
   rawData.forEach(r => {
     if(!isCourse(r)) return;
-    if(!isCourseActiveInMonth(r, selectedYear, selectedMonth)) return;
+    if(!isCourseActiveByRange(r, selectedYear, selectedMonth)) return;
 
     if(selectedManager && getInstructorManager(r) !== selectedManager) return;
 
