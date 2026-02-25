@@ -108,6 +108,7 @@ const btnMonth=document.getElementById('btnMonth');
 const btnWeek=document.getElementById('btnWeek');
 const btnSummary=document.getElementById('btnSummary');
 const btnInstructors=document.getElementById('btnInstructors');
+const btnEndDates=document.getElementById('btnEndDates');
 const goCalendar = document.getElementById('goCalendar');
 const managerFilter=document.getElementById('managerFilter');
 const employeeFilter=document.getElementById('employeeFilter');
@@ -128,6 +129,16 @@ function updateSchedulingButtonVisibility(){
     btn.style.display = '';
   }else{
     btn.style.display = 'none';
+  }
+}
+
+function updateEndDatesButtonVisibility(){
+  if(!btnEndDates) return;
+  const id = String(window.EmployeeID || '').trim();
+  if(id === '7000' || id === '8000'){
+    btnEndDates.style.display = '';
+  }else{
+    btnEndDates.style.display = 'none';
   }
 }
 
@@ -354,11 +365,13 @@ function updateModeButtons(){
   btnWeek.classList.remove('active');
   btnSummary.classList.remove('active');
   btnInstructors.classList.remove('active');
+  if(btnEndDates) btnEndDates.classList.remove('active');
 
   if(window.mode === 'month') btnMonth.classList.add('active');
   if(window.mode === 'week') btnWeek.classList.add('active');
   if(window.mode === 'summary') btnSummary.classList.add('active');
   if(window.mode === 'instructors') btnInstructors.classList.add('active');
+  if(window.mode === 'enddates' && btnEndDates) btnEndDates.classList.add('active');
 }
 
 function endDate(r){
@@ -420,6 +433,7 @@ async function initFromRawData(){
   updatePageUserName(currentUserForHeader);
 
   updateSchedulingButtonVisibility();
+  updateEndDatesButtonVisibility();
 
   window.mode='week';
 
@@ -454,7 +468,7 @@ function render(){
   view.innerHTML='';
   closeSidePanel();
 
-  if(userRole === 'instructor' || window.mode === 'summary' || window.mode === 'instructors'){
+  if(userRole === 'instructor' || window.mode === 'summary' || window.mode === 'instructors' || window.mode === 'enddates'){
     filtersEl.style.display = 'none';
   }else{
     filtersEl.style.display = 'flex';
@@ -469,6 +483,9 @@ function render(){
   else if(window.mode==='instructors'){
     renderInstructors();
   }
+  else if(window.mode==='enddates'){
+    renderEndDates();
+  }
   else{
     renderMonthView();
   }
@@ -476,7 +493,7 @@ function render(){
   updateNavButtons();
   updateModeButtons();
 
-  if(window.mode === 'month'){
+  if(window.mode === 'month' || window.mode === 'enddates'){
     goCalendar.style.display = 'none';
   } else {
     goCalendar.style.display = 'inline-flex';
@@ -1590,6 +1607,61 @@ btnInstructors.onclick = ()=>{
   window.mode='instructors';
   render();
 };
+if(btnEndDates){
+  btnEndDates.onclick = ()=>{
+    window.mode='enddates';
+    render();
+  };
+}
+
+function renderEndDates(){
+  titleEl.textContent = 'תאריכי סיום';
+
+  const today = new Date();
+  today.setHours(0,0,0,0);
+
+  const seen = new Set();
+  const courses = rawData
+    .filter(r => isCourse(r) && r.End instanceof Date && !isNaN(r.End.getTime()))
+    .filter(r => {
+      const key = `${r.Program}||${r.School}||${r.Authority}`;
+      if(seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+    .sort((a, b) => a.End - b.End);
+
+  const rows = courses.map(r => {
+    const isPast = r.End < today;
+    const rowClass = isPast ? 'end-dates-past' : '';
+    const dateStr = r.End.toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    return `<tr class="${rowClass}">
+      <td>${r.School || '—'}</td>
+      <td>${r.Authority || '—'}</td>
+      <td style="white-space:nowrap">${dateStr}</td>
+    </tr>`;
+  }).join('');
+
+  view.innerHTML = `
+    <div class="end-dates-wrap">
+      <div class="end-dates-title">תאריכי סיום</div>
+      <div style="overflow-x:auto">
+        <table class="end-dates-table">
+          <thead>
+            <tr>
+              <th>בית ספר</th>
+              <th>רשות</th>
+              <th>תאריך סיום</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rows || '<tr><td colspan="3" style="text-align:center;padding:20px;color:#94a3b8">אין נתונים</td></tr>'}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+}
 goCalendar.onclick = ()=>{
   window.mode = 'month';
   currentDate = clampDateToDataRange(new Date());
