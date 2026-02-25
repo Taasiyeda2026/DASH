@@ -565,6 +565,7 @@ async function initFromRawData(){
   };
   window.currentUser = currentUserForHeader;
   window.currentUserName = currentUserForHeader.Employee || currentUserForHeader.Name || '';
+  window.currentUserEmployeeID = String(window.EmployeeID || '').trim();
   updatePageUserName(currentUserForHeader);
 
   updateSchedulingButtonVisibility();
@@ -825,6 +826,71 @@ function renderInstructorGridMonth(){
 
   wrap.appendChild(grid);
   view.appendChild(wrap);
+
+  if(window.currentUserRole === 'instructor'){
+    const currentYear = y;
+    const currentMonth = m;
+    const currentEmployeeID = String(window.currentUserEmployeeID || window.EmployeeID || '').trim();
+
+    const activeCourses = rawData.filter(r =>
+      isCourse(r) &&
+      String(r.EmployeeID || '').trim() === currentEmployeeID &&
+      isCourseActiveByRange(r, currentYear, currentMonth)
+    ).length;
+
+    const dailyActivitiesCount = rawData.filter(r => {
+      const type = String(r.EventType || '').trim().toUpperCase();
+      const isDaily = type === 'WORKSHOP' || type === 'TOUR';
+      const isOwn = String(r.EmployeeID || '').trim() === currentEmployeeID;
+      const date1 = parseDate(r.Date1);
+      const inMonthByDate1 = date1 && date1.getFullYear() === currentYear && date1.getMonth() === currentMonth;
+
+      return isDaily && isOwn && inMonthByDate1;
+    }).length;
+
+    const distinctDays = new Set(
+      rawData
+        .filter(r =>
+          r.EmployeeID == currentEmployeeID &&
+          r.Dates?.some(d =>
+            d.getFullYear() === currentYear &&
+            d.getMonth() === currentMonth
+          )
+        )
+        .flatMap(r =>
+          r.Dates
+            .filter(d =>
+              d.getFullYear() === currentYear &&
+              d.getMonth() === currentMonth
+            )
+            .map(d => d.toDateString())
+        )
+    ).size;
+
+    const personalSummary = document.createElement('div');
+    personalSummary.style.maxWidth = '600px';
+    personalSummary.style.margin = '24px auto';
+    personalSummary.style.display = 'grid';
+    personalSummary.style.gridTemplateColumns = 'repeat(3,minmax(0,1fr))';
+    personalSummary.style.gap = '10px';
+
+    personalSummary.innerHTML = `
+      <div class="kpi-card" style="padding:12px 10px;">
+        <div class="kpi-label">קורסים פעילים</div>
+        <div class="kpi-value">${activeCourses}</div>
+      </div>
+      <div class="kpi-card" style="padding:12px 10px;">
+        <div class="kpi-label">סדנאות/סיורים</div>
+        <div class="kpi-value">${dailyActivitiesCount}</div>
+      </div>
+      <div class="kpi-card" style="padding:12px 10px;">
+        <div class="kpi-label">ימי פעילות</div>
+        <div class="kpi-value">${distinctDays}</div>
+      </div>
+    `;
+
+    view.appendChild(personalSummary);
+  }
 }
 
 function renderWeekView(){
@@ -1330,6 +1396,27 @@ function renderSummary(){
 
   const totalCourses = activeThisMonth + startingFuture;
 
+  const dailyActivitiesThisMonth = rawData.filter(r => {
+
+    const type = String(r.EventType).trim().toUpperCase();
+
+    const isDaily = type === 'WORKSHOP' || type === 'TOUR';
+
+    const inMonth = r.Dates?.some(d =>
+      d.getFullYear() === currentYear &&
+      d.getMonth() === currentMonth
+    );
+
+    const isAllowed =
+      window.currentUserRole === 'admin'
+        ? true
+        : r.EmployeeID == (window.currentUserEmployeeID || window.EmployeeID);
+
+    return isDaily && inMonth && isAllowed;
+  });
+
+  const dailyCount = dailyActivitiesThisMonth.length;
+
   const missingInstructorCount = rawData.filter(r => {
 
     if(String(r.EventType || '').trim().toUpperCase() !== 'COURSE')
@@ -1372,6 +1459,11 @@ function renderSummary(){
       <div class="kpi-card">
         <div class="kpi-label">נפתחים בעתיד</div>
         <div class="kpi-value">${startingFuture}</div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-label">סדנאות וסיורים החודש</div>
+        <div class="kpi-value">${dailyCount}</div>
       </div>
 
       ${missingInstructorCount > 0 ? `
@@ -1525,6 +1617,7 @@ function renderInstructors(){
   selectedMonth = m - 1;
 
   const instructorsMap = {};
+  const instructorMetaByName = {};
   const missingInstructorCourses = [];
   const allActiveCourses = [];
 
@@ -1543,11 +1636,49 @@ function renderInstructors(){
 
     if(!instructorsMap[r.Employee]){
       instructorsMap[r.Employee] = [];
+      instructorMetaByName[r.Employee] = {
+        EmployeeID: String(r.EmployeeID || '').trim(),
+        Employee: r.Employee
+      };
     }
     instructorsMap[r.Employee].push(r);
   });
 
-  const names = Object.keys(instructorsMap)
+  const instructorDailyCountByName = {};
+
+  Object.keys(instructorsMap).forEach(name => {
+    const instructor = instructorMetaByName[name] || {};
+
+    const instructorDailyCount = rawData.filter(r => {
+
+      const type = String(r.EventType).trim().toUpperCase();
+
+      const isDaily = type === 'WORKSHOP' || type === 'TOUR';
+
+      const inMonth = r.Dates?.some(d =>
+        d.getFullYear() === selectedYear &&
+        d.getMonth() === selectedMonth
+      );
+
+      return isDaily &&
+             inMonth &&
+             r.EmployeeID == instructor.EmployeeID;
+
+    }).length;
+
+    instructorDailyCountByName[name] = instructorDailyCount;
+  });
+
+  const visibleInstructorNames = Object.keys(instructorsMap).filter(name => {
+    if(userRole === 'admin') return true;
+    if(userRole === 'instructor'){
+      const instructor = instructorMetaByName[name] || {};
+      return String(instructor.EmployeeID || '').trim() === String(window.currentUserEmployeeID || window.EmployeeID || '').trim();
+    }
+    return true;
+  });
+
+  const names = visibleInstructorNames
     .sort((a,b)=> instructorsMap[b].length - instructorsMap[a].length || a.localeCompare(b,'he'));
 
   const totalCourses = allActiveCourses.length;
@@ -1562,14 +1693,14 @@ function renderInstructors(){
   summaryHeader.innerHTML = `
     כמות מדריכים: ${names.length}<br>
     כמות קורסים: ${totalCourses}
-    ${missingInstructorCourses.length > 0
+    ${userRole === 'admin' && missingInstructorCourses.length > 0
       ? `<br><span style="color:#dc2626;font-weight:800">⚠ חסר מדריך: ${missingInstructorCourses.length} קורסים</span>`
       : ''}
   `;
 
   view.appendChild(summaryHeader);
 
-  if(names.length===0 && missingInstructorCourses.length===0){
+  if(names.length===0 && (userRole !== 'admin' || missingInstructorCourses.length===0)){
     const empty = document.createElement('div');
     empty.style.textAlign = 'center';
     empty.style.padding = '40px';
@@ -1587,7 +1718,7 @@ function renderInstructors(){
   grid.style.margin = '20px auto';
   grid.style.padding = '10px';
 
-  if(missingInstructorCourses.length > 0){
+  if(userRole === 'admin' && missingInstructorCourses.length > 0){
     const box = document.createElement('div');
     box.style.background = '#ffffff';
     box.style.border = '2px solid var(--danger)';
@@ -1647,6 +1778,9 @@ function renderInstructors(){
       </div>
       <div style="font-size:13px;color:#475569;margin-top:6px">
         קורסים פעילים
+      </div>
+      <div style="font-size:12px;color:#0f766e;margin-top:8px;font-weight:700">
+        סדנאות/סיורים החודש: ${instructorDailyCountByName[name] || 0}
       </div>
     `;
 
