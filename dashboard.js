@@ -1770,7 +1770,7 @@ function renderInstructors(){
   names.forEach(name=>{
     const instructorDailyCount = instructorDailyCountByName[name] || 0;
     const dailyWorkshopsContent = instructorDailyCount > 0
-      ? `סדנאות/סיורים החודש: ${instructorDailyCount}`
+      ? `סדנאות/סיורים: ${instructorDailyCount}`
       : '&nbsp;';
 
     const box = document.createElement('div');
@@ -1802,7 +1802,7 @@ function renderInstructors(){
         קורסים פעילים
       </div>
       <div style="font-size:12px;color:#0f766e;margin-top:8px;font-weight:700">
-        סדנאות/סיורים: ${instructorDailyCountByName[name] || 0}
+        ${dailyWorkshopsContent}
       </div>
     `;
 
