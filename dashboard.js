@@ -1631,11 +1631,11 @@ function renderEndDates(){
     })
     .sort((a, b) => a.End - b.End);
 
-  const rows = courses.map(r => {
+  const rows = courses.map((r, i) => {
     const isPast = r.End < today;
     const rowClass = isPast ? 'end-dates-past' : '';
     const dateStr = r.End.toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit', year: 'numeric' });
-    return `<tr class="${rowClass}">
+    return `<tr class="${rowClass}" data-idx="${i}" style="cursor:pointer">
       <td>${r.School || '—'}</td>
       <td>${r.Authority || '—'}</td>
       <td style="white-space:nowrap">${dateStr}</td>
@@ -1654,14 +1654,50 @@ function renderEndDates(){
               <th>תאריך סיום</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody id="endDatesBody">
             ${rows || '<tr><td colspan="3" style="text-align:center;padding:20px;color:#94a3b8">אין נתונים</td></tr>'}
           </tbody>
         </table>
       </div>
     </div>
   `;
+
+  const tbody = document.getElementById('endDatesBody');
+  if(tbody){
+    tbody.addEventListener('click', e => {
+      const tr = e.target.closest('tr[data-idx]');
+      if(!tr) return;
+      const idx = parseInt(tr.dataset.idx, 10);
+      const course = courses[idx];
+      if(!course) return;
+      openEndDateDetail(course);
+    });
+  }
 }
+function openEndDateDetail(course){
+  const dates = (course.Dates || [])
+    .filter(d => d instanceof Date && !isNaN(d.getTime()))
+    .sort((a, b) => a - b);
+
+  const dateItems = dates.map((d, i) => {
+    const dateStr = d.toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    return `<div style="padding:7px 0;border-bottom:1px solid #f1f5f9;font-size:14px;color:#334155;display:flex;justify-content:space-between;align-items:center">
+      <span>${dateStr}</span>
+      <span style="color:#94a3b8;font-size:12px">מפגש ${i + 1}</span>
+    </div>`;
+  }).join('');
+
+  sideContent.innerHTML = `
+    <div style="padding:16px">
+      <div style="font-size:16px;font-weight:700;color:#1e293b;margin-bottom:4px">${course.Program || ''}</div>
+      <div style="font-size:13px;color:#64748b;margin-bottom:16px">${course.School || '—'} | ${course.Authority || '—'}</div>
+      <div style="font-size:14px;font-weight:600;color:#334155;margin-bottom:10px">תאריכי מפגשים (${dates.length})</div>
+      <div>${dateItems || '<div style="color:#94a3b8;text-align:center;padding:16px">אין תאריכים</div>'}</div>
+    </div>
+  `;
+  openSidePanel();
+}
+
 goCalendar.onclick = ()=>{
   window.mode = 'month';
   currentDate = clampDateToDataRange(new Date());
