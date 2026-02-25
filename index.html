@@ -830,6 +830,52 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
 
 
 @media (max-width: 768px){
+  :root{
+    --mobile-header-offset: 64px;
+  }
+
+  /* Sticky header + navigation only on mobile */
+  header,
+  .header,
+  .top-bar,
+  .dashboard-header{
+    position: sticky;
+    top: 0;
+    z-index: 1001;
+    background: #ffffff;
+  }
+
+  .nav{
+    position: sticky;
+    top: var(--mobile-header-offset);
+    z-index: 1000;
+    background: #ffffff;
+  }
+
+  /* Horizontal overflow protection */
+  *{
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  table{
+    width: 100%;
+  }
+
+  .card,
+  .container,
+  .dashboard-content,
+  .dashboard-grid,
+  .grid,
+  #view{
+    width: 100%;
+  }
+
+  .dashboard-grid,
+  .grid{
+    overflow-x: hidden;
+  }
+
   .mobile-week{
     margin-bottom:14px;
   }
