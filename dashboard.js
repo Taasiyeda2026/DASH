@@ -845,7 +845,7 @@ function buildDay(date,data){
 
     if(g.type === 'holiday') {
       evDiv.className = 'event'; evDiv.style.background = '#fee2e2';
-      evDiv.innerHTML = `<strong>חג</strong> <div>${first.Program}</div>`;
+      evDiv.innerHTML = `<div>${first.Program}</div>`;
     } else {
       const hasEmp = !!(first.Employee && first.Employee.trim());
       evDiv.className = 'event' + (!hasEmp ? ' missing' : '');
