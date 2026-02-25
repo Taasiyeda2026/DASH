@@ -410,6 +410,38 @@
         46064
       ],
       "InstructorManager": "לינוי שמואל מזרחי"
+    },
+    {
+      "EmployeeID": 1504,
+      "Employee": "עליזה מולה",
+      "Program": "סדנאות תמיר",
+      "EventType": "WORKSHOP",
+      "Authority": "תל אביב",
+      "School": "הר נבו",
+      "CourseManager": "לינוי שמואל מזרחי",
+      "StartTime": 0.4583333333333333,
+      "EndTime": 0.4895833333333333,
+      "Date1": 46098,
+      "Dates": [
+        46098
+      ],
+      "InstructorManager": "לינוי שמואל מזרחי"
+    },
+    {
+      "EmployeeID": 1504,
+      "Employee": "עליזה מולה",
+      "Program": "סדנאות תמיר",
+      "EventType": "WORKSHOP",
+      "Authority": "תל אביב",
+      "School": "הר נבו",
+      "CourseManager": "לינוי שמואל מזרחי",
+      "StartTime": 0.5,
+      "EndTime": 0.53125,
+      "Date1": 46098,
+      "Dates": [
+        46098
+      ],
+      "InstructorManager": "לינוי שמואל מזרחי"
     }
   ]
 }

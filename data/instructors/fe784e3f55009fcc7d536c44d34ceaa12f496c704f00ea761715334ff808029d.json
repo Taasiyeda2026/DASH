@@ -144,6 +144,86 @@
         46149
       ],
       "InstructorManager": "גיל נאמן"
+    },
+    {
+      "EmployeeID": 1505,
+      "Employee": "אוריה פדידה",
+      "Program": "סדנאות תמיר",
+      "EventType": "WORKSHOP",
+      "Authority": "נתניה",
+      "School": "אורט גוטמן",
+      "CourseManager": "גיל נאמן",
+      "StartTime": 0.3541666666666667,
+      "EndTime": 0.3888888888888889,
+      "Date1": 46079,
+      "Dates": [
+        46079
+      ],
+      "InstructorManager": "גיל נאמן"
+    },
+    {
+      "EmployeeID": 1505,
+      "Employee": "אוריה פדידה",
+      "Program": "סדנאות תמיר",
+      "EventType": "WORKSHOP",
+      "Authority": "נתניה",
+      "School": "אורט גוטמן",
+      "CourseManager": "גיל נאמן",
+      "StartTime": 0.3888888888888889,
+      "EndTime": 0.4166666666666667,
+      "Date1": 46079,
+      "Dates": [
+        46079
+      ],
+      "InstructorManager": "גיל נאמן"
+    },
+    {
+      "EmployeeID": 1505,
+      "Employee": "אוריה פדידה",
+      "Program": "סדנאות תמיר",
+      "EventType": "WORKSHOP",
+      "Authority": "נתניה",
+      "School": "אורט גוטמן",
+      "CourseManager": "גיל נאמן",
+      "StartTime": 0.4236111111111111,
+      "EndTime": 0.4548611111111111,
+      "Date1": 46079,
+      "Dates": [
+        46079
+      ],
+      "InstructorManager": "גיל נאמן"
+    },
+    {
+      "EmployeeID": 1505,
+      "Employee": "אוריה פדידה",
+      "Program": "סדנאות תמיר",
+      "EventType": "WORKSHOP",
+      "Authority": "נתניה",
+      "School": "אורט גוטמן",
+      "CourseManager": "גיל נאמן",
+      "StartTime": 0.46875,
+      "EndTime": 0.5,
+      "Date1": 46079,
+      "Dates": [
+        46079
+      ],
+      "InstructorManager": "גיל נאמן"
+    },
+    {
+      "EmployeeID": 1505,
+      "Employee": "אוריה פדידה",
+      "Program": "סדנאות תמיר",
+      "EventType": "WORKSHOP",
+      "Authority": "נתניה",
+      "School": "אורט גוטמן",
+      "CourseManager": "גיל נאמן",
+      "StartTime": 0.5,
+      "EndTime": 0.53125,
+      "Date1": 46079,
+      "Dates": [
+        46079
+      ],
+      "InstructorManager": "גיל נאמן"
     }
   ]
 }

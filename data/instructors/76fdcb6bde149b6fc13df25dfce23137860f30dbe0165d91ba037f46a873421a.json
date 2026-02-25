@@ -337,6 +337,22 @@
         46086
       ],
       "InstructorManager": "לינוי שמואל מזרחי"
+    },
+    {
+      "EmployeeID": 1507,
+      "Employee": "אלכס זפקה",
+      "Program": "סיור",
+      "EventType": "TOUR",
+      "Authority": "תל אביב",
+      "School": "בינת תקשורת",
+      "CourseManager": "לינוי שמואל מזרחי",
+      "StartTime": 0.375,
+      "EndTime": 0.4791666666666667,
+      "Date1": 46091,
+      "Dates": [
+        46091
+      ],
+      "InstructorManager": "לינוי שמואל מזרחי"
     }
   ]
 }

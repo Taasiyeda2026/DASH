@@ -135,6 +135,102 @@
         46065
       ],
       "InstructorManager": "גיל נאמן"
+    },
+    {
+      "EmployeeID": 1514,
+      "Employee": "קרן גורביץ",
+      "Program": "סדנאות תמיר",
+      "EventType": "WORKSHOP",
+      "Authority": "נתניה",
+      "School": "אלתרמן",
+      "CourseManager": "גיל נאמן",
+      "StartTime": 0.3333333333333333,
+      "EndTime": 0.3680555555555556,
+      "Date1": 46103,
+      "Dates": [
+        46103
+      ],
+      "InstructorManager": "גיל נאמן"
+    },
+    {
+      "EmployeeID": 1514,
+      "Employee": "קרן גורביץ",
+      "Program": "סדנאות תמיר",
+      "EventType": "WORKSHOP",
+      "Authority": "נתניה",
+      "School": "אלתרמן",
+      "CourseManager": "גיל נאמן",
+      "StartTime": 0.3680555555555556,
+      "EndTime": 0.3993055555555556,
+      "Date1": 46103,
+      "Dates": [
+        46103
+      ],
+      "InstructorManager": "גיל נאמן"
+    },
+    {
+      "EmployeeID": 1514,
+      "Employee": "קרן גורביץ",
+      "Program": "סדנאות תמיר",
+      "EventType": "WORKSHOP",
+      "Authority": "נתניה",
+      "School": "אלתרמן",
+      "CourseManager": "גיל נאמן",
+      "StartTime": 0.4201388888888889,
+      "EndTime": 0.4548611111111111,
+      "Date1": 46103,
+      "Dates": [
+        46103
+      ],
+      "InstructorManager": "גיל נאמן"
+    },
+    {
+      "EmployeeID": 1514,
+      "Employee": "קרן גורביץ",
+      "Program": "סדנאות תמיר",
+      "EventType": "WORKSHOP",
+      "Authority": "נתניה",
+      "School": "אלתרמן",
+      "CourseManager": "גיל נאמן",
+      "StartTime": 0.4548611111111111,
+      "EndTime": 0.4861111111111111,
+      "Date1": 46103,
+      "Dates": [
+        46103
+      ],
+      "InstructorManager": "גיל נאמן"
+    },
+    {
+      "EmployeeID": 1514,
+      "Employee": "קרן גורביץ",
+      "Program": "סדנאות תמיר",
+      "EventType": "WORKSHOP",
+      "Authority": "נתניה",
+      "School": "אלתרמן",
+      "CourseManager": "גיל נאמן",
+      "StartTime": 0.5,
+      "EndTime": 0.53125,
+      "Date1": 46103,
+      "Dates": [
+        46103
+      ],
+      "InstructorManager": "גיל נאמן"
+    },
+    {
+      "EmployeeID": 1514,
+      "Employee": "קרן גורביץ",
+      "Program": "סדנאות תמיר",
+      "EventType": "WORKSHOP",
+      "Authority": "נתניה",
+      "School": "אלתרמן",
+      "CourseManager": "גיל נאמן",
+      "StartTime": 0.53125,
+      "EndTime": 0.5625,
+      "Date1": 46103,
+      "Dates": [
+        46103
+      ],
+      "InstructorManager": "גיל נאמן"
     }
   ]
 }
