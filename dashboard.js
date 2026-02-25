@@ -172,8 +172,8 @@ const dayNames=['ראשון','שני','שלישי','רביעי','חמישי','ש
 const employeeColors = {
   "הנאא אבו אמזה": "#F7E1E1",
   "יונתן יהונתן פתייה": "#F7F5ED",
-  "אביב בלנדר": "#FFE6F6",
-  "אסיל ג'בר": "#F7E1E1",
+  "אביב בלנדר": "#ffffae",
+  "אסיל ג'בר": "#ffd3ef",
   "ברקת קטעי": "#E2FBE9",
   "אלכס זפקה": "#FFF5EC",
   "עליזה מולה": "#F0FFFF",
@@ -186,7 +186,7 @@ const employeeColors = {
   "כרמית סמנדרוב": "#F5F0E1",
   "מיכל שכטמן": "#FFFFE9",
   "ראנה סאלח": "#FCF2FD",
-  "סוהא סאלם": "#DDFFFA",
+  "סוהא סאלם": "#ffe39a",
   "קרן גורביץ": "#F2FCFD",
   "אביגדור שרון": "#DDFFFA"
 };
@@ -614,7 +614,7 @@ function renderInstructorGridMonth(){
       const pill = document.createElement('div');
       pill.className = 'instructor-cal-pill';
       pill.style.background = g.type === 'holiday'
-        ? '#fee2e2'
+        ? '#c0fff6'
         : getEmployeeColor(firstItem.Employee);
       const txt = firstItem.Program || '';
       pill.textContent = txt.length > 10 ? txt.slice(0,9)+'…' : txt;
