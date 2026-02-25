@@ -63,6 +63,15 @@ rawData = normalizeData(rawData);
 
 let schedulingJson = null;
 let employmentTypeByEmployeeId = new Map();
+let notesByKey = new Map();
+
+function eventTypeOf(record){
+  return String(record?.EventType || '').trim().toUpperCase();
+}
+
+function isEvent(record){
+  return eventTypeOf(record) === 'EVENT';
+}
 
 async function loadSchedulingJson(){
   try{
@@ -82,6 +91,23 @@ async function loadSchedulingJson(){
     console.error('loadSchedulingJson error:', err);
     schedulingJson = null;
     employmentTypeByEmployeeId = new Map();
+  }
+}
+
+async function loadNotesJson(){
+  try{
+    const res = await fetch('data/notes/notes.json', { cache: 'no-store' });
+    if(res.status === 404){
+      notesByKey = new Map();
+      return;
+    }
+    if(!res.ok) throw new Error('Failed to fetch notes.json: ' + res.status);
+
+    const payload = await res.json();
+    notesByKey = new Map(Object.entries(payload?.notesByKey || {}));
+  }catch(err){
+    console.warn('loadNotesJson warning:', err);
+    notesByKey = new Map();
   }
 }
 
@@ -219,7 +245,65 @@ function parseDate(v){
 }
 
 function isCourse(r){
-  return String(r.EventType || '').trim().toUpperCase() === 'COURSE';
+  return eventTypeOf(r) === 'COURSE';
+}
+
+function getSessionNumberForItem(item){
+  if(Number.isFinite(item.meetingIdx)) return item.meetingIdx;
+
+  const dates = Array.isArray(item.Dates) ? item.Dates : [];
+  const selectedDate = item.selectedDate instanceof Date ? item.selectedDate : null;
+  if(!selectedDate) return null;
+
+  const idx = dates.findIndex(d => sameDay(d, selectedDate));
+  return idx >= 0 ? idx + 1 : null;
+}
+
+function getNotesForCourseItem(item){
+  if(userRole !== 'instructor' || !isCourse(item)) return null;
+
+  const program = String(item.Program || '').trim();
+  const sessionNumber = getSessionNumberForItem(item);
+  if(!program || !sessionNumber) return null;
+
+  const noteData = notesByKey.get(`${program}|${sessionNumber}`);
+  if(!noteData || typeof noteData !== 'object') return null;
+
+  const toArray = (v) => Array.isArray(v) ? v.filter(Boolean) : [];
+  const message = toArray(noteData.message);
+  const reminder = toArray(noteData.reminder);
+  const general = toArray(noteData.general);
+
+  if(!message.length && !reminder.length && !general.length) return null;
+
+  return { message, reminder, general };
+}
+
+function renderNotesBlock(notes){
+  if(!notes) return '';
+
+  const sections = [
+    { title: 'הודעה', items: notes.message },
+    { title: 'תזכורת', items: notes.reminder },
+    { title: 'מידע כללי', items: notes.general }
+  ].filter(section => section.items.length > 0)
+    .map(section => `
+      <div style="margin-top:8px;">
+        <div style="font-weight:700;color:#334155;">${section.title}</div>
+        <ul style="margin:4px 0 0 18px;padding:0;">
+          ${section.items.map(line => `<li>${line}</li>`).join('')}
+        </ul>
+      </div>
+    `).join('');
+
+  if(!sections) return '';
+
+  return `
+    <div style="margin-top:10px;padding-top:10px;border-top:1px dashed var(--border);">
+      <div style="font-weight:800;margin-bottom:4px;">פתקים</div>
+      ${sections}
+    </div>
+  `;
 }
 
 
@@ -233,6 +317,16 @@ function getInstructorManager(r){
 
 function getManagerForCourseViews(r){
   return userRole === 'instructor' ? getInstructorManager(r) : getCourseManager(r);
+}
+
+
+function isEventVisibleToCurrentUser(record){
+  if(!isEvent(record)) return true;
+  if(userRole !== 'instructor') return true;
+
+  const eventEmployeeId = String(record.EmployeeID || '').trim();
+  const currentEmployeeId = String(window.EmployeeID || '').trim();
+  return !!eventEmployeeId && eventEmployeeId === currentEmployeeId;
 }
 
 function isCourseActiveInMonth(r, year, month){
@@ -455,9 +549,10 @@ async function initFromRawData(){
 
   if(userRole === 'instructor'){
     await loadSchedulingJson();
+    await loadNotesJson();
     if(schedulingJson && Array.isArray(schedulingJson.courses)){
       const holidays = schedulingJson.courses.filter(
-        r => String(r.EventType || '').trim().toUpperCase() === 'HOLIDAY'
+        r => eventTypeOf(r) === 'HOLIDAY'
       );
       if(holidays.length){
         rawData = rawData.concat(normalizeData(holidays));
@@ -467,7 +562,7 @@ async function initFromRawData(){
     if(schedulingJson){
       const currentEmployeeId = String(window.EmployeeID || '').trim();
       const eventsFromCourses = Array.isArray(schedulingJson.courses)
-        ? schedulingJson.courses.filter(r => String(r.EventType || '').trim().toUpperCase() === 'EVENT')
+        ? schedulingJson.courses.filter(isEvent)
         : [];
       const eventsLegacy = Array.isArray(schedulingJson.events) ? schedulingJson.events : [];
       const visibleEvents = eventsFromCourses
@@ -477,7 +572,7 @@ async function initFromRawData(){
       if(visibleEvents.length){
         const existingEventKeys = new Set(
           rawData
-            .filter(r => String(r.EventType || '').trim().toUpperCase() === 'EVENT')
+            .filter(isEvent)
             .map(r => `${String(r.EmployeeID || '').trim()}|${String(r.Program || '').trim()}|${String(r.Date1 || '').trim()}|${String(r.StartTime || '').trim()}|${String(r.EndTime || '').trim()}`)
         );
 
@@ -493,14 +588,28 @@ async function initFromRawData(){
     }
   } else {
     await loadSchedulingJson();
+    notesByKey = new Map();
     if(schedulingJson){
       const eventsFromCourses = Array.isArray(schedulingJson.courses)
-        ? schedulingJson.courses.filter(r => String(r.EventType || '').trim().toUpperCase() === 'EVENT')
+        ? schedulingJson.courses.filter(isEvent)
         : [];
       const eventsLegacy = Array.isArray(schedulingJson.events) ? schedulingJson.events : [];
       const allEvents = eventsFromCourses.concat(eventsLegacy);
       if(allEvents.length){
-        rawData = rawData.concat(normalizeData(allEvents));
+        const existingEventKeys = new Set(
+          rawData
+            .filter(isEvent)
+            .map(r => `${String(r.EmployeeID || '').trim()}|${String(r.Program || '').trim()}|${String(r.Date1 || '').trim()}|${String(r.StartTime || '').trim()}|${String(r.EndTime || '').trim()}`)
+        );
+
+        const missingEvents = allEvents.filter(e => {
+          const key = `${String(e.EmployeeID || '').trim()}|${String(e.Program || '').trim()}|${String(e.Date1 || '').trim()}|${String(e.StartTime || '').trim()}|${String(e.EndTime || '').trim()}`;
+          return !existingEventKeys.has(key);
+        });
+
+        if(missingEvents.length){
+          rawData = rawData.concat(normalizeData(missingEvents));
+        }
       }
     }
   }
@@ -626,7 +735,7 @@ function renderInstructorGridMonth(){
       if(ev.EventType === 'HOLIDAY'){
         const key = `holiday-${ev.Program}`;
         if(!groupsMap[key]) groupsMap[key] = { type:'holiday', items:[ev] };
-      } else if(String(ev.EventType || '').trim().toUpperCase() === 'EVENT'){
+      } else if(isEvent(ev)){
         const key = `event-${ev.Employee}-${ev.Program}`;
         if(!groupsMap[key]) groupsMap[key] = { type:'event', time: ev.StartTime||'99:99', items:[] };
         groupsMap[key].items.push(ev);
@@ -903,7 +1012,7 @@ function buildDay(date,data){
     if(ev.EventType === 'HOLIDAY') {
       const key = `holiday-${ev.Program}`;
       if(!groupsMap[key]) groupsMap[key] = { type:'holiday', time: '00:00', items:[ev] };
-    } else if(String(ev.EventType || '').trim().toUpperCase() === 'EVENT') {
+    } else if(isEvent(ev)) {
       const key = `event-${ev.Employee}-${ev.Program}`;
       if(!groupsMap[key]) groupsMap[key] = { type:'event', time: ev.StartTime || '99:99', items:[] };
       groupsMap[key].items.push(ev);
@@ -929,7 +1038,7 @@ function buildDay(date,data){
       evDiv.className = 'event';
       evDiv.style.background = '#fef3c7';
       evDiv.style.border = '1px solid #f59e0b';
-      const hourStr = first.StartTime ? `<div class="event-hour">${first.StartTime}</div>` : '';
+      const hourStr = (first.StartTime || first.EndTime) ? `<div class="event-hour">${first.StartTime || '—'}–${first.EndTime || '—'}</div>` : '';
       evDiv.innerHTML = `${hourStr}<strong>${first.Program}</strong>`;
       evDiv.onclick = (e) => { e.stopPropagation(); openSideGrouped(g.items); };
     } else {
@@ -959,7 +1068,7 @@ function openSideGrouped(items) {
   const first = sortedItems[0];
 
   // אירוע נקודתי — פאנל מיוחד
-  if(String(first.EventType || '').trim().toUpperCase() === 'EVENT'){
+  if(isEvent(first)){
     const timeRange = (first.StartTime || first.EndTime) ? `${first.StartTime} – ${first.EndTime}` : '—';
     sideContent.innerHTML = `
       <h2>${first.Program}</h2>
@@ -985,6 +1094,7 @@ function openSideGrouped(items) {
     const end = endDate(item);
     const timeRange = (item.StartTime || item.EndTime) ? `${item.StartTime} – ${item.EndTime}` : '—';
     const empDisplay = (item.Employee && item.Employee.trim()) ? item.Employee : `<span style="color:var(--danger); font-weight:bold;">חסר מדריך</span>`;
+    const notesHtml = renderNotesBlock(getNotesForCourseItem(item));
 
     sideContent.innerHTML += `
       <div class="group-item">
@@ -996,6 +1106,7 @@ function openSideGrouped(items) {
         <div class='row'><span class='label'>בית ספר</span><span class='value'>${item.School || '—'}</span></div>
         <div class='row'><span class='label'>רשות</span><span class='value'>${item.Authority || '—'}</span></div>
         <div class='row'><span class='label'>סיום קורס</span><span class='value'>${end ? end.toLocaleDateString('he-IL') : '—'}</span></div>
+        ${notesHtml}
       </div>
     `;
   });
@@ -1003,7 +1114,11 @@ function openSideGrouped(items) {
 }
 
 function applyFilters(){
-  return rawData.filter(r=>(!managerFilter.value||getManagerForCourseViews(r)===managerFilter.value)&&(!employeeFilter.value||r.Employee===employeeFilter.value));
+  return rawData.filter(r =>
+    isEventVisibleToCurrentUser(r) &&
+    (!managerFilter.value || getManagerForCourseViews(r) === managerFilter.value) &&
+    (!employeeFilter.value || r.Employee === employeeFilter.value)
+  );
 }
 
 function getCourseStartDate(r){
