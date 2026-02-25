@@ -1751,6 +1751,11 @@ function renderInstructors(){
   }
 
   names.forEach(name=>{
+    const instructorDailyCount = instructorDailyCountByName[name] || 0;
+    const dailyWorkshopsContent = instructorDailyCount > 0
+      ? `סדנאות/סיורים החודש: ${instructorDailyCount}`
+      : '&nbsp;';
+
     const box = document.createElement('div');
     box.style.background = getEmployeeColor(name);
     box.style.border = '1px solid var(--border)';
@@ -1780,7 +1785,7 @@ function renderInstructors(){
         קורסים פעילים
       </div>
       <div style="font-size:12px;color:#0f766e;margin-top:8px;font-weight:700">
-        סדנאות/סיורים החודש: ${instructorDailyCountByName[name] || 0}
+        ${dailyWorkshopsContent}
       </div>
     `;
 
