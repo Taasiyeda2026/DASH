@@ -437,7 +437,17 @@ async function initFromRawData(){
 
   window.mode='week';
 
-  if(userRole !== 'instructor'){
+  if(userRole === 'instructor'){
+    await loadSchedulingJson();
+    if(schedulingJson && Array.isArray(schedulingJson.courses)){
+      const holidays = schedulingJson.courses.filter(
+        r => String(r.EventType || '').trim().toUpperCase() === 'HOLIDAY'
+      );
+      if(holidays.length){
+        rawData = rawData.concat(normalizeData(holidays));
+      }
+    }
+  } else {
     await loadSchedulingJson();
   }
 
@@ -673,6 +683,11 @@ function renderMobileWeekView(){
   }
 
   view.appendChild(container);
+
+  requestAnimationFrame(() => {
+    const todayEl = container.querySelector('.today');
+    if(todayEl) todayEl.scrollIntoView({ block: 'start', behavior: 'auto' });
+  });
 }
 
 function initMobileAccordion(){
