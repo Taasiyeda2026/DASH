@@ -170,12 +170,28 @@ let currentDate=new Date(); currentDate.setHours(0,0,0,0);
 const dayNames=['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];
 
 const employeeColors = {
-  "הנאא אבו אמזה": "#f9d3d3", "יונתן יהונתן פתייה": "#fdf1d3", "אביב בלנדר": "#d3f4f9",
-  "אסיל ג'בר": "#dcd3f9", "ברקת קטעי": "#d3f9de", "אלכס זפקה": "#FFDEBD",
-  "עליזה מולה": "#CCFFFF", "ליאל בן חמו": "#FEFEB4", "אפרת אוחיון": "#FFFFCC",
-  "אלדר מיכאל טייב": "#A3E0FF", "הילה רוזן": "#f9d3eb", "תמר שפיר": "#EAEAEA",
-  "אילנה טיטייבסקי": "#d3f9d8", "כרמית סמנדרוב": "#E8D1FF", "מיכל שכטמן": "#d3f9f4",
-  "ראנה סאלח": "#f6d3f9", "סוהא סאלם": "#f9f6d3", "קרן גורביץ": "#d3eff9"
+  "הנאא אבו אמזה": "#ffe1fb",
+  "יונתן יהונתן פתייה": "#F7F5ED",
+  "אביב בלנדר": "#FCF2FD",
+  "אסיל ג'בר": "#ffd3ef",
+  "ברקת קטעי": "#E2FBE9",
+  "אלכס זפקה": "#FFF5EC",
+  "עליזה מולה": "#eee8ff",
+  "ליאל בן חמו": "#FFFFE9",
+  "אפרת אוחיון": "#EFEAFF",
+  "אלדר מיכאל טייב": "#E4F6FF",
+  "הילה רוזן": "#FFE6F6",
+  "תמר שפיר": "#F9EEEE",
+  "אילנה טיטייבסקי": "#E6FFEB",
+  "אמיר מלמוד": "#E4F6FF",
+  "אוריה פדידה": "#DDFFFA",
+  "אושרי רם": "#DDFFFA",
+  "כרמית סמנדרוב": "#fff5ec",
+  "מיכל שכטמן": "#FFFFE9",
+  "ראנה סאלח": "#FCF2FD",
+  "סוהא סאלם": "#ffefc5",
+  "קרן גורביץ": "#F2FCFD",
+  "אביגדור שרון": "#DDFFFA"
 };
 
 function getEmployeeColor(name) {
@@ -615,11 +631,8 @@ function renderInstructorGridMonth(){
       const pill = document.createElement('div');
       pill.className = 'instructor-cal-pill';
       pill.style.background = g.type === 'holiday'
-        ? '#fee2e2'
-        : g.type === 'event'
-          ? '#fef3c7'
-          : getEmployeeColor(firstItem.Employee);
-      if(g.type === 'event') pill.style.border = '1px solid #f59e0b';
+        ? '#c0fff6'
+        : getEmployeeColor(firstItem.Employee);
       if(g.type === 'holiday') pill.addEventListener('click', e => e.stopPropagation());
       const txt = firstItem.Program || '';
       pill.textContent = txt.length > 10 ? txt.slice(0,9)+'…' : txt;
@@ -771,7 +784,7 @@ function renderMobileMonth(){
       padding:16px;
       box-shadow:0 6px 16px rgba(0,0,0,0.06);
       cursor:pointer;
-      border:${containsToday ? '2px solid #3b82f6' : '1px solid #e2e8f0'};
+      border:${containsToday ? '3px solid #3b82f6' : '1px solid #e2e8f0'};
       -webkit-tap-highlight-color:transparent;
     `;
     box.innerHTML = `
