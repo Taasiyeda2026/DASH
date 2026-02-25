@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-02-25T19:46:09.862Z",
+  "generatedAt": "2026-02-25T22:05:45.422Z",
   "authorityLocations": {
     "נצרת": {
       "lat": 32.6996,
@@ -4254,14 +4254,6 @@
         46091,
         46098
       ]
-    },
-    {
-      "Program": "ביומימיקרי",
-      "EventType": "COURSE",
-      "Authority": "מ.א חוף אשקלון",
-      "School": "חופים",
-      "CourseManager": "לינוי שמואל מזרחי",
-      "Dates": []
     },
     {
       "EmployeeID": 1504,
