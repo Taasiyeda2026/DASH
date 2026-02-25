@@ -1992,11 +1992,15 @@ const sideBackdrop = document.getElementById('side-backdrop');
 
 function openSidePanel(){
   side.classList.add('open');
-  if(isMobile()) sideBackdrop.classList.add('active');
+  if(isMobile()){
+    sideBackdrop.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
 }
 function closeSidePanel(){
   side.classList.remove('open');
   sideBackdrop.classList.remove('active');
+  document.body.style.overflow = '';
 }
 
 document.getElementById('closeSide').onclick = closeSidePanel;
