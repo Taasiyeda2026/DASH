@@ -279,18 +279,23 @@ function getNotesForCourseItem(item){
   return { message, reminder, general };
 }
 
-function renderNotesBlock(notes){
+function getNotesTitleColor(name){
+  if(!name || !name.trim()) return '#f1f5f9';
+  return employeeColors[name.trim()] || '#f1f5f9';
+}
+
+function renderNotesBlock(notes, employeeName){
   if(!notes) return '';
 
   const sections = [
     { title: 'הודעה', items: notes.message },
-    { title: 'תזכורת', items: notes.reminder },
+    { title: 'תזכורת לשיעור הבא', items: notes.reminder },
     { title: 'מידע כללי', items: notes.general }
   ].filter(section => section.items.length > 0)
     .map(section => `
-      <div style="margin-top:8px;">
-        <div style="font-weight:700;color:#334155;">${section.title}</div>
-        <ul style="margin:4px 0 0 18px;padding:0;">
+      <div class="notes-section">
+        <div class="note-section-title">${section.title}</div>
+        <ul>
           ${section.items.map(line => `<li>${line}</li>`).join('')}
         </ul>
       </div>
@@ -299,9 +304,11 @@ function renderNotesBlock(notes){
   if(!sections) return '';
 
   return `
-    <div style="margin-top:10px;padding-top:10px;border-top:1px dashed var(--border);">
-      <div style="font-weight:800;margin-bottom:4px;">פתקים</div>
-      ${sections}
+    <div class="notes-box">
+      <div class="notes-title" style="color:${getNotesTitleColor(employeeName)};">פתקים</div>
+      <div class="notes-content">
+        ${sections}
+      </div>
     </div>
   `;
 }
@@ -1094,7 +1101,7 @@ function openSideGrouped(items) {
     const end = endDate(item);
     const timeRange = (item.StartTime || item.EndTime) ? `${item.StartTime} – ${item.EndTime}` : '—';
     const empDisplay = (item.Employee && item.Employee.trim()) ? item.Employee : `<span style="color:var(--danger); font-weight:bold;">חסר מדריך</span>`;
-    const notesHtml = renderNotesBlock(getNotesForCourseItem(item));
+    const notesHtml = renderNotesBlock(getNotesForCourseItem(item), item.Employee || '');
 
     sideContent.innerHTML += `
       <div class="group-item">
