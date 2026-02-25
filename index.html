@@ -643,21 +643,24 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
     margin-bottom: 8px !important;
   }
 
-  /* התאמת גודל כפתורי סיכום ומדריכים */
-  #btnSummary,
-  #btnInstructors{
-    flex: 0 1 auto !important;
-    width: 100%;
-    height: 38px;
-    font-size: 14px;
-    border-radius: 14px;
-  }
-
+  /* כפתורי מצב תצוגה – שורה אחת קומפקטית */
   .nav-modes button {
     flex: 1 1 0;
-    font-size: 12.5px;
-    height: 40px;
-    padding: 0 8px;
+    font-size: 11px;
+    height: 32px;
+    padding: 0 4px;
+    white-space: nowrap;
+  }
+
+  #btnSummary,
+  #btnInstructors,
+  #btnEndDates {
+    flex: 1 1 0 !important;
+    width: auto !important;
+    height: 32px !important;
+    font-size: 11px !important;
+    border-radius: 10px !important;
+    padding: 0 4px !important;
   }
   .nav-modes select {
     height: 38px;
