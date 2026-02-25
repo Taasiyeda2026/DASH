@@ -619,6 +619,7 @@ function renderInstructorGridMonth(){
       pill.style.background = g.type === 'holiday'
         ? '#c0fff6'
         : getEmployeeColor(firstItem.Employee);
+      if(g.type === 'holiday') pill.addEventListener('click', e => e.stopPropagation());
       const txt = firstItem.Program || '';
       pill.textContent = txt.length > 10 ? txt.slice(0,9)+'…' : txt;
       cell.appendChild(pill);
