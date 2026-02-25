@@ -240,6 +240,20 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
 }
 
 .grid{width:100%;max-width:1200px;margin:0 auto;padding:10px;display:grid;grid-template-columns:repeat(7,1fr);gap:12px;grid-auto-rows: 1fr;}
+
+#view,
+.summary-wrap,
+.instructor-cal-wrap,
+.grid {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+@media (max-width: 800px){
+  .grid{
+    grid-template-columns: 1fr !important;
+  }
+}
 .day{background:var(--card);border-radius:12px;padding:8px;min-height:140px;border:1px solid var(--border); display: flex; flex-direction: column; gap: 4px;}
 .day.today{
   border:2px solid #3b82f6 !important;
@@ -256,6 +270,9 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
 
 /* side panel */
 .side,.side-panel{position:fixed;top:0;left:0;width:320px;max-width:100%;height:100%;background:#fff;box-shadow:-6px 0 24px rgba(0,0,0,.18);transform:translateX(-100%);transition:.28s ease;z-index:50;padding:0;overflow:hidden;display:flex;flex-direction:column;}
+#side {
+  max-width: 100%;
+}
 .side.open{transform:translateX(0)}
 .side .close,
 .side-close{position:relative;top:auto;left:auto;flex-shrink:0;align-self:flex-start;margin:14px 0 4px 14px;z-index:1000;background:#fff;border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;border:none;box-shadow:0 1px 6px rgba(0,0,0,0.12);}
@@ -598,14 +615,10 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
   /* הקטנת ריווח כללי במובייל */
   header{
     padding: 10px 12px !important;
-    position: sticky;
-    top: 0;
-    z-index: 20;
   }
 
   .nav{
     padding: 8px 10px !important;
-    top: 89px;
   }
 
   #view{
@@ -830,26 +843,9 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
 
 
 @media (max-width: 768px){
-  :root{
-    --mobile-header-offset: 64px;
-  }
-
-  /* Sticky header + navigation only on mobile */
   header,
-  .header,
-  .top-bar,
-  .dashboard-header{
-    position: sticky;
-    top: 0;
-    z-index: 1001;
-    background: #ffffff;
-  }
-
   .nav{
-    position: sticky;
-    top: var(--mobile-header-offset);
-    z-index: 1000;
-    background: #ffffff;
+    position: static;
   }
 
   /* Horizontal overflow protection */
@@ -996,6 +992,13 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
 
 /* ===== HEADER MOBILE – wrap & hide redundant title ===== */
 @media(max-width:800px) {
+  .mobile-sticky-wrapper{
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background: #fff;
+  }
+
   .header-inner {
     flex-wrap: wrap;
   }
@@ -1283,6 +1286,7 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
 <div id="app-wrapper">
 <div id="loginScreen"></div>
 <div id="app" style="display:none">
+<div class="mobile-sticky-wrapper">
 <header>
   <div class="header-inner">
     <img src="logo.png" class="app-logo" />
@@ -1292,12 +1296,6 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
     <button id="logoutBtn">Logout</button>
   </div>
 </header>
-
-<div class="controls" id="filters">
-  <select id="managerFilter"><option value="">כל המנהלים</option></select>
-  <select id="employeeFilter"><option value="">כל המדריכים</option></select>
-  <button id="clearFilters">נקה סינון</button>
-</div>
 
 <div class="nav">
   <div class="nav-modes">
@@ -1316,6 +1314,13 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
     <span id="title"></span>
     <button id="next" aria-label="הבא">◀</button>
   </div>
+</div>
+</div>
+
+<div class="controls" id="filters">
+  <select id="managerFilter"><option value="">כל המנהלים</option></select>
+  <select id="employeeFilter"><option value="">כל המדריכים</option></select>
+  <button id="clearFilters">נקה סינון</button>
 </div>
 
 <div id="view"></div>
