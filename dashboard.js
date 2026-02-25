@@ -766,7 +766,7 @@ function renderMobileMonth(){
       padding:16px;
       box-shadow:0 6px 16px rgba(0,0,0,0.06);
       cursor:pointer;
-      border:${containsToday ? '2px solid #3b82f6' : '1px solid #e2e8f0'};
+      border:${containsToday ? '3px solid #3b82f6' : '1px solid #e2e8f0'};
       -webkit-tap-highlight-color:transparent;
     `;
     box.innerHTML = `
