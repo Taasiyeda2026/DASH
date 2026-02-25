@@ -463,8 +463,18 @@ async function initFromRawData(){
         rawData = rawData.concat(normalizeData(holidays));
       }
     }
+    // אירועים נקודתיים — רק של המדריך הנוכחי
+    if(schedulingJson && Array.isArray(schedulingJson.events)){
+      const instructorName = rawData[0]?.Employee || '';
+      const myEvents = schedulingJson.events.filter(e => e.Employee === instructorName);
+      if(myEvents.length) rawData = rawData.concat(normalizeData(myEvents));
+    }
   } else {
     await loadSchedulingJson();
+    // אירועים נקודתיים — כל האירועים גלויים למנהלים
+    if(schedulingJson && Array.isArray(schedulingJson.events) && schedulingJson.events.length){
+      rawData = rawData.concat(normalizeData(schedulingJson.events));
+    }
   }
 
   render();
@@ -588,6 +598,10 @@ function renderInstructorGridMonth(){
       if(ev.EventType === 'HOLIDAY'){
         const key = `holiday-${ev.Program}`;
         if(!groupsMap[key]) groupsMap[key] = { type:'holiday', items:[ev] };
+      } else if(String(ev.EventType || '').trim().toUpperCase() === 'EVENT'){
+        const key = `event-${ev.Employee}-${ev.Program}`;
+        if(!groupsMap[key]) groupsMap[key] = { type:'event', time: ev.StartTime||'99:99', items:[] };
+        groupsMap[key].items.push(ev);
       } else {
         const key = `${ev.Employee}-${ev.Program}`;
         if(!groupsMap[key]) groupsMap[key] = { type:'course', time: ev.StartTime||'99:99', items:[] };
@@ -861,6 +875,10 @@ function buildDay(date,data){
     if(ev.EventType === 'HOLIDAY') {
       const key = `holiday-${ev.Program}`;
       if(!groupsMap[key]) groupsMap[key] = { type:'holiday', time: '00:00', items:[ev] };
+    } else if(String(ev.EventType || '').trim().toUpperCase() === 'EVENT') {
+      const key = `event-${ev.Employee}-${ev.Program}`;
+      if(!groupsMap[key]) groupsMap[key] = { type:'event', time: ev.StartTime || '99:99', items:[] };
+      groupsMap[key].items.push(ev);
     } else {
       const key = `${ev.Employee}-${ev.Program}`;
       if(!groupsMap[key]) groupsMap[key] = { type:'course', time: ev.StartTime || '99:99', items:[] };
@@ -879,6 +897,13 @@ function buildDay(date,data){
     if(g.type === 'holiday') {
       evDiv.className = 'event'; evDiv.style.background = '#fee2e2';
       evDiv.innerHTML = `<div>${first.Program}</div>`;
+    } else if(g.type === 'event') {
+      evDiv.className = 'event';
+      evDiv.style.background = '#fef3c7';
+      evDiv.style.border = '1px solid #f59e0b';
+      const hourStr = first.StartTime ? `<div class="event-hour">${first.StartTime}</div>` : '';
+      evDiv.innerHTML = `${hourStr}<strong>${first.Program}</strong>`;
+      evDiv.onclick = (e) => { e.stopPropagation(); openSideGrouped(g.items); };
     } else {
       const hasEmp = !!(first.Employee && first.Employee.trim());
       evDiv.className = 'event' + (!hasEmp ? ' missing' : '');
@@ -904,6 +929,24 @@ function openSideGrouped(items) {
   if(sortedItems.length === 0) return;
 
   const first = sortedItems[0];
+
+  // אירוע נקודתי — פאנל מיוחד
+  if(String(first.EventType || '').trim().toUpperCase() === 'EVENT'){
+    const timeRange = (first.StartTime || first.EndTime) ? `${first.StartTime} – ${first.EndTime}` : '—';
+    sideContent.innerHTML = `
+      <h2>${first.Program}</h2>
+      <div class='subtitle'>מנהל: ${getManagerForCourseViews(first) || '—'}</div>
+      <div style="border-top:1px solid var(--border); margin-top:10px; padding-top:10px;"></div>
+      <div class="group-item">
+        <div class='row'><span class='label'>מדריך</span><span class='value'>${first.Employee || '—'}</span></div>
+        <div class='row'><span class='label'>שעות</span><span class='value'>${timeRange}</span></div>
+        ${first.Note ? `<div class='row'><span class='label'>הערה</span><span class='value'>${first.Note}</span></div>` : ''}
+      </div>
+    `;
+    openSidePanel();
+    return;
+  }
+
   sideContent.innerHTML = `
     <h2>${first.Program}</h2>
     <div class='subtitle'>מנהל: ${getManagerForCourseViews(first) || '—'}</div>
