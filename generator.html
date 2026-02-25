@@ -546,6 +546,9 @@ function renderInstructorTable(candidates){
       closeInstructorModal();
     });
   });
+  const schedulingEventCount = schedulingCourses.filter(
+    course => String(course.EventType ?? '').trim().toUpperCase() === 'EVENT'
+  ).length;
 
   body.querySelectorAll('tr').forEach((tr, idx)=>{
     tr.style.cursor = 'pointer';
@@ -567,6 +570,7 @@ async function generateInstructorZip(){
 
   log.innerHTML = '';
   downloadBtn.style.display = 'none';
+  log.innerHTML += `<div class="log-summary">סה"כ: ${instructorCount} מדריכים · ${adminCount} מנהלים · ${skipped} דולגו · ${Object.keys(authorityLocations).length} רשויות · scheduling.json נוצר · EVENT: ${schedulingEventCount}</div>`;
 
   if(!s.selectedInstructor){ logRow(log,'log-err','לא נבחר מדריך.'); return; }
 
