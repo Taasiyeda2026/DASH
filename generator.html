@@ -348,6 +348,9 @@ document.getElementById('generateBtn').addEventListener('click', async ()=>{
       CourseManager: String(course.CourseManager ?? '').trim()
     });
   });
+  const schedulingEventCount = schedulingCourses.filter(
+    course => String(course.EventType ?? '').trim().toUpperCase() === 'EVENT'
+  ).length;
 
   const schedulingJson = {
     generatedAt:        new Date().toISOString(),
@@ -358,7 +361,7 @@ document.getElementById('generateBtn').addEventListener('click', async ()=>{
 
   schedulingFolder.file('scheduling.json', JSON.stringify(schedulingJson, null, 2));
 
-  log.innerHTML += `<div class="log-summary">סה"כ: ${instructorCount} מדריכים · ${adminCount} מנהלים · ${skipped} דולגו · ${Object.keys(authorityLocations).length} רשויות · scheduling.json נוצר</div>`;
+  log.innerHTML += `<div class="log-summary">סה"כ: ${instructorCount} מדריכים · ${adminCount} מנהלים · ${skipped} דולגו · ${Object.keys(authorityLocations).length} רשויות · scheduling.json נוצר · EVENT: ${schedulingEventCount}</div>`;
 
   zipBlob = await zip.generateAsync({type:'blob'});
   downloadBtn.style.display = 'block';

@@ -463,17 +463,45 @@ async function initFromRawData(){
         rawData = rawData.concat(normalizeData(holidays));
       }
     }
-    // אירועים נקודתיים — רק של המדריך הנוכחי
-    if(schedulingJson && Array.isArray(schedulingJson.events)){
-      const instructorName = rawData[0]?.Employee || '';
-      const myEvents = schedulingJson.events.filter(e => e.Employee === instructorName);
-      if(myEvents.length) rawData = rawData.concat(normalizeData(myEvents));
+
+    if(schedulingJson){
+      const currentEmployeeId = String(window.EmployeeID || '').trim();
+      const eventsFromCourses = Array.isArray(schedulingJson.courses)
+        ? schedulingJson.courses.filter(r => String(r.EventType || '').trim().toUpperCase() === 'EVENT')
+        : [];
+      const eventsLegacy = Array.isArray(schedulingJson.events) ? schedulingJson.events : [];
+      const visibleEvents = eventsFromCourses
+        .concat(eventsLegacy)
+        .filter(e => String(e.EmployeeID || '').trim() === currentEmployeeId);
+
+      if(visibleEvents.length){
+        const existingEventKeys = new Set(
+          rawData
+            .filter(r => String(r.EventType || '').trim().toUpperCase() === 'EVENT')
+            .map(r => `${String(r.EmployeeID || '').trim()}|${String(r.Program || '').trim()}|${String(r.Date1 || '').trim()}|${String(r.StartTime || '').trim()}|${String(r.EndTime || '').trim()}`)
+        );
+
+        const missingEvents = visibleEvents.filter(e => {
+          const key = `${String(e.EmployeeID || '').trim()}|${String(e.Program || '').trim()}|${String(e.Date1 || '').trim()}|${String(e.StartTime || '').trim()}|${String(e.EndTime || '').trim()}`;
+          return !existingEventKeys.has(key);
+        });
+
+        if(missingEvents.length){
+          rawData = rawData.concat(normalizeData(missingEvents));
+        }
+      }
     }
   } else {
     await loadSchedulingJson();
-    // אירועים נקודתיים — כל האירועים גלויים למנהלים
-    if(schedulingJson && Array.isArray(schedulingJson.events) && schedulingJson.events.length){
-      rawData = rawData.concat(normalizeData(schedulingJson.events));
+    if(schedulingJson){
+      const eventsFromCourses = Array.isArray(schedulingJson.courses)
+        ? schedulingJson.courses.filter(r => String(r.EventType || '').trim().toUpperCase() === 'EVENT')
+        : [];
+      const eventsLegacy = Array.isArray(schedulingJson.events) ? schedulingJson.events : [];
+      const allEvents = eventsFromCourses.concat(eventsLegacy);
+      if(allEvents.length){
+        rawData = rawData.concat(normalizeData(allEvents));
+      }
     }
   }
 
