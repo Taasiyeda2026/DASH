@@ -454,7 +454,10 @@ async function generateFullZip(){
   const schedulingJson = buildSchedulingJson(s.mainData, s.codesData, s.distanceData);
   schedulingFolder.file('scheduling.json', JSON.stringify(schedulingJson, null, 2));
 
-  log.innerHTML += `<div class="log-summary">סה"כ: ${instructorCount} מדריכים · ${adminCount} מנהלים · ${skipped} דולגו · ${Object.keys(authorityLocations).length} רשויות · scheduling.json נוצר</div>`;
+  // אופציונלי: ספירת EVENT מתוך mainData
+  const schedulingEventCount = s.mainData.filter(r => String(r.EventType ?? '').trim().toUpperCase() === 'EVENT').length;
+
+  log.innerHTML += `<div class="log-summary">סה"כ: ${instructorCount} מדריכים · ${adminCount} מנהלים · ${skipped} דולגו · ${Object.keys(authorityLocations).length} רשויות · scheduling.json נוצר · EVENT: ${schedulingEventCount}</div>`;
 
   s.zipBlob = await zip.generateAsync({type:'blob'});
   setProgress('', true, 100, 'הושלם!');
@@ -518,7 +521,7 @@ function renderInstructorTable(candidates){
   const q = String(document.getElementById('instructorSearch').value || '').trim();
   const body = document.getElementById('instructorTableBody');
   const filtered = q
-    ? candidates.filter(r => r.Employee.includes(q) || r.EmployeeID.includes(q))
+    ? candidates.filter(r => (r.Employee || '').includes(q) || r.EmployeeID.includes(q))
     : candidates;
 
   if(!filtered.length){
@@ -546,9 +549,6 @@ function renderInstructorTable(candidates){
       closeInstructorModal();
     });
   });
-  const schedulingEventCount = schedulingCourses.filter(
-    course => String(course.EventType ?? '').trim().toUpperCase() === 'EVENT'
-  ).length;
 
   body.querySelectorAll('tr').forEach((tr, idx)=>{
     tr.style.cursor = 'pointer';
@@ -570,7 +570,6 @@ async function generateInstructorZip(){
 
   log.innerHTML = '';
   downloadBtn.style.display = 'none';
-  log.innerHTML += `<div class="log-summary">סה"כ: ${instructorCount} מדריכים · ${adminCount} מנהלים · ${skipped} דולגו · ${Object.keys(authorityLocations).length} רשויות · scheduling.json נוצר · EVENT: ${schedulingEventCount}</div>`;
 
   if(!s.selectedInstructor){ logRow(log,'log-err','לא נבחר מדריך.'); return; }
 
@@ -594,6 +593,8 @@ async function generateInstructorZip(){
     .filter(r => Number(r.EmployeeID) === Number(employeeId))
     .map(course => normalizeCourse(course, { InstructorManager: instructorManager }));
 
+  const eventCountForInstructor = courses.filter(c => String(c.EventType ?? '').trim().toUpperCase() === 'EVENT').length;
+
   const zip = new JSZip();
   zip.folder('data/instructors').file(`${hash}.json`, JSON.stringify({
     name: String(instructorRow.Employee ?? '').trim() || courses[0]?.Employee || '',
@@ -607,8 +608,9 @@ async function generateInstructorZip(){
   s.zipBlob = await zip.generateAsync({type:'blob'});
   setProgress('Instructor', true, 100, 'הושלם!');
 
-  logRow(log,'log-ok',`נוצר ZIP למדריך ${String(instructorRow.Employee ?? '').trim() || employeeId}.`);
-  log.innerHTML += '<div class="log-summary">הקובץ כולל: data/instructors/&lt;hash&gt;.json + data/Scheduling/scheduling.json</div>';
+  const displayName = String(instructorRow.Employee ?? '').trim() || employeeId;
+  logRow(log,'log-ok',`נוצר ZIP למדריך ${displayName}.`);
+  log.innerHTML += `<div class="log-summary">רשומות: ${courses.length} · EVENT למדריך: ${eventCountForInstructor} · כולל scheduling.json</div>`;
   downloadBtn.style.display = 'block';
 }
 
@@ -666,6 +668,7 @@ function convertNotesRows(rows){
     addUniqueOrdered(rec.reminder, rec.seenReminder, rem);
     addUniqueOrdered(rec.general, rec.seenGeneral, gen);
 
+    // חוק: Rem של מפגש X הוא Message של מפגש X+1
     const keyNext = `${program}|${sessionNumber+1}`;
     const nextRec = ensureKey(keyNext);
     addUniqueOrdered(nextRec.message, nextRec.seenMessage, rem);
