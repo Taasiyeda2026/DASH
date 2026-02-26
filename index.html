@@ -336,6 +336,10 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
   background:#dbeafe;
   border-radius:14px;
   font-weight:700;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:2px;
 }
 
 .view-week .day-column.today .day-number{
@@ -365,14 +369,15 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
 .view-week .today-badge{
   display:inline-flex;
   align-items:center;
+  vertical-align:middle;
 }
 
 .view-week .today-badge-icon{
   width:18px;
   height:18px;
+  display:block;
   margin-right:6px;
   opacity:0.95;
-  vertical-align:middle;
 }
 
 .view-week .group-count{
@@ -1483,9 +1488,10 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
 .view-month .today-icon {
   width: 18px;
   height: 18px;
+  display: inline-block;
   opacity: 0.9;
   margin: 0 6px;
-  vertical-align: middle;
+  vertical-align: text-bottom;
 }
 
 .view-month .kpi-value.summary-number {
