@@ -318,7 +318,7 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
 .view-month .empty-day{opacity:0.6;font-size:13px;padding:16px 8px;text-align:center;}
 
 /* ===== SIDE PANEL ===== */
-.side,.side-panel{position:fixed;top:0;left:0;width:320px;max-width:100%;height:100%;background:#fff;box-shadow:-6px 0 24px rgba(0,0,0,.18);transform:translateX(-100%);transition:.28s ease;z-index:10001;padding:0;overflow:hidden;display:flex;flex-direction:column;}
+.side,.side-panel{position:fixed;top:0;left:0;width:320px;max-width:100%;height:100%;background:#fff;box-shadow:-6px 0 24px rgba(0,0,0,.18);transform:translateX(-100%);transition:.28s ease;z-index:30000;padding:0;overflow:hidden;display:flex;flex-direction:column;}
 #side{max-width:100%;}
 .side.open{transform:translateX(0);pointer-events:auto;}
 .side .close,
@@ -547,7 +547,7 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
 
 /* ===== SIDE PANEL BACKDROP ===== */
 body.no-scroll{overflow:hidden;}
-#side-backdrop{display:none;position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:10000;pointer-events:none;backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);}
+#side-backdrop{display:none;position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:29000;pointer-events:none;backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);}
 #side-backdrop.active{display:block;pointer-events:auto;}
 
 /* ===== MOBILE MONTH ACCORDION ===== */
@@ -632,7 +632,7 @@ body.no-scroll{overflow:hidden;}
   .side .close,.side-close{width:44px !important;height:44px !important;font-size:22px !important;}
   .nav-arrows #prev,.nav-arrows #next{width:44px;min-height:44px;}
   #view div[style*="cursor: pointer"]:active{transform:scale(0.96) !important;opacity:0.85;transition:transform 0.1s,opacity 0.1s;}
-  #side-backdrop{z-index:10000;}
+  #side-backdrop{z-index:29000;}
 
   header{padding:10px 12px !important;}
   .nav{padding:8px 10px !important;}
@@ -659,7 +659,7 @@ body.no-scroll{overflow:hidden;}
 
   .kpi-number{font-size:48px;}
 
-  .side,.side-panel{top:auto !important;bottom:0 !important;left:0 !important;right:0 !important;width:100% !important;max-width:100% !important;height:88vh !important;transform:translateY(110%) !important;border-radius:20px 20px 0 0 !important;box-shadow:0 -6px 32px rgba(0,0,0,.22) !important;transition:transform .32s cubic-bezier(.32,.72,0,1) !important;z-index:200 !important;}
+  .side,.side-panel{top:auto !important;bottom:0 !important;left:0 !important;right:0 !important;width:100% !important;max-width:100% !important;height:88vh !important;transform:translateY(110%) !important;border-radius:20px 20px 0 0 !important;box-shadow:0 -6px 32px rgba(0,0,0,.22) !important;transition:transform .32s cubic-bezier(.32,.72,0,1) !important;z-index:30000 !important;}
   .side.open,.side-panel.open{transform:translateY(0) !important;}
   .side::before{content:'';display:block;width:40px;height:4px;background:#cbd5e1;border-radius:2px;margin:10px auto 4px;flex-shrink:0;}
   .side .close,.side-close{align-self:center !important;margin:4px auto 8px !important;}
@@ -773,7 +773,7 @@ body.no-scroll{overflow:hidden;}
 </div>
 </div>
 
-<div class="side" id="side" style="z-index: 10001;">
+<div class="side" id="side">
   <button class="close" id="closeSide" onclick="closeSidePanel()" style="z-index: 10005; position: absolute; top: 10px; left: 10px; width: 36px; height: 36px; cursor: pointer; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; color: #0f172a; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: all 0.2s;">×</button>
   <div id="sideContent" style="padding-top: 10px;"></div>
 </div>
