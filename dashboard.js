@@ -1098,7 +1098,7 @@ function buildDay(date,data){
   const cell=document.createElement('div');
   cell.className='day day-column';
   const isToday = sameDay(date, new Date());
-  cell.innerHTML=`<div class='day-header'>${isToday ? "<span class='today-badge'>TODAY</span>" : ''}${date.getDate()}/${date.getMonth()+1} | ${dayNames[date.getDay()]}</div>`;
+  cell.innerHTML=`<div class='day-header'>${isToday ? "<span class='today-badge'><img class='today-icon' src='icon-today.svg' alt='TODAY'></span>" : ''}${date.getDate()}/${date.getMonth()+1} | ${dayNames[date.getDay()]}</div>`;
   if(isToday){
     cell.classList.add('today');
   }
