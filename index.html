@@ -156,11 +156,11 @@ button,select,a,[onclick]{touch-action:manipulation;}
   }
 }
 header{background:#fff;border-bottom:1px solid var(--border)}
-.header-inner{width:100%;max-width:1200px;margin:0 auto;padding:14px;display:flex;gap:12px;align-items:center}
+.header-inner{width:100%;max-width: 100%;margin:0 auto;padding:14px;display:flex;gap:12px;align-items:center}
 .app-logo{height:40px}
 
 .controls{display:flex;gap:8px;justify-content:center;align-items:center;flex-wrap:wrap;margin:10px}
-.instructors-count-title{width:100%;max-width:1200px;margin:18px auto 0;padding:0 10px;text-align:right;font-size:16px;font-weight:700;}
+.instructors-count-title{width:100%;max-width: 100%;margin:18px auto 0;padding:0 10px;text-align:right;font-size:16px;font-weight:700;}
 select,button{height:32px;border:1px solid var(--border);border-radius:8px;background:#fff;padding:0 10px;cursor:pointer}
 .today-star {
   width: 58px;
@@ -239,18 +239,27 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
 .nav-arrows{display:flex;gap:8px;align-items:center}
 .nav-arrows #title{width:100%;max-width:240px;text-align:center;font-weight:700;font-size:15px;white-space:nowrap;}
 
-#view{
-  height: calc(100vh - 120px);
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 24px 20px 150px 20px;
-  overflow-y: auto;
-  overflow-x: hidden;
-  -webkit-overflow-scrolling: touch;
-}
+#view {
+    height: calc(100vh - 120px);
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 20px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
 
-.grid{width:100%;max-width:1400px;margin:0 auto;padding:10px;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:12px;grid-auto-rows: 1fr;}
+.grid {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 10px;
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 15px;
+    grid-auto-rows: minmax(140px, auto);
+  }
 .event strong, .calendar-event strong, .schedule-item strong, .schedule-card strong { font-size: 0.82em; }
 .day.today .day-header { font-weight: 800; color: #1d4ed8; }
 .day.today .day-header .date-number { font-weight: 800; }
@@ -264,13 +273,26 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
 .summary-wrapper,
 .instructor-cal-wrap,
 .grid {
-  max-width: 100%;
-  overflow-x: hidden;
-}
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 10px;
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 15px;
+    grid-auto-rows: minmax(140px, auto);
+  }
 
 @media (max-width: 800px){
-  .grid{
-    grid-template-columns: 1fr !important;
+  .grid {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 10px;
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 15px;
+    grid-auto-rows: minmax(140px, auto);
   }
 }
 .day{background:var(--card);border-radius:12px;padding:8px;min-height:140px;border:1px solid var(--border); display: flex; flex-direction: column; gap: 4px;}
@@ -329,12 +351,16 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
 }
 
 .view-week .grid,
-.view-month .grid{
-  gap: 12px;
-  background: transparent;
-  border-radius: 14px;
-  overflow: visible;
-}
+.view-month .grid {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 10px;
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 15px;
+    grid-auto-rows: minmax(140px, auto);
+  }
 
 .view-week .day-column,
 .view-month .day-column{
@@ -850,16 +876,39 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
     padding: 8px 10px !important;
   }
 
-  #view{
-    padding: 10px !important;
+  #view {
+    height: calc(100vh - 120px);
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 20px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
   }
 
   /* גריד עמודה אחת */
-  .grid{grid-template-columns:1fr !important; gap:10px !important; padding:6px;}
+  .grid {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 10px;
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 15px;
+    grid-auto-rows: minmax(140px, auto);
+  }
 
   /* ביטול גובה אחיד של ימים במובייל */
-  .grid{
-    grid-auto-rows: auto !important;
+  .grid {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 10px;
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 15px;
+    grid-auto-rows: minmax(140px, auto);
   }
 
   .day{
@@ -1089,13 +1138,27 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
   .dashboard-content,
   .dashboard-grid,
   .grid,
-  #view{
+  #view {
+    height: calc(100vh - 120px);
     width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 20px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
   }
 
   .dashboard-grid,
-  .grid{
-    overflow-x: hidden;
+  .grid {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 10px;
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 15px;
+    grid-auto-rows: minmax(140px, auto);
   }
 
   .mobile-week{
@@ -1527,7 +1590,7 @@ body.no-scroll {
 @media(min-width:800px) {
   .view-month .instructor-cal-wrap {
     padding: 8px 8px 34px;
-    max-width: 1200px;
+    max-width: 100%;
     margin: 0 auto;
   }
   .view-month .instructor-cal-grid {
