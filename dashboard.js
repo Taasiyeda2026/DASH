@@ -36,7 +36,7 @@ function sortByDateAndTime(list) {
 
     if (aDate.getTime() !== bDate.getTime()) {
       return aDate - bDate;
-    }
+  }
 
     const [aH, aM] = String(a.start || '99:99').split(':').map(Number);
     const [bH, bM] = String(b.start || '99:99').split(':').map(Number);
@@ -100,7 +100,7 @@ async function loadNotesJson(){
     if(res.status === 404){
       notesByKey = new Map();
       return;
-    }
+  }
     if(!res.ok) throw new Error('Failed to fetch notes.json: ' + res.status);
 
     const payload = await res.json();
@@ -190,7 +190,7 @@ Object.defineProperty(window, 'mode', {
     if(userRole === 'instructor'){
       _mode = 'month';
       return;
-    }
+  }
     _mode = value;
   },
   configurable: false
@@ -268,7 +268,7 @@ function toRgbTuple(colorValue) {
       if (v < 1 / 2) return q;
       if (v < 2 / 3) return p + (q - p) * (2 / 3 - v) * 6;
       return p;
-    };
+  };
     const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
     const p = 2 * l - q;
     const r = Math.round(hue2rgb(p, q, h + 1 / 3) * 255);
@@ -377,7 +377,7 @@ function renderNotesBlock(notes, employeeName){
         <ul>
           ${section.items.map(line => `<li>${line}</li>`).join('')}
         </ul>
-      </div>
+    </div>
     `).join('');
 
   if(!sections) return '';
@@ -387,7 +387,7 @@ function renderNotesBlock(notes, employeeName){
       <div class="notes-title">פתקים</div>
       <div class="notes-content">
         ${sections}
-      </div>
+    </div>
     </div>
   `;
 }
@@ -452,11 +452,11 @@ function getBusiestWeekWorkDays(courses, year, month){
 
         if(!weeksMap[key]){
           weeksMap[key] = new Set();
-        }
+      }
 
         weeksMap[key].add(d.toDateString());
-      }
-    });
+    }
+  });
   });
 
   let maxDays = 0;
@@ -464,7 +464,7 @@ function getBusiestWeekWorkDays(courses, year, month){
   Object.values(weeksMap).forEach(set=>{
     if(set.size > maxDays){
       maxDays = set.size;
-    }
+  }
   });
 
   return maxDays;
@@ -516,7 +516,7 @@ function canGoPrev(){
       const temp = new Date(currentDate);
       temp.setDate(temp.getDate() - 7);
       return temp >= getMinAllowedMonth();
-    }
+  }
     const temp = new Date(currentDate);
     temp.setMonth(temp.getMonth()-1);
 
@@ -545,7 +545,7 @@ function canGoNext(){
       const temp = new Date(currentDate);
       temp.setDate(temp.getDate() + 7);
       return weekOverlapsDataRange(temp);
-    }
+  }
     const temp = new Date(currentDate);
     temp.setMonth(temp.getMonth()+1);
     return temp.getFullYear() < dataRange.max.getFullYear() ||
@@ -657,8 +657,8 @@ async function initFromRawData(){
       );
       if(holidays.length){
         rawData = rawData.concat(normalizeData(holidays));
-      }
     }
+  }
 
     if(schedulingJson){
       const currentEmployeeId = String(window.EmployeeID || '').trim();
@@ -680,13 +680,13 @@ async function initFromRawData(){
         const missingEvents = visibleEvents.filter(e => {
           const key = `${String(e.EmployeeID || '').trim()}|${String(e.Program || '').trim()}|${String(e.Date1 || '').trim()}|${String(e.StartTime || '').trim()}|${String(e.EndTime || '').trim()}`;
           return !existingEventKeys.has(key);
-        });
+      });
 
         if(missingEvents.length){
           rawData = rawData.concat(normalizeData(missingEvents));
-        }
       }
     }
+  }
   } else {
     await loadSchedulingJson();
     notesByKey = new Map();
@@ -706,13 +706,13 @@ async function initFromRawData(){
         const missingEvents = allEvents.filter(e => {
           const key = `${String(e.EmployeeID || '').trim()}|${String(e.Program || '').trim()}|${String(e.Date1 || '').trim()}|${String(e.StartTime || '').trim()}|${String(e.EndTime || '').trim()}`;
           return !existingEventKeys.has(key);
-        });
+      });
 
         if(missingEvents.length){
           rawData = rawData.concat(normalizeData(missingEvents));
-        }
       }
     }
+  }
   }
 
   render();
@@ -784,9 +784,9 @@ function renderMonthView(){
   if(userRole === 'instructor'){
     if(isMobile()){
       renderInstructorMobileWeek();
-    } else {
+  } else {
       renderInstructorGridMonth();
-    }
+  }
     return;
   }
   if(isMobile()){
@@ -826,8 +826,8 @@ function renderInstructorMobileWeek(){
       window.scrollTo({
         top: y,
         behavior: 'auto'
-      });
-    }
+    });
+  }
   });
 }
 
@@ -874,7 +874,7 @@ function renderInstructorGridMonth(){
     const dailyItems = [];
     data.forEach(r => r.Dates.forEach((dd, idx) => {
       if(sameDay(dd, date)) dailyItems.push({ ...r, meetingIdx: idx+1, selectedDate: dd });
-    }));
+  }));
 
     // קיבוץ לפי תוכנית (זהה ל-buildDay)
     const groupsMap = {};
@@ -882,16 +882,16 @@ function renderInstructorGridMonth(){
       if(ev.EventType === 'HOLIDAY'){
         const key = `holiday-${ev.Program}`;
         if(!groupsMap[key]) groupsMap[key] = { type:'holiday', items:[ev] };
-      } else if(isEvent(ev)){
+    } else if(isEvent(ev)){
         const key = `event-${ev.Employee}-${ev.Program}`;
         if(!groupsMap[key]) groupsMap[key] = { type:'event', time: ev.StartTime||'99:99', items:[] };
         groupsMap[key].items.push(ev);
-      } else {
+    } else {
         const key = `${ev.Employee}-${ev.Program}`;
         if(!groupsMap[key]) groupsMap[key] = { type:'course', time: ev.StartTime||'99:99', items:[] };
         groupsMap[key].items.push(ev);
-      }
-    });
+    }
+  });
     const groups = Object.values(groupsMap)
       .sort((a,b) => (a.time||'').localeCompare(b.time||''));
 
@@ -926,14 +926,14 @@ function renderInstructorGridMonth(){
       const txt = firstItem.Program || '';
       pill.textContent = txt.length > 10 ? txt.slice(0,9)+'…' : txt;
       cell.appendChild(pill);
-    });
+  });
 
     if(!isShabbat && groups.length > maxPills){
       const more = document.createElement('div');
       more.className = 'instructor-cal-more';
       more.textContent = `+${groups.length - maxPills}`;
       cell.appendChild(more);
-    }
+  }
 
     // לחיצה → פתח פאנל צד (לא לחגים)
     const nonHolidayItems = dailyItems.filter(item => String(item.EventType || '').trim().toUpperCase() !== 'HOLIDAY');
@@ -941,8 +941,8 @@ function renderInstructorGridMonth(){
       cell.addEventListener('click', (e) => {
         e.stopPropagation();
         openSideGrouped(nonHolidayItems);
-      });
-    }
+    });
+  }
 
     grid.appendChild(cell);
   }
@@ -969,7 +969,7 @@ function renderInstructorGridMonth(){
       const inMonthByDate1 = date1 && date1.getFullYear() === currentYear && date1.getMonth() === currentMonth;
 
       return isDaily && isOwn && inMonthByDate1;
-    }).length;
+  }).length;
 
     const distinctDays = new Set(
       rawData
@@ -1001,16 +1001,16 @@ function renderInstructorGridMonth(){
       <div class="kpi-card" style="padding:12px 10px;">
         <div class="kpi-label summary-label">קורסים פעילים</div>
         <div class="kpi-value summary-number">${activeCourses}</div>
-      </div>
+    </div>
       <div class="kpi-card" style="padding:12px 10px;">
         <div class="kpi-label summary-label">סדנאות/סיורים</div>
         <div class="kpi-value summary-number">${dailyActivitiesCount}</div>
-      </div>
+    </div>
       <div class="kpi-card" style="padding:12px 10px;">
         <div class="kpi-label summary-label">ימי פעילות</div>
         <div class="kpi-value summary-number">${distinctDays}</div>
-      </div>
-    `;
+    </div>
+  `;
 
     view.appendChild(personalSummary);
   }
@@ -1078,8 +1078,8 @@ function renderMobileWeekView(){
       window.scrollTo({
         top: y,
         behavior: 'auto'
-      });
-    }
+    });
+  }
   });
 }
 
@@ -1102,9 +1102,9 @@ function initMobileAccordion(){
 
       if (!isOpen) {
         week.classList.add('open');
-      }
+    }
 
-    });
+  });
 
   });
 }
@@ -1147,12 +1147,12 @@ function renderMobileMonth(){
       cursor:pointer;
       border:${containsToday ? '3px solid #3b82f6' : '1px solid #e2e8f0'};
       -webkit-tap-highlight-color:transparent;
-    `;
+  `;
     box.innerHTML = `
       <div style="font-weight:800;font-size:15px;text-align:center;color:${containsToday ? '#2563eb' : '#0f172a'}">
         ${weekStart.toLocaleDateString('he-IL')} – ${weekEnd.toLocaleDateString('he-IL')}
-      </div>
-    `;
+    </div>
+  `;
 
     const ws = new Date(weekStart);
     box.addEventListener('click', () => openMobileWeekDetail(ws, data));
@@ -1172,8 +1172,8 @@ function renderMobileMonth(){
       window.scrollTo({
         top: y,
         behavior: 'auto'
-      });
-    }, 80);
+    });
+  }, 80);
   }
 }
 
@@ -1248,15 +1248,15 @@ function buildDay(date,data){
     if(ev.EventType === 'HOLIDAY') {
       const key = `holiday-${ev.Program}`;
       if(!groupsMap[key]) groupsMap[key] = { type:'holiday', time: '00:00', items:[ev] };
-    } else if(isEvent(ev)) {
+  } else if(isEvent(ev)) {
       const key = `event-${ev.Employee}-${ev.Program}`;
       if(!groupsMap[key]) groupsMap[key] = { type:'event', time: ev.StartTime || '99:99', items:[] };
       groupsMap[key].items.push(ev);
-    } else {
+  } else {
       const key = `${ev.Employee}-${ev.Program}`;
       if(!groupsMap[key]) groupsMap[key] = { type:'course', time: ev.StartTime || '99:99', items:[] };
       groupsMap[key].items.push(ev);
-    }
+  }
   });
 
   const sortedGroups = Object.values(groupsMap).sort((a, b) => a.time.localeCompare(b.time));
@@ -1278,12 +1278,12 @@ function buildDay(date,data){
     if(g.type === 'holiday') {
       evDiv.className = 'event schedule-card holiday';
       evDiv.innerHTML = `<div class="title">${first.Program || ""}</div>`;
-    } else if(g.type === 'event') {
+  } else if(g.type === 'event') {
       evDiv.className = 'event schedule-card';
       const hourStr = (first.StartTime || first.EndTime) ? `<div class="event-hour">${first.StartTime || '—'}–${first.EndTime || '—'}</div>` : '';
       evDiv.innerHTML = `${hourStr}<strong class="title">${first.Program}</strong><div class="meta">פעילות יומית</div>`;
       evDiv.onclick = (e) => { e.stopPropagation(); openSideGrouped(g.items); };
-    } else {
+  } else {
       const hasEmp = !!(first.Employee && first.Employee.trim());
       evDiv.className = 'event schedule-card' + (!hasEmp ? ' missing' : '');
 
@@ -1299,16 +1299,16 @@ function buildDay(date,data){
         const openGroup = (e) => {
           e.stopPropagation();
           openSideGrouped(g.items);
-        };
+      };
         groupCountEl.addEventListener('click', openGroup);
         groupCountEl.addEventListener('keydown', (e) => {
           if(e.key === 'Enter' || e.key === ' '){
             e.preventDefault();
             openGroup(e);
-          }
-        });
-      }
+        }
+      });
     }
+  }
     cell.appendChild(evDiv);
   });
   return cell;
@@ -1352,8 +1352,8 @@ function buildGroupedDetailsContent(items){
         <div class='row'><span class='label'>מדריך</span><span class='value'>${first.Employee || '—'}</span></div>
         <div class='row'><span class='label'>שעות</span><span class='value'>${timeRange}</span></div>
         ${first.Note ? `<div class='row'><span class='label'>הערה</span><span class='value'>${first.Note}</span></div>` : ''}
-      </div>
-    `;
+    </div>
+  `;
     return { title: first.Program || 'פרטי פעילות', html };
   }
 
@@ -1364,12 +1364,12 @@ function buildGroupedDetailsContent(items){
       <h2 style="color:${getProgramColor(first.Program)}">${first.Program}</h2>
       <div class='subtitle'>מנהל: ${getManagerForCourseViews(first) || '—'}</div>
       <div style="border-top:1px solid var(--border); margin-top:10px; padding-top:10px;"></div>
-    `;
+  `;
   } else {
     html = `
       <h2>פעילויות</h2>
       <div style="border-top:1px solid var(--border); margin-top:10px; padding-top:10px;"></div>
-    `;
+  `;
   }
 
   sortedItems.forEach(item => {
@@ -1392,10 +1392,10 @@ function buildGroupedDetailsContent(items){
           <div class='row'><span class='label'>בית ספר</span><span class='value'>${item.School || '—'}</span></div>
           <div class='row'><span class='label'>שעות</span><span class='value'>${timeRange}</span></div>
           <div class='row'><span class='label'>מדריך</span><span class='value'>${empDisplay}</span></div>
-        </div>
-      `;
+    </div>
+    `;
       return;
-    }
+  }
 
     html += `
       <div class="group-item">
@@ -1403,14 +1403,14 @@ function buildGroupedDetailsContent(items){
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
           <div class='badge'>מפגש ${item.meetingIdx}</div>
           <div style="background:#334155; color:#fff; padding:2px 8px; border-radius:6px; font-size:12px; font-weight:bold;">${timeRange}</div>
-        </div>
+    </div>
         <div class='row'><span class='label'>מדריך</span><span class='value'>${empDisplay}</span></div>
         <div class='row'><span class='label'>בית ספר</span><span class='value'>${item.School || '—'}</span></div>
         <div class='row'><span class='label'>רשות</span><span class='value'>${item.Authority || '—'}</span></div>
         <div class='row'><span class='label'>סיום קורס</span><span class='value'>${end ? end.toLocaleDateString('he-IL') : '—'}</span></div>
         ${notesHtml}
-      </div>
-    `;
+    </div>
+  `;
   });
 
   const sheetTitle = allSameProgram ? (first.Program || 'פרטי יום') : 'פרטי יום';
@@ -1508,14 +1508,14 @@ function openMissingCourses(year, month){
       <div class="course-card">
         <div style="font-weight:800;font-size:16px;margin-bottom:6px">
           ${r.Program || '—'}
-        </div>
+    </div>
         <div>🏫 בית ספר: ${r.School || '—'}</div>
         <div>🌍 רשות: ${r.Authority || '—'}</div>
         <div>👨‍💼 מנהל: ${getCourseManager(r) || '—'}</div>
         <div>📅 התחלה: ${startDate ? startDate.toLocaleDateString('he-IL') : '—'}</div>
         <div>🏁 סיום: ${end ? end.toLocaleDateString('he-IL') : '—'}</div>
-      </div>
-    `;
+    </div>
+  `;
   });
 
   openSidePanel();
@@ -1543,8 +1543,8 @@ function openManagerOverlay(mgr, year, month){
         ${mgrMissingActive.map(r=>`
           <div style="font-size:13px;padding:5px 0;border-bottom:1px solid #fecaca">
             ${r.Program || '—'}${r.School ? ` · ${r.School}` : ''}
-          </div>`).join('')}
-      </div>` : ''}
+      </div>`).join('')}
+    </div>` : ''}
     ${mgrEndedThisMonth.length
       ? mgrEndedThisMonth.map(r=>{
           const empName = (r.Employee && r.Employee.trim())
@@ -1558,11 +1558,11 @@ function openManagerOverlay(mgr, year, month){
                 🏫 בית ספר: ${r.School || '—'}<br>
                 🌍 רשות: ${r.Authority || '—'}<br>
                 📅 סיום: ${parseDate(r.End).toLocaleDateString('he-IL')}
-              </div>
-            </div>`;
-        }).join('')
+          </div>
+        </div>`;
+      }).join('')
       : '<div style="color:#94a3b8;text-align:center;padding:20px 0">אין קורסים המסתיימים החודש</div>'
-    }
+  }
   `;
   openSidePanel();
 }
@@ -1677,23 +1677,23 @@ function renderSummary(){
       <div class="kpi-small blue">
         <div class="kpi-title">פעילים החודש</div>
         <div class="kpi-number">${activeThisMonth}</div>
-      </div>
+    </div>
 
       <div class="kpi-small green">
         <div class="kpi-title">נפתחים בעתיד</div>
         <div class="kpi-number">${startingFuture}</div>
-      </div>
+    </div>
 
       <div class="kpi-small orange">
         <div class="kpi-title">סדנאות וסיורים</div>
         <div class="kpi-number">${dailyCount}</div>
-      </div>
+    </div>
     </div>
 
     ${missingInstructorCount > 0 ? `
       <div class="alert-missing">
         ⚠ חסרים ${missingInstructorCount} מדריכים לשיבוץ
-      </div>
+    </div>
     ` : ''}
   `;
   const managers = [...new Set(courses.map(r=>getCourseManager(r)).filter(Boolean))]
@@ -1714,7 +1714,7 @@ function renderSummary(){
     const mgrFuture = mgrCourses.filter(r => {
       const start = getCourseStartDate(r);
       return start && start >= nextMonthStart;
-    }).length;
+  }).length;
 
     const col = document.createElement('div');
     col.className = `manager-card${index === 1 ? ' secondary' : ''}`;
@@ -1724,15 +1724,15 @@ function renderSummary(){
       <div class="manager-metric">
         <span>קורסים פעילים</span>
         <strong>${mgrActive}</strong>
-      </div>
+    </div>
       <div class="manager-metric">
         <span>מסתיימים החודש</span>
         <strong>${mgrEndedThisMonth.length}</strong>
-      </div>
+    </div>
       <div class="manager-metric">
         <span>נפתחים בעתיד</span>
         <strong>${mgrFuture}</strong>
-      </div>`;
+    </div>`;
 
     split.appendChild(col);
   });
@@ -1747,7 +1747,7 @@ function renderSummary(){
       e.stopPropagation();
       const mgrName = managerCol.dataset.manager;
       openManagerOverlay(mgrName, currentYear, currentMonth);
-    }
+  }
 
   });
 }
@@ -1763,8 +1763,8 @@ function getUniqueInstructorMonths(){
       const key = `${year}-${String(month+1).padStart(2,'0')}`;
       if(!monthsMap.has(key)){
         monthsMap.set(key,{year,month});
-      }
-    });
+    }
+  });
   });
 
   return [...monthsMap.entries()]
@@ -1780,7 +1780,7 @@ function getUniqueInstructorMonths(){
       value:`${year}-${String(month+1).padStart(2,'0')}`,
       label:new Date(year,month,1)
         .toLocaleDateString('he-IL',{month:'long',year:'numeric'})
-    }));
+  }));
 }
 
 function renderInstructors(){
@@ -1817,10 +1817,10 @@ function renderInstructors(){
 
     if(monthOptions.some(opt=>opt.value === todayValue)){
       renderInstructors.selectedMonthValue = todayValue;
-    }
+  }
     else if(monthOptions.length > 0){
       renderInstructors.selectedMonthValue = monthOptions[0].value;
-    }
+  }
 
   }
 
@@ -1858,15 +1858,15 @@ function renderInstructors(){
     if(!r.Employee || !r.Employee.trim()){
       missingInstructorCourses.push(r);
       return;
-    }
+  }
 
     if(!instructorsMap[r.Employee]){
       instructorsMap[r.Employee] = [];
       instructorMetaByName[r.Employee] = {
         EmployeeID: String(r.EmployeeID || '').trim(),
         Employee: r.Employee
-      };
-    }
+    };
+  }
     instructorsMap[r.Employee].push(r);
   });
 
@@ -1890,7 +1890,7 @@ function renderInstructors(){
              inMonth &&
              r.EmployeeID == instructor.EmployeeID;
 
-    }).length;
+  }).length;
 
     instructorDailyCountByName[name] = instructorDailyCount;
   });
@@ -1900,7 +1900,7 @@ function renderInstructors(){
     if(userRole === 'instructor'){
       const instructor = instructorMetaByName[name] || {};
       return String(instructor.EmployeeID || '').trim() === String(window.currentUserEmployeeID || window.EmployeeID || '').trim();
-    }
+  }
     return true;
   });
 
@@ -1962,14 +1962,14 @@ function renderInstructors(){
     box.innerHTML = `
       <div style="font-weight:800;font-size:18px;margin-bottom:10px;color:var(--danger)">
         חסר מדריך
-      </div>
+    </div>
       <div style="font-size:32px;font-weight:900;color:var(--danger)">
         ${missingInstructorCourses.length}
-      </div>
+    </div>
       <div style="font-size:13px;color:#64748b;margin-top:6px">
         תוכניות פעילות
-      </div>
-    `;
+    </div>
+  `;
 
     box.onclick = (e)=>{ e.stopPropagation(); openInstructorModal("חסר מדריך", missingInstructorCourses, selectedMonth, selectedYear); };
 
@@ -2003,17 +2003,17 @@ function renderInstructors(){
     box.innerHTML = `
       <div style="font-weight:800;font-size:18px;margin-bottom:10px">
         ${name}
-      </div>
+    </div>
       <div style="font-size:32px;font-weight:900">
         ${instructorsMap[name].length}
-      </div>
+    </div>
       <div style="font-size:13px;color:#475569;margin-top:6px">
         קורסים פעילים
-      </div>
+    </div>
       <div style="font-size:12px;color:#0f766e;margin-top:8px;font-weight:700">
         ${dailyWorkshopsContent}
-      </div>
-    `;
+    </div>
+  `;
 
     box.onclick = (e)=>{ e.stopPropagation(); openInstructorModal(name, instructorsMap[name], selectedMonth, selectedYear); };
 
@@ -2082,12 +2082,12 @@ function openInstructorModal(name, courses, selectedMonth, selectedYear){
 
         if(!weeks[key]){
           weeks[key] = new Set();
-        }
-
-        weeks[key].add(date.toDateString());
       }
 
-    });
+        weeks[key].add(date.toDateString());
+    }
+
+  });
 
   });
 
@@ -2096,32 +2096,32 @@ function openInstructorModal(name, courses, selectedMonth, selectedYear){
   Object.values(weeks).forEach(set=>{
     if(set.size > maxDays){
       maxDays = set.size;
-    }
+  }
   });
 
   totalWorkDays = maxDays;
   const employmentType = getEmploymentTypeForEmployeeId(courseOnlyRecords?.[0]?.EmployeeID);
-    const managerName = getInstructorManager(courseOnlyRecords[0]) || '—';
+  const managerName = getInstructorManager(courseOnlyRecords[0]) || '—';
 
-    // הוספת שורת רשות אם מדובר ב"חסר מדריך"
-    let authorityRow = '';
-    if (name === "חסר מדריך" && courseOnlyRecords[0]?.Authority) {
-      authorityRow = `<span class="badge" style="background:#f1f5f9;color:#475569;border:1px solid #cbd5e1;">רשות: ${courseOnlyRecords[0].Authority}</span>`;
-    }
+  // הוספת שורת רשות אם מדובר ב"חסר מדריך"
+  let authorityRow = '';
+  if (name === "חסר מדריך" && courseOnlyRecords[0]?.Authority) {
+    authorityRow = `<span class="badge" style="background:#f1f5f9;color:#475569;border:1px solid #cbd5e1;">רשות: ${courseOnlyRecords[0].Authority}</span>`;
+  }
 
-    sideContent.innerHTML = `
-      <div class="instructor-header">
-        <div class="instructor-name">${name}</div>
-        <div class="instructor-badges">
-          <span class="badge type">${employmentType}</span>
-          <span class="badge days">${totalWorkDays} ימי עבודה בשבוע</span>
-          <span class="badge courses">${sortedCourses.length} קורסים</span>
+  sideContent.innerHTML = `
+    <div class="instructor-header">
+      <div class="instructor-name">${name}</div>
+      <div class="instructor-badges">
+        <span class="badge type">${employmentType}</span>
+        <span class="badge days">${totalWorkDays} ימי עבודה בשבוע</span>
+        <span class="badge courses">${sortedCourses.length} קורסים</span>
           ${dailyRecords.length > 0 ? `<span class="badge" style="background:#d1fae5;color:#065f46;">${dailyRecords.length} סדנאות/סיורים</span>` : ''}
-          <span class="badge">מנהל: ${managerName}</span>
-          ${authorityRow}
-        </div>
+        <span class="badge">מנהל: ${managerName}</span>
+        ${authorityRow}
       </div>
-    `;
+      </div>
+  `;
 
   sortedCourses.forEach(r=>{
 
@@ -2148,19 +2148,19 @@ function openInstructorModal(name, courses, selectedMonth, selectedYear){
           background:${getEmployeeColor(name)};
         ">
           ${r.Program || '—'}
-        </div>
+      </div>
 
         <div>
           <span style="font-weight:700;color:#0f172a;">בית ספר:</span> ${r.School || '—'}<br>
           <span style="font-weight:700;color:#0f172a;">רשות:</span> ${r.Authority || '—'}
-        </div>
+      </div>
 
         <div>
           <div style="font-weight:700;color:#0f172a;">תאריכי פעילות</div>
           <div>(${startDate}) - (${endDateFormatted})</div>
-        </div>
       </div>
-    `;
+      </div>
+  `;
   });
 
   if(dailyRecords.length > 0){
@@ -2168,7 +2168,7 @@ function openInstructorModal(name, courses, selectedMonth, selectedYear){
       <div style="font-weight:800;font-size:15px;margin:16px 0 8px;color:#065f46;border-top:1px solid var(--border);padding-top:14px;">
         סדנאות וסיורים
       </div>
-    `;
+  `;
     dailyRecords.forEach(r => {
       const type = String(r.EventType || '').trim().toUpperCase();
       const typeLabel = type === 'TOUR' ? 'סיור' : 'סדנה';
@@ -2187,18 +2187,18 @@ function openInstructorModal(name, courses, selectedMonth, selectedYear){
           ">
             ${r.Program || typeLabel}
             <span style="font-size:12px;font-weight:600;margin-right:6px;">(${typeLabel})</span>
-          </div>
+      </div>
           <div>
             <span style="font-weight:700;color:#0f172a;">בית ספר:</span> ${r.School || '—'}<br>
             <span style="font-weight:700;color:#0f172a;">רשות:</span> ${r.Authority || '—'}
-          </div>
+      </div>
           <div>
             <div style="font-weight:700;color:#0f172a;">תאריך</div>
             <div>${activityDateText}${timeRange !== '—' ? ' | ' + timeRange : ''}</div>
-          </div>
-        </div>
-      `;
-    });
+      </div>
+      </div>
+  `;
+  });
   }
 
   openSidePanel();
@@ -2217,7 +2217,7 @@ document.getElementById('prev').onclick = ()=>{
 
     if(temp >= getMinAllowedMonth()){
       currentDate = temp;
-    }
+  }
   }
   else if(window.mode==='month'){
     if(userRole === 'instructor' && isMobile()){
@@ -2225,11 +2225,11 @@ document.getElementById('prev').onclick = ()=>{
       const temp = new Date(currentDate);
       temp.setDate(temp.getDate() - 7);
       if(temp >= getMinAllowedMonth()) currentDate = temp;
-    } else {
+  } else {
       const temp = new Date(currentDate);
       temp.setMonth(temp.getMonth()-1);
       if(temp >= getMinAllowedMonth()) currentDate = temp;
-    }
+  }
   }
 
   render();
@@ -2255,7 +2255,7 @@ document.getElementById('next').onclick = ()=>{
 
     if(dataRange && weekEnd >= dataRange.min && weekStart <= dataRange.max){
       currentDate = temp;
-    }
+  }
   }
   else if(window.mode==='month'){
     if(userRole === 'instructor' && isMobile()){
@@ -2263,13 +2263,13 @@ document.getElementById('next').onclick = ()=>{
       const temp = new Date(currentDate);
       temp.setDate(temp.getDate() + 7);
       if(weekOverlapsDataRange(temp)) currentDate = temp;
-    } else {
+  } else {
       const temp = new Date(currentDate.getFullYear(), currentDate.getMonth()+1, 1);
       if(dataRange){
         const maxMonth = new Date(dataRange.max.getFullYear(), dataRange.max.getMonth(), 1);
         if(temp <= maxMonth) currentDate = temp;
-      }
     }
+  }
   }
 
   render();
@@ -2316,7 +2316,7 @@ function renderEndDates(){
       if(seen.has(key)) return false;
       seen.add(key);
       return true;
-    })
+  })
     .sort((a, b) => a.End - b.End);
 
   const rows = courses.map((r, i) => {
@@ -2347,7 +2347,7 @@ function renderEndDates(){
             ${rows || '<tr><td colspan="3" style="text-align:center;padding:20px;color:#94a3b8">אין נתונים</td></tr>'}
           </tbody>
         </table>
-      </div>
+    </div>
     </div>
   `;
 
@@ -2360,7 +2360,7 @@ function renderEndDates(){
       const course = courses[idx];
       if(!course) return;
       openEndDateDetail(course);
-    });
+  });
   }
 
   const searchInput = document.getElementById('endDatesSearch');
@@ -2372,8 +2372,8 @@ function renderEndDates(){
         const school = (cells[0]?.textContent || '').toLowerCase();
         const authority = (cells[1]?.textContent || '').toLowerCase();
         tr.style.display = (!q || school.includes(q) || authority.includes(q)) ? '' : 'none';
-      });
     });
+  });
   }
 }
 function openEndDateDetail(course){
@@ -2417,7 +2417,7 @@ document.getElementById('goToday').onclick = ()=>{
     const index = options.indexOf(key);
     if(index >= 0){
       summaryMonth.selectedIndex = index;
-    }
+  }
   }
 
   if(window.mode === 'instructors'){
@@ -2532,7 +2532,7 @@ document.addEventListener('keydown', e => {
     // החלקה למטה (סגירה) — לפחות 60px ואנכית יותר מאופקית
     if(dy > 60 && dx < dy * 0.8){
       closeSidePanel();
-    }
+  }
   }, { passive: true });
 })();
 
