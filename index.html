@@ -252,110 +252,129 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
 .event-hour{font-size:10px; color:#0f172a; font-weight:600; background:rgba(255,255,255,0.65); backdrop-filter:blur(2px); padding:2px 6px; border-radius:6px; align-self:flex-start; margin-bottom:4px;}
 
 /* שבועי בלבד – ליטוש שקט למנהלים */
+.view-week{
+  background:#f6f8fb;
+}
+
 #view.week-mode{
   padding-top: 30px;
 }
 
-#view.week-mode .grid{
-  gap: 0;
-  background: #fff;
+.view-week .grid{
+  gap: 12px;
+  background: transparent;
   border-radius: 14px;
-  overflow: hidden;
+  overflow: visible;
 }
 
-#view.week-mode .day-column{
-  border-right:1px solid #f1f5f9;
-  border-radius: 0;
-  border-top: 0;
-  border-bottom: 0;
-  border-left: 0;
+.view-week .day-column{
+  background:#ffffff;
+  border-radius:18px;
+  border:1px solid rgba(15,23,42,0.06);
+  transition:0.2s ease;
   min-height: 180px;
 }
 
-#view.week-mode .day-column.today{
-  border:0 !important;
+.view-week .day-column:hover{
+  background:#f9fbff;
+}
+
+.view-week .day-column.today{
+  background:rgba(59,130,246,0.07);
+  border:none;
+  box-shadow:none;
   border-radius:18px;
-  overflow:hidden;
-  box-shadow:0 0 0 2px rgba(59,130,246,0.35);
 }
 
-#view.week-mode .day-column .day-header{
-  border-radius:18px 18px 0 0;
+.view-week .day-column.today .day-header{
+  background:rgba(59,130,246,0.12);
+  font-weight:700;
 }
 
-#view.week-mode .schedule-card{
+.view-week .day-column.today .day-number{
+  background:#2563eb;
+  color:#ffffff;
+  border-radius:999px;
+  padding:4px 10px;
+  font-weight:700;
+}
+
+.view-week .schedule-card{
   --card-color:#cbd5e1;
-  background:
-    linear-gradient(0deg, rgba(255,255,255,0.94), rgba(255,255,255,0.94)),
-    linear-gradient(0deg, color-mix(in srgb, var(--card-color) 8%, transparent), color-mix(in srgb, var(--card-color) 8%, transparent));
-  border-radius:18px;
-  padding:12px;
+  position:relative;
+  background:#ffffff;
+  border-radius:16px;
+  border:1px solid rgba(15,23,42,0.06);
   box-shadow:0 6px 18px rgba(0,0,0,0.05);
-  border-right:4px solid var(--card-color);
-  border-left:0;
-  border-top:0;
-  border-bottom:0;
-  transition:0.2s ease;
+  overflow:hidden;
+  transition:0.18s ease;
   margin-bottom:14px;
 }
 
-#view.week-mode .schedule-card:hover{
-  transform:translateY(-2px);
+.view-week .schedule-card::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:var(--card-color);
+  opacity:0.08;
+  pointer-events:none;
+}
+
+.view-week .schedule-card::after{
+  content:"";
+  position:absolute;
+  top:0;
+  right:0;
+  width:4px;
+  height:100%;
+  background:var(--card-color);
+  pointer-events:none;
+}
+
+.view-week .schedule-card:hover{
+  transform:translateY(-1px);
   box-shadow:0 10px 24px rgba(0,0,0,0.08);
 }
 
-@supports not (background: color-mix(in srgb, #000 8%, transparent)) {
-  #view.week-mode .schedule-card{
-    background:rgba(255,255,255,0.95);
-    position:relative;
-  }
-
-  #view.week-mode .schedule-card::before{
-    content:"";
-    position:absolute;
-    inset:0;
-    border-radius:18px;
-    background:var(--card-color);
-    opacity:0.08;
-    pointer-events:none;
-  }
+.view-week .day-column.today .schedule-card{
+  background:#ffffff;
 }
 
-#view.week-mode .schedule-card .title{ font-weight:600; }
-#view.week-mode .schedule-card .meta{ opacity:0.7; font-size:13px; }
+.view-week .schedule-card .title{ font-weight:600; }
+.view-week .schedule-card .meta{ opacity:0.7; font-size:13px; }
 
-#view.week-mode .today-badge{
+.view-week .today-badge{
   display:inline-flex;
   align-items:center;
 }
 
-#view.week-mode .today-icon{
-  width:20px;
-  height:20px;
-  vertical-align:middle;
-  margin:0 6px;
+.view-week .today-badge-icon{
+  width:18px;
+  height:18px;
+  margin-right:6px;
   opacity:0.95;
+  vertical-align:middle;
 }
 
-#view.week-mode .group-count{
+.view-week .group-count{
   position:absolute;
   top:8px;
   left:8px;
-  background:rgba(255,255,255,0.85);
+  background:rgba(255,255,255,0.9);
   border:1px solid rgba(15,23,42,0.08);
   color:#1e293b;
   font-size:12px;
   font-weight:600;
   padding:4px 8px;
-  border-radius:20px;
+  border-radius:999px;
   cursor:pointer;
   transition:0.2s ease;
 }
 
-#view.week-mode .group-count:hover{ background:#e2e8f0; }
-#view.week-mode .group-count:active{ transform:scale(0.96); }
+.view-week .group-count:hover{ background:#e2e8f0; }
+.view-week .group-count:active{ transform:scale(0.96); }
 
-#view.week-mode .empty-day{
+.view-week .empty-day{
   opacity:0.6;
   font-size:13px;
   padding:16px 8px;
@@ -1172,33 +1191,37 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
   }
 }
 
+.view-month{
+  background:#f6f8fb;
+}
+
 /* ===== INSTRUCTOR COMPACT CALENDAR GRID ===== */
-.instructor-cal-wrap {
+.view-month .instructor-cal-wrap {
   padding: 4px 4px 80px;
 }
-.instructor-cal-header-row {
+.view-month .instructor-cal-header-row {
   display: grid;
   grid-template-columns: repeat(6, 1fr) 24px;
   gap: 2px;
   margin-bottom: 3px;
 }
-.instructor-cal-header-row > div {
+.view-month .instructor-cal-header-row > div {
   text-align: center;
   font-size: 10px;
   font-weight: 700;
   color: #94a3b8;
   padding: 2px 0 5px;
 }
-.instructor-cal-header-row > div:last-child {
+.view-month .instructor-cal-header-row > div:last-child {
   font-size: 9px;
   color: #cbd5e1;
 }
-.instructor-cal-grid {
+.view-month .instructor-cal-grid {
   display: grid;
   grid-template-columns: repeat(6, 1fr) 24px;
   gap: 2px;
 }
-.instructor-cal-cell.ic-shabbat {
+.view-month .instructor-cal-cell.ic-shabbat {
   min-height: 0;
   background: #f8fafc;
   border-color: #f1f5f9;
@@ -1206,15 +1229,15 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
   justify-content: flex-start;
   align-items: center;
 }
-.instructor-cal-cell.ic-shabbat .instructor-cal-day-num {
+.view-month .instructor-cal-cell.ic-shabbat .instructor-cal-day-num {
   font-size: 9px;
   color: #cbd5e1;
   writing-mode: vertical-rl;
   text-orientation: mixed;
 }
-.instructor-cal-cell {
+.view-month .instructor-cal-cell {
   background: #fff;
-  border: 1px solid #e2e8f0;
+  border:1px solid rgba(15,23,42,0.06);
   border-radius: 14px;
   padding: 3px 2px;
   min-height: 64px;
@@ -1225,29 +1248,28 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
   -webkit-tap-highlight-color: transparent;
   transition: 0.15s ease;
 }
-.instructor-cal-cell.ic-empty {
+.view-month .instructor-cal-cell.ic-empty {
   background: transparent;
   border-color: transparent;
 }
-.instructor-cal-cell.ic-today {
+.view-month .instructor-cal-cell.ic-today {
   box-shadow: none !important;
-  border-color: #e5e7eb !important;
-  background: #fff;
+  border-color:rgba(15,23,42,0.06) !important;
 }
-.instructor-cal-cell.ic-has-events {
+.view-month .instructor-cal-cell.ic-has-events {
   cursor: pointer;
 }
-.instructor-cal-cell.ic-has-events:hover {
+.view-month .instructor-cal-cell:hover {
   background: #f8fafc;
   box-shadow: 0 6px 18px rgba(0,0,0,0.06);
   transform: translateY(-1px);
 }
-.instructor-cal-cell.ic-has-events:active {
+.view-month .instructor-cal-cell.ic-has-events:active {
   opacity: 0.7;
   transform: scale(0.95);
   transition: transform 0.1s, opacity 0.1s;
 }
-.instructor-cal-day-num {
+.view-month .instructor-cal-day-num {
   font-size: 11px;
   font-weight: 600;
   color: #374151;
@@ -1255,7 +1277,7 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
   line-height: 1;
   padding: 1px 0;
 }
-.instructor-cal-day-num.ic-today-num {
+.view-month .instructor-cal-day-num.ic-today-num {
   display: inline-block;
   background: #2563eb;
   color: #fff;
@@ -1264,7 +1286,7 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
   font-weight: 700;
   margin: 0 auto;
 }
-.instructor-cal-pill {
+.view-month .instructor-cal-pill {
   border-radius: 999px;
   padding: 6px 10px;
   font-size: 13px;
@@ -1275,7 +1297,7 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
   text-overflow: ellipsis;
   line-height: 1;
 }
-.instructor-cal-more {
+.view-month .instructor-cal-more {
   font-size: 8px;
   color: #64748b;
   font-weight: 700;
@@ -1283,25 +1305,25 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
   margin-top: 1px;
 }
 @media (max-width:768px) {
-  .instructor-cal-cell {
+  .view-month .instructor-cal-cell {
     min-height: 92px;
     padding: 8px;
     border-radius: 14px;
   }
-  .instructor-cal-cell:active {
+  .view-month .instructor-cal-cell:active {
     transform: scale(0.985);
     background: #f1f5f9;
   }
-  .instructor-cal-day-num {
+  .view-month .instructor-cal-day-num {
     font-size: 16px;
     font-weight: 600;
   }
-  .instructor-cal-pill {
+  .view-month .instructor-cal-pill {
     font-size: 14px;
     padding: 6px 10px;
-    border-radius: 10px;
+    border-radius: 999px;
   }
-  .instructor-cal-cell.ic-today {
+  .view-month .instructor-cal-cell.ic-today {
     box-shadow: none !important;
     border: none !important;
   }
@@ -1383,37 +1405,37 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
 }
 /* Desktop: cells a bit taller */
 @media(min-width:800px) {
-  .instructor-cal-wrap {
+  .view-month .instructor-cal-wrap {
     padding: 8px 8px 34px;
     max-width: 1200px;
     margin: 0 auto;
   }
-  .instructor-cal-grid {
+  .view-month .instructor-cal-grid {
     gap: 4px;
   }
-  .instructor-cal-header-row {
+  .view-month .instructor-cal-header-row {
     gap: 4px;
   }
-  .instructor-cal-cell {
+  .view-month .instructor-cal-cell {
     min-height: 88px;
     padding: 5px 4px;
     gap: 3px;
   }
-  .instructor-cal-day-num {
+  .view-month .instructor-cal-day-num {
     font-size: 14px;
     padding: 2px 0;
   }
-  .instructor-cal-day-num.ic-today-num {
+  .view-month .instructor-cal-day-num.ic-today-num {
     min-width: 24px;
     font-size: 13px;
   }
-  .instructor-cal-header-row > div {
+  .view-month .instructor-cal-header-row > div {
     font-size: 12px;
     padding: 4px 0 8px;
   }
 }
 
-.today-icon {
+.view-month .today-icon {
   width: 18px;
   height: 18px;
   opacity: 0.9;
@@ -1421,13 +1443,13 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
   vertical-align: middle;
 }
 
-.kpi-value.summary-number {
+.view-month .kpi-value.summary-number {
   font-size: 30px;
   font-weight: 800;
   color: #0f172a;
 }
 
-.kpi-label.summary-label {
+.view-month .kpi-label.summary-label {
   font-size: 13px;
   opacity: 0.7;
 }

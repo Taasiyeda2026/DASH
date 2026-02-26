@@ -676,6 +676,8 @@ function render(){
   enforceInstructorMode();
   view.innerHTML='';
   view.classList.toggle('week-mode', window.mode === 'week');
+  view.classList.toggle('view-week', window.mode === 'week');
+  view.classList.toggle('view-month', window.mode === 'month');
   closeSidePanel();
 
   if(userRole === 'instructor' || window.mode === 'summary' || window.mode === 'instructors' || window.mode === 'enddates'){
@@ -1104,7 +1106,8 @@ function buildDay(date,data){
   const cell=document.createElement('div');
   cell.className='day day-column';
   const isToday = sameDay(date, new Date());
-  cell.innerHTML=`<div class='day-header'>${isToday ? "<span class='today-badge'><img class='today-icon' src='icon-today.svg' alt='TODAY'></span>" : ''}${date.getDate()}/${date.getMonth()+1} | ${dayNames[date.getDay()]}</div>`;
+  const dayNumberMarkup = isToday ? `<span class='day-number'>${date.getDate()}</span>` : `${date.getDate()}`;
+  cell.innerHTML=`<div class='day-header'>${isToday ? "<span class='today-badge'><img class='today-badge-icon' src='icon-today.svg' alt='TODAY'></span>" : ''}${dayNumberMarkup}/${date.getMonth()+1} | ${dayNames[date.getDay()]}</div>`;
   if(isToday){
     cell.classList.add('today');
   }
