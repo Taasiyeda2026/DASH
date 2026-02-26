@@ -1696,11 +1696,15 @@ function renderSummary(){
     </div>
     ` : ''}
   `;
-  const managers = [...new Set(courses.map(r=>getCourseManager(r)).filter(Boolean))]
-    .sort((a,b)=>a.localeCompare(b,'he'))
-    .slice(0,2);
+  const managers = [...new Set(rawData.filter(isCourse).map(r=>getCourseManager(r)).filter(Boolean))]
+    .sort((a,b)=>a.localeCompare(b,'he'));
+  
   const split = document.createElement('div');
   split.className = 'managers-row';
+  split.style.display = 'grid';
+  split.style.gridTemplateColumns = 'repeat(auto-fit, minmax(250px, 1fr))';
+  split.style.gap = '20px';
+  split.style.marginTop = '20px';
 
   managers.forEach((mgr,index)=>{
     const mgrCourses = courses.filter(r=>getCourseManager(r) === mgr);
