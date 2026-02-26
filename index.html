@@ -31,14 +31,14 @@ html, body {
   width: 100%;
   max-width: 100%;
   overflow-x: hidden;
-  overscroll-behavior-x: none;
+  overscroll-behavior: none;
 }
 
 body {
   -webkit-text-size-adjust: 100%;
   /* מניעת גלילה אופקית במגע (iOS/Android) */
   touch-action: pan-y;
-  overscroll-behavior-x: none;
+  overscroll-behavior: none;
 }
 
 img {
@@ -435,7 +435,7 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
 .side.open{transform:translateX(0)}
 .side .close,
 .side-close{position:relative;top:auto;left:auto;flex-shrink:0;align-self:flex-start;margin:14px 0 4px 14px;z-index:1000;background:#fff;border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;border:none;box-shadow:0 1px 6px rgba(0,0,0,0.12);}
-#sideContent{flex:1;overflow-y:auto;padding:0 18px 18px 18px;}
+#sideContent{flex:1;overflow-y:auto;overflow-x:hidden;padding:0 18px 18px 18px;overscroll-behavior:contain;}
 .side h2,
 .day-sheet-content h2{margin:0 0 6px 0;font-size:20px}
 .side .subtitle,
