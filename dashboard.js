@@ -820,7 +820,14 @@ function renderInstructorMobileWeek(){
 
   requestAnimationFrame(() => {
     const todayEl = container.querySelector('.today');
-    if(todayEl) todayEl.scrollIntoView({ block: 'start', behavior: 'auto' });
+    if(todayEl){
+      const headerHeight = document.querySelector('.mobile-sticky-wrapper')?.offsetHeight || 0;
+      const y = todayEl.getBoundingClientRect().top + window.scrollY - headerHeight - 10;
+      window.scrollTo({
+        top: y,
+        behavior: 'auto'
+      });
+    }
   });
 }
 
@@ -1065,7 +1072,14 @@ function renderMobileWeekView(){
 
   requestAnimationFrame(() => {
     const todayEl = container.querySelector('.today');
-    if(todayEl) todayEl.scrollIntoView({ block: 'start', behavior: 'auto' });
+    if(todayEl){
+      const headerHeight = document.querySelector('.mobile-sticky-wrapper')?.offsetHeight || 0;
+      const y = todayEl.getBoundingClientRect().top + window.scrollY - headerHeight - 10;
+      window.scrollTo({
+        top: y,
+        behavior: 'auto'
+      });
+    }
   });
 }
 
@@ -1151,7 +1165,16 @@ function renderMobileMonth(){
 
   // גלול לשבוע TODAY בלי להחליף את התצוגה
   const todayBox = container.querySelector('[data-today="true"]');
-  if(todayBox) setTimeout(() => todayBox.scrollIntoView({ behavior:'smooth', block:'center' }), 80);
+  if(todayBox) {
+    setTimeout(() => {
+      const headerHeight = document.querySelector('.mobile-sticky-wrapper')?.offsetHeight || 0;
+      const y = todayBox.getBoundingClientRect().top + window.scrollY - headerHeight - 10;
+      window.scrollTo({
+        top: y,
+        behavior: 'auto'
+      });
+    }, 80);
+  }
 }
 
 function openMobileWeekDetail(weekStart, data){
