@@ -1921,38 +1921,16 @@ function renderInstructors(){
   }
 
   const grid = document.createElement('div');
-  grid.style.display = 'grid';
-  grid.style.gridTemplateColumns = 'repeat(auto-fill,minmax(180px,1fr))';
-  grid.style.gap = '16px';
-  grid.style.maxWidth = '1200px';
-  grid.style.margin = '20px auto';
-  grid.style.padding = '10px';
+  grid.className = 'instructors-grid';
 
   if(userRole === 'admin' && missingInstructorCourses.length > 0){
     const box = document.createElement('div');
-    box.style.background = '#ffffff';
-    box.style.border = '2px solid var(--danger)';
-    box.style.borderRadius = '14px';
-    box.style.padding = '16px';
-    box.style.cursor = 'pointer';
-    box.style.boxShadow = '0 4px 10px rgba(0,0,0,0.05)';
-    box.style.display = 'flex';
-    box.style.flexDirection = 'column';
-    box.style.alignItems = 'center';
-    box.style.justifyContent = 'center';
-    box.style.textAlign = 'center';
-    box.style.minHeight = '140px';
+    box.className = 'instructor-card instructor-card-missing';
 
     box.innerHTML = `
-      <div style="font-weight:800;font-size:18px;margin-bottom:10px;color:var(--danger)">
-        חסר מדריך
-    </div>
-      <div style="font-size:32px;font-weight:900;color:var(--danger)">
-        ${missingInstructorCourses.length}
-    </div>
-      <div style="font-size:13px;color:#64748b;margin-top:6px">
-        תוכניות פעילות
-    </div>
+      <div class="instructor-card-name" style="color:var(--danger)">חסר מדריך</div>
+      <div class="instructor-card-count" style="color:var(--danger)">${missingInstructorCourses.length}</div>
+      <div class="instructor-card-label">תוכניות פעילות</div>
   `;
 
     box.onclick = (e)=>{ e.stopPropagation(); openInstructorModal("חסר מדריך", missingInstructorCourses, selectedMonth, selectedYear); };
@@ -1967,36 +1945,17 @@ function renderInstructors(){
       : '&nbsp;';
 
     const box = document.createElement('div');
+    box.className = 'instructor-card';
     box.style.background = getEmployeeColor(name);
-    box.style.border = '1px solid var(--border)';
-    box.style.borderRadius = '16px';
-    box.style.padding = '14px';
-    box.style.cursor = 'pointer';
-    box.style.boxShadow = '0 4px 10px rgba(0,0,0,0.05)';
-    box.style.transition = '0.2s';
-    box.style.display = 'flex';
-    box.style.flexDirection = 'column';
-    box.style.alignItems = 'center';
-    box.style.justifyContent = 'center';
-    box.style.textAlign = 'center';
-    box.style.minHeight = '140px';
 
     box.addEventListener('mouseenter', ()=>{ if(!window.matchMedia('(hover:none)').matches) box.style.transform='scale(1.03)'; });
     box.addEventListener('mouseleave', ()=>{ box.style.transform='scale(1)'; });
 
     box.innerHTML = `
-      <div style="font-weight:800;font-size:18px;margin-bottom:10px">
-        ${name}
-    </div>
-      <div style="font-size:32px;font-weight:900">
-        ${instructorsMap[name].length}
-    </div>
-      <div style="font-size:13px;color:#475569;margin-top:6px">
-        קורסים פעילים
-    </div>
-      <div style="font-size:12px;color:#0f766e;margin-top:8px;font-weight:700">
-        ${dailyWorkshopsContent}
-    </div>
+      <div class="instructor-card-name">${name}</div>
+      <div class="instructor-card-count">${instructorsMap[name].length}</div>
+      <div class="instructor-card-label">קורסים פעילים</div>
+      <div class="instructor-card-daily">${dailyWorkshopsContent}</div>
   `;
 
     box.onclick = (e)=>{ e.stopPropagation(); openInstructorModal(name, instructorsMap[name], selectedMonth, selectedYear); };
