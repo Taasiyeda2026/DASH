@@ -740,8 +740,7 @@ function initSummaryMonths(){
 function render(){
 
   enforceInstructorMode();
-  view.innerHTML='';
-  view.classList.toggle('week-mode', window.mode === 'week');
+  view.innerHTML=''; view.style.display='flex'; view.style.flexDirection='column'; view.classList.toggle('week-mode', window.mode === 'week');
   view.classList.toggle('view-week', window.mode === 'week');
   view.classList.toggle('view-month', window.mode === 'month');
   closeSidePanel();
@@ -1666,7 +1665,7 @@ function renderSummary(){
   titleEl.textContent = currentMonthStart.toLocaleString('he-IL',{month:'long',year:'numeric'});
 
   const wrap = document.createElement('div');
-  wrap.className = 'summary-wrapper';
+  wrap.className = 'summary-wrapper'; wrap.style.width='100%'; wrap.style.display='flex'; wrap.style.flexDirection='column'; wrap.style.gap='20px';
   wrap.innerHTML = `
     <div class="kpi-total">
       <div class="kpi-title">סה"כ קורסים פעילים</div>

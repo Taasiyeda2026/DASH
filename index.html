@@ -244,10 +244,12 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
     width: 100%;
     max-width: 100%;
     margin: 0;
-    padding: 20px;
+    padding: 20px 20px 180px 20px;
     overflow-y: auto;
     overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
+    display: flex;
+    flex-direction: column;
   }
 
 .grid {
@@ -259,6 +261,7 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
     grid-template-columns: repeat(7, minmax(0, 1fr));
     gap: 15px;
     grid-auto-rows: minmax(140px, auto);
+    flex-shrink: 0;
   }
 .event strong, .calendar-event strong, .schedule-item strong, .schedule-card strong { font-size: 0.82em; }
 .day.today .day-header { font-weight: 800; color: #1d4ed8; }
@@ -281,6 +284,7 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
     grid-template-columns: repeat(7, minmax(0, 1fr));
     gap: 15px;
     grid-auto-rows: minmax(140px, auto);
+    flex-shrink: 0;
   }
 
 @media (max-width: 800px){
@@ -293,6 +297,7 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
     grid-template-columns: repeat(7, minmax(0, 1fr));
     gap: 15px;
     grid-auto-rows: minmax(140px, auto);
+    flex-shrink: 0;
   }
 }
 .day{background:var(--card);border-radius:12px;padding:8px;min-height:140px;border:1px solid var(--border); display: flex; flex-direction: column; gap: 4px;}
@@ -364,6 +369,7 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
     grid-template-columns: repeat(7, minmax(0, 1fr));
     gap: 15px;
     grid-auto-rows: minmax(140px, auto);
+    flex-shrink: 0;
   }
 
 .view-week .day-column,
@@ -628,14 +634,15 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
 }
 
 /* --- שינויים בעמוד הסיכום --- */
-.summary-wrapper{
-  max-width:900px;
-  margin:0 auto;
-  text-align:center;
-  padding:60px 20px;
-  display:grid;
-  gap:20px;
-}
+.summary-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding-bottom: 40px;
+  }
 
 .kpi-total{
   background:#ffffff;
@@ -685,12 +692,13 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
   text-align:center;
 }
 
-.kpi-row{
-  display:flex;
-  justify-content:center;
-  gap:20px;
-  flex-wrap:wrap;
-}
+.kpi-row {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+  }
 
 .kpi-small{
   min-width:200px;
@@ -726,13 +734,13 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
   color:#991b1b;
 }
 
-.managers-row{
-  display:flex;
-  justify-content:center;
-  gap:20px;
-  flex-wrap:wrap;
-  margin-top:28px;
-}
+.managers-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    width: 100%;
+    margin-top: 20px;
+  }
 
 .manager-card{
   width:320px;
@@ -885,10 +893,12 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
     width: 100%;
     max-width: 100%;
     margin: 0;
-    padding: 20px;
+    padding: 20px 20px 180px 20px;
     overflow-y: auto;
     overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
+    display: flex;
+    flex-direction: column;
   }
 
   /* גריד עמודה אחת */
@@ -901,6 +911,7 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
     grid-template-columns: repeat(7, minmax(0, 1fr));
     gap: 15px;
     grid-auto-rows: minmax(140px, auto);
+    flex-shrink: 0;
   }
 
   /* ביטול גובה אחיד של ימים במובייל */
@@ -913,6 +924,7 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
     grid-template-columns: repeat(7, minmax(0, 1fr));
     gap: 15px;
     grid-auto-rows: minmax(140px, auto);
+    flex-shrink: 0;
   }
 
   .day{
@@ -935,8 +947,14 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
     max-width:320px;
   }
 
-  .summary-wrapper{
-    padding:40px 10px;
+  .summary-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding-bottom: 40px;
   }
 
   /* פילטרים - עמודה אנכית במובייל */
@@ -1147,10 +1165,12 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
     width: 100%;
     max-width: 100%;
     margin: 0;
-    padding: 20px;
+    padding: 20px 20px 180px 20px;
     overflow-y: auto;
     overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
+    display: flex;
+    flex-direction: column;
   }
 
   .dashboard-grid,
@@ -1163,6 +1183,7 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
     grid-template-columns: repeat(7, minmax(0, 1fr));
     gap: 15px;
     grid-auto-rows: minmax(140px, auto);
+    flex-shrink: 0;
   }
 
   .mobile-week{
