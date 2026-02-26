@@ -511,6 +511,12 @@ function canGoPrev(){
   if(!dataRange) return false;
 
   if(window.mode === 'month'){
+    if(userRole === 'instructor' && isMobile()){
+      // מדריך במובייל – ניווט שבועי
+      const temp = new Date(currentDate);
+      temp.setDate(temp.getDate() - 7);
+      return temp >= getMinAllowedMonth();
+    }
     const temp = new Date(currentDate);
     temp.setMonth(temp.getMonth()-1);
 
@@ -534,6 +540,12 @@ function canGoNext(){
   if(!dataRange) return false;
 
   if(window.mode === 'month'){
+    if(userRole === 'instructor' && isMobile()){
+      // מדריך במובייל – ניווט שבועי
+      const temp = new Date(currentDate);
+      temp.setDate(temp.getDate() + 7);
+      return weekOverlapsDataRange(temp);
+    }
     const temp = new Date(currentDate);
     temp.setMonth(temp.getMonth()+1);
     return temp.getFullYear() < dataRange.max.getFullYear() ||
@@ -770,7 +782,11 @@ function render(){
 
 function renderMonthView(){
   if(userRole === 'instructor'){
-    renderInstructorGridMonth();
+    if(isMobile()){
+      renderInstructorMobileWeek();
+    } else {
+      renderInstructorGridMonth();
+    }
     return;
   }
   if(isMobile()){
@@ -778,6 +794,34 @@ function renderMonthView(){
     return;
   }
   renderDesktopMonth();
+}
+
+function renderInstructorMobileWeek(){
+  const weekStart = new Date(currentDate);
+  weekStart.setDate(currentDate.getDate() - currentDate.getDay());
+  weekStart.setHours(0,0,0,0);
+
+  const weekEnd = new Date(weekStart);
+  weekEnd.setDate(weekStart.getDate() + 6);
+
+  titleEl.textContent = `${weekStart.toLocaleDateString('he-IL')} – ${weekEnd.toLocaleDateString('he-IL')}`;
+
+  const data = applyFilters();
+  const container = document.createElement('div');
+  container.style.cssText = 'display:flex;flex-direction:column;gap:12px;padding:10px 10px 80px;';
+
+  for(let i = 0; i < 7; i++){
+    const date = new Date(weekStart);
+    date.setDate(weekStart.getDate() + i);
+    container.appendChild(buildDay(date, data));
+  }
+
+  view.appendChild(container);
+
+  requestAnimationFrame(() => {
+    const todayEl = container.querySelector('.today');
+    if(todayEl) todayEl.scrollIntoView({ block: 'start', behavior: 'auto' });
+  });
 }
 
 function renderInstructorGridMonth(){
@@ -2153,11 +2197,15 @@ document.getElementById('prev').onclick = ()=>{
     }
   }
   else if(window.mode==='month'){
-    const temp = new Date(currentDate);
-    temp.setMonth(temp.getMonth()-1);
-
-    if(temp >= getMinAllowedMonth()){
-      currentDate = temp;
+    if(userRole === 'instructor' && isMobile()){
+      // מדריך במובייל – ניווט שבועי
+      const temp = new Date(currentDate);
+      temp.setDate(temp.getDate() - 7);
+      if(temp >= getMinAllowedMonth()) currentDate = temp;
+    } else {
+      const temp = new Date(currentDate);
+      temp.setMonth(temp.getMonth()-1);
+      if(temp >= getMinAllowedMonth()) currentDate = temp;
     }
   }
 
@@ -2187,12 +2235,16 @@ document.getElementById('next').onclick = ()=>{
     }
   }
   else if(window.mode==='month'){
-    const temp = new Date(currentDate.getFullYear(), currentDate.getMonth()+1, 1);
-
-    if(dataRange){
-      const maxMonth = new Date(dataRange.max.getFullYear(), dataRange.max.getMonth(), 1);
-      if(temp <= maxMonth){
-        currentDate = temp;
+    if(userRole === 'instructor' && isMobile()){
+      // מדריך במובייל – ניווט שבועי
+      const temp = new Date(currentDate);
+      temp.setDate(temp.getDate() + 7);
+      if(weekOverlapsDataRange(temp)) currentDate = temp;
+    } else {
+      const temp = new Date(currentDate.getFullYear(), currentDate.getMonth()+1, 1);
+      if(dataRange){
+        const maxMonth = new Date(dataRange.max.getFullYear(), dataRange.max.getMonth(), 1);
+        if(temp <= maxMonth) currentDate = temp;
       }
     }
   }

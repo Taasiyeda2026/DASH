@@ -219,6 +219,9 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
   z-index:30; /* מתחת לסייד-פאנל (50), לאוברליי (100) ולשיט (9999) */
   background:#fff;
   box-shadow:0 1px 4px rgba(0,0,0,0.06);
+  /* מניעת גלילה אופקית שנגרמת מהעטיפה */
+  max-width:100%;
+  overflow-x:hidden;
 }
 /* הפנימיים לא יתחרו עם ה-wrapper על sticky */
 .mobile-sticky-wrapper header,
