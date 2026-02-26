@@ -440,10 +440,9 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
 }
 
 /* side panel */
-.side,.side-panel{position:fixed;top:0;left:0;width:320px;max-width:100%;height:100%;background:#fff;box-shadow:-6px 0 24px rgba(0,0,0,.18);transform:translateX(-100%);transition:.28s ease;z-index:200;padding:0;overflow:hidden;display:flex;flex-direction:column;}
+.side,.side-panel{position:fixed;top:0;left:0;width:320px;max-width:100%;height:100%;background:#fff;box-shadow:-6px 0 24px rgba(0,0,0,.18);transform:translateX(-100%);transition:.28s ease;z-index:10001;padding:0;overflow:hidden;display:flex;flex-direction:column;}
 #side {
   max-width: 100%;
-  pointer-events: none;
 }
 .side.open{
   transform:translateX(0);
@@ -1170,7 +1169,7 @@ body.no-scroll {
   position: fixed;
   inset: 0;
   background: rgba(15,23,42,.45);
-  z-index: 190;
+  z-index: 10000;
   pointer-events: none;
   backdrop-filter: blur(2px);
   -webkit-backdrop-filter: blur(2px);
@@ -1180,7 +1179,7 @@ body.no-scroll {
   pointer-events: auto;
 }
 @media(max-width:800px) {
-  #side-backdrop { z-index: 190; }
+  #side-backdrop { z-index: 10000; }
 }
 
 /* ===== MANAGER OVERLAY CLOSE BUTTON ===== */
@@ -1725,9 +1724,9 @@ body.no-scroll {
 </div>
 </div>
 
-<div class="side" id="side">
-  <button class="close" id="closeSide" onclick="closeSidePanel()" style="z-index: 999999; position: absolute; top: 20px; right: 20px; width: 40px; height: 40px; cursor: pointer; background: rgba(0,0,0,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: none; font-size: 24px;">×</button>
-  <div id="sideContent"></div>
+<div class="side" id="side" style="z-index: 10001;">
+  <button class="close" id="closeSide" onclick="closeSidePanel()" style="z-index: 10005; position: absolute; top: 15px; right: 15px; width: 44px; height: 44px; cursor: pointer; background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; color: #0f172a; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: all 0.2s;">×</button>
+  <div id="sideContent" style="padding-top: 50px;"></div>
 </div>
 <div id="side-backdrop"></div>
 
