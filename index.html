@@ -162,47 +162,42 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
 .today-star {
   width: 38px;
   height: 38px;
-  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  background: transparent;
   cursor: pointer;
   border: none;
-  border-radius: 50%;
+  border-radius: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0;
-  transition: all 0.18s ease;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  transition: transform 0.18s ease;
+  box-shadow: none;
 }
 
 .today-star:hover {
-  transform: scale(1.1) rotate(8deg);
-  box-shadow: 0 8px 20px rgba(245,158,11,0.4);
-  filter: brightness(1.05);
+  transform: scale(1.12);
 }
 
 .today-star:active {
   transform: scale(0.92);
-  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-  filter: brightness(0.9);
 }
 .today-calendar {
   width: 38px;
   height: 38px;
-  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  background: transparent;
   cursor: pointer;
   border: none;
-  border-radius: 10px;
+  border-radius: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0;
-  transition: all 0.18s ease;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  transition: transform 0.18s ease;
+  box-shadow: none;
 }
 
 .today-calendar:hover {
-  transform: scale(1.1);
-  box-shadow: 0 8px 20px rgba(37,99,235,0.4);
+  transform: scale(1.12);
 }
 
 .today-calendar:active {
@@ -1305,8 +1300,8 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
   </div>
   <div class="nav-arrows">
     <button id="prev" aria-label="הקודם">▶</button>
-    <button id="goToday" class="today-star" title="היום" aria-label="היום"><img src="icon-today.svg" width="22" height="22" alt=""></button>
-    <button id="goCalendar" class="today-calendar" aria-label="חודש" title="חודש"><img src="icon-calendar.svg" width="22" height="22" alt=""></button>
+    <button id="goToday" class="today-star" title="היום" aria-label="היום"><img src="icon-today.svg" width="38" height="38" alt="" style="display:block"></button>
+    <button id="goCalendar" class="today-calendar" aria-label="חודש" title="חודש"><img src="icon-calendar.svg" width="38" height="38" alt="" style="display:block"></button>
     <span id="title"></span>
     <button id="next" aria-label="הבא">◀</button>
   </div>
