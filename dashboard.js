@@ -2024,7 +2024,7 @@ function renderInstructors(){
 }
 
 function openInstructorModal(name, courses, selectedMonth, selectedYear){
-
+  console.log('פתיחת מודל מדריך:', name);
   const month = selectedMonth ?? currentDate.getMonth();
   const year  = selectedYear ?? currentDate.getFullYear();
 
