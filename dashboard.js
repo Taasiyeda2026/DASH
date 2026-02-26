@@ -1515,37 +1515,18 @@ function renderSummary(){
     </div>
 
     ${missingInstructorCount > 0 ? `
-      <div class="alert-missing" role="button" tabindex="0">
-        <div>
-          <strong>⚠ חסרים ${missingInstructorCount} מדריכים לשיבוץ</strong>
-          <div class="alert-subtext">לחץ לצפייה בקורסים</div>
-        </div>
-        <span>›</span>
+      <div class="alert-missing">
+        ⚠ חסרים ${missingInstructorCount} מדריכים לשיבוץ
       </div>
     ` : ''}
   `;
-
-  const missingAlert = wrap.querySelector('.alert-missing');
-  if (missingAlert) {
-    missingAlert.addEventListener('click', (e) => {
-      e.stopPropagation();
-      openMissingCourses(currentYear, currentMonth);
-    });
-    missingAlert.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        openMissingCourses(currentYear, currentMonth);
-      }
-    });
-  }
-
   const managers = [...new Set(courses.map(r=>getCourseManager(r)).filter(Boolean))]
     .sort((a,b)=>a.localeCompare(b,'he'))
     .slice(0,2);
   const split = document.createElement('div');
   split.className = 'managers-row';
 
-  managers.forEach(mgr=>{
+  managers.forEach((mgr,index)=>{
     const mgrCourses = courses.filter(r=>getCourseManager(r) === mgr);
     const mgrActive = mgrCourses.filter(r =>
       isCourseActiveByRange(r, currentYear, currentMonth)
@@ -1559,7 +1540,8 @@ function renderSummary(){
       return start && start >= nextMonthStart;
     }).length;
 
-    const col = document.createElement('div'); col.className = 'manager-card';
+    const col = document.createElement('div');
+    col.className = `manager-card${index === 1 ? ' secondary' : ''}`;
     col.dataset.manager = mgr;
     col.innerHTML = `
       <div class="manager-name">${mgr}</div>
