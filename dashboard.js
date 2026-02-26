@@ -1182,11 +1182,20 @@ function openSideGrouped(items) {
     return;
   }
 
-  sideContent.innerHTML = `
-    <h2>${first.Program}</h2>
-    <div class='subtitle'>מנהל: ${getManagerForCourseViews(first) || '—'}</div>
-    <div style="border-top:1px solid var(--border); margin-top:10px; padding-top:10px;"></div>
-  `;
+  const allSameProgram = sortedItems.every(i => i.Program === first.Program);
+
+  if(allSameProgram){
+    sideContent.innerHTML = `
+      <h2>${first.Program}</h2>
+      <div class='subtitle'>מנהל: ${getManagerForCourseViews(first) || '—'}</div>
+      <div style="border-top:1px solid var(--border); margin-top:10px; padding-top:10px;"></div>
+    `;
+  } else {
+    sideContent.innerHTML = `
+      <h2>פעילויות</h2>
+      <div style="border-top:1px solid var(--border); margin-top:10px; padding-top:10px;"></div>
+    `;
+  }
 
   sortedItems.forEach(item => {
     const type = eventTypeOf(item);
@@ -1197,10 +1206,12 @@ function openSideGrouped(items) {
     const notesHtml = renderNotesBlock(getNotesForCourseItem(item), item.Employee || '');
     const activityDate = item.selectedDate || getEarliestDate(item.Dates);
     const activityDateText = activityDate ? activityDate.toLocaleDateString('he-IL') : '—';
+    const programHeader = !allSameProgram ? `<div style="font-weight:700;font-size:14px;color:#1e293b;margin-bottom:8px">${item.Program || '—'}</div>` : '';
 
     if(isDaily){
       sideContent.innerHTML += `
         <div class="group-item">
+          ${programHeader}
           <div class='row'><span class='label'>תאריך</span><span class='value'>${activityDateText}</span></div>
           <div class='row'><span class='label'>רשות</span><span class='value'>${item.Authority || '—'}</span></div>
           <div class='row'><span class='label'>בית ספר</span><span class='value'>${item.School || '—'}</span></div>
@@ -1213,6 +1224,7 @@ function openSideGrouped(items) {
 
     sideContent.innerHTML += `
       <div class="group-item">
+        ${programHeader}
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
           <div class='badge'>מפגש ${item.meetingIdx}</div>
           <div style="background:#334155; color:#fff; padding:2px 8px; border-radius:6px; font-size:12px; font-weight:bold;">${timeRange}</div>
