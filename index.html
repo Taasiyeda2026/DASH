@@ -26,10 +26,17 @@
 }
 
 html, body {
-    height: 100%;
-    width: 100%;
+    -webkit-text-size-adjust: 100%;
     margin: 0;
     padding: 0;
+    height: 100vh;
+    width: 100vw;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    font-family: system-ui, Arial;
+    background: var(--bg);
+    color: var(--text);
   }
 
 body {
@@ -38,6 +45,8 @@ body {
     padding: 0;
     height: 100vh;
     width: 100vw;
+    display: flex;
+    flex-direction: column;
     overflow: hidden;
     font-family: system-ui, Arial;
     background: var(--bg);
@@ -135,6 +144,8 @@ body {
     padding: 0;
     height: 100vh;
     width: 100vw;
+    display: flex;
+    flex-direction: column;
     overflow: hidden;
     font-family: system-ui, Arial;
     background: var(--bg);
@@ -230,18 +241,10 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
 
 /* ===== STICKY WRAPPER – header + nav קבועים בגלילה ===== */
 .mobile-sticky-wrapper {
-    position: fixed; /* Changed from sticky to fixed to be safer */
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 20000;
-    background: #fff;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
     width: 100%;
-    height: 80px; /* Fixed height for consistency */
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
+    background: #fff;
+    z-index: 20000;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
   }
 /* הפנימיים לא יתחרו עם ה-wrapper על sticky */
 .mobile-sticky-wrapper header,
@@ -257,15 +260,14 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
 .nav-arrows #title{width:100%;max-width:240px;text-align:center;font-weight:700;font-size:15px;white-space:nowrap;}
 
 #view {
-    height: calc(100vh - 80px);
     width: 100%;
     max-width: 100%;
     margin: 0;
-    padding: 80px 20px 250px 20px; /* Increased top padding to ensure content starts below header */
-    overflow-y: scroll;
-    overflow-x: auto;
+    padding: 20px 20px 250px 20px;
+    overflow-y: auto;
+    overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
-    position: relative;
+    flex: 1;
   }
 
 .grid {
@@ -939,15 +941,14 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
   }
 
   #view {
-    height: calc(100vh - 80px);
     width: 100%;
     max-width: 100%;
     margin: 0;
-    padding: 80px 20px 250px 20px; /* Increased top padding to ensure content starts below header */
-    overflow-y: scroll;
-    overflow-x: auto;
+    padding: 20px 20px 250px 20px;
+    overflow-y: auto;
+    overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
-    position: relative;
+    flex: 1;
   }
 
   /* גריד עמודה אחת */
@@ -1240,15 +1241,14 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
   .dashboard-grid,
   .grid,
   #view {
-    height: calc(100vh - 80px);
     width: 100%;
     max-width: 100%;
     margin: 0;
-    padding: 80px 20px 250px 20px; /* Increased top padding to ensure content starts below header */
-    overflow-y: scroll;
-    overflow-x: auto;
+    padding: 20px 20px 250px 20px;
+    overflow-y: auto;
+    overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
-    position: relative;
+    flex: 1;
   }
 
   .dashboard-grid,
