@@ -2438,7 +2438,13 @@ function openDaySheet(title, htmlContent){
   daySheetContent.innerHTML = htmlContent || '';
   daySheet.classList.remove('day-sheet-hidden');
   daySheetBackdrop.classList.remove('day-sheet-hidden');
-  _lockScroll('day-sheet');
+
+  if (isMobile()) {
+    _lockScroll('day-sheet');
+  } else {
+    _unlockScroll('day-sheet');
+  }
+
   applyNotesBoxColor();
 }
 
