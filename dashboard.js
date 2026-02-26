@@ -242,6 +242,49 @@ function instructorColor(name) {
   return `hsl(${hue} 70% 52%)`;
 }
 
+function toRgbTuple(colorValue) {
+  if (!colorValue) return '148, 163, 184';
+  const normalized = String(colorValue).trim();
+  const hexMatch = normalized.match(/^#([\da-f]{3}|[\da-f]{6})$/i);
+  if (hexMatch) {
+    const hex = hexMatch[1];
+    const fullHex = hex.length === 3 ? hex.split('').map(ch => ch + ch).join('') : hex;
+    const r = parseInt(fullHex.slice(0, 2), 16);
+    const g = parseInt(fullHex.slice(2, 4), 16);
+    const b = parseInt(fullHex.slice(4, 6), 16);
+    return `${r}, ${g}, ${b}`;
+  }
+
+  const hslMatch = normalized.match(/^hsl\((\d+)\s+(\d+)%\s+(\d+)%\)$/i);
+  if (hslMatch) {
+    const h = Number(hslMatch[1]) / 360;
+    const s = Number(hslMatch[2]) / 100;
+    const l = Number(hslMatch[3]) / 100;
+    const hue2rgb = (p, q, t) => {
+      let v = t;
+      if (v < 0) v += 1;
+      if (v > 1) v -= 1;
+      if (v < 1 / 6) return p + (q - p) * 6 * v;
+      if (v < 1 / 2) return q;
+      if (v < 2 / 3) return p + (q - p) * (2 / 3 - v) * 6;
+      return p;
+    };
+    const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+    const p = 2 * l - q;
+    const r = Math.round(hue2rgb(p, q, h + 1 / 3) * 255);
+    const g = Math.round(hue2rgb(p, q, h) * 255);
+    const b = Math.round(hue2rgb(p, q, h - 1 / 3) * 255);
+    return `${r}, ${g}, ${b}`;
+  }
+
+  return '148, 163, 184';
+}
+
+function applyInstructorColorVars(node, colorValue) {
+  node.style.setProperty('--instructor-color', colorValue);
+  node.style.setProperty('--instructor-color-rgb', toRgbTuple(colorValue));
+}
+
 function formatTime(v){
   if(v==null||v==='') return '';
   if(typeof v==='number'){
@@ -821,9 +864,9 @@ function renderInstructorGridMonth(){
       const pill = document.createElement('div');
       pill.className = 'instructor-cal-pill calendar-event';
       const instructorName = firstItem.Employee || firstItem.Instructor || firstItem.EmployeeName || '';
-      const eventColor = g.type === 'holiday' ? '#5eead4' : instructorColor(instructorName);
-      pill.style.setProperty('--instructor-color', eventColor);
-      pill.style.background = g.type === 'holiday' ? '#c0fff6' : '';
+      const eventColor = g.type === 'holiday' ? '#cbd5e1' : instructorColor(instructorName);
+      applyInstructorColorVars(pill, eventColor);
+      if(g.type === 'holiday') pill.classList.add('holiday');
       if(g.type === 'holiday') pill.addEventListener('click', e => e.stopPropagation());
       const txt = firstItem.Program || '';
       pill.textContent = txt.length > 10 ? txt.slice(0,9)+'…' : txt;
@@ -1159,10 +1202,10 @@ function buildDay(date,data){
     const evDiv = document.createElement('div');
     const first = g.items[0];
     const instructorName = first.Employee || first.Instructor || first.EmployeeName || '';
-    evDiv.style.setProperty('--instructor-color', instructorColor(instructorName));
+    applyInstructorColorVars(evDiv, instructorColor(instructorName));
 
     if(g.type === 'holiday') {
-      evDiv.className = 'event schedule-card';
+      evDiv.className = 'event schedule-card holiday';
       evDiv.innerHTML = `<div class="title">${first.Program || ""}</div>`;
     } else if(g.type === 'event') {
       evDiv.className = 'event schedule-card';
