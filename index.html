@@ -748,24 +748,28 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
 }
 
 .managers-row {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 320px));
+    display: flex;
+    flex-wrap: wrap;
     justify-content: center;
-    gap: 20px;
+    gap: 24px;
     width: 100%;
-    margin-top: 20px;
+    margin: 32px auto 0 auto;
   }
 
-.manager-card{
-  width:320px;
-  background:#ffffff;
-  border-radius:20px;
-  padding:24px 20px;
-  box-shadow:0 10px 32px rgba(0,0,0,0.07);
-  border-right:4px solid #3b82f6;
-  text-align:right;
-  cursor:pointer;
-}
+.manager-card {
+    background: #ffffff;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 24px;
+    width: 100%;
+    max-width: 340px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
 
 .manager-card.secondary{
   border-right-color:#22c55e;
@@ -964,9 +968,19 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
     font-size:48px;
   }
 
-  .manager-card{
-    width:100%;
-    max-width:320px;
+  .manager-card {
+    background: #ffffff;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 24px;
+    width: 100%;
+    max-width: 340px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
   }
 
   .summary-wrapper {
