@@ -773,11 +773,13 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
     text-align: center;
     box-shadow: 0 4px 12px rgba(0,0,0,0.05);
     margin: 0;
+    border-top: 5px solid #e2e8f0;
   }
 
-.manager-card.secondary{
-  border-right-color:#22c55e;
-}
+.manager-card.secondary {
+    border-top: 5px solid #818cf8;
+    background: #f5f3ff;
+  }
 
 .manager-name {
     font-size: 18px;
@@ -990,6 +992,7 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
     text-align: center;
     box-shadow: 0 4px 12px rgba(0,0,0,0.05);
     margin: 0;
+    border-top: 5px solid #e2e8f0;
   }
 
   .summary-wrapper {
@@ -1858,7 +1861,17 @@ body.no-scroll {
     font-size: 13px !important;
   }
 }
-</style>
+
+  .manager-card:not(.secondary) {
+    border-top: 5px solid #10b981;
+    background: #f0fdf4;
+  }
+  .manager-name {
+    border-bottom: 2px solid currentColor;
+    padding-bottom: 4px;
+    width: fit-content;
+  }
+  </style>
 </head>
 <body>
 <div id="app-wrapper">
