@@ -130,6 +130,11 @@ const titleEl=document.getElementById('title');
 const filtersEl=document.getElementById('filters');
 const side=document.getElementById('side');
 const sideContent=document.getElementById('sideContent');
+const daySheet=document.getElementById('daySheet');
+const daySheetBackdrop=document.getElementById('daySheetBackdrop');
+const daySheetTitle=document.getElementById('daySheetTitle');
+const daySheetContent=document.getElementById('daySheetContent');
+const daySheetClose=document.getElementById('daySheetClose');
 const btnMonth=document.getElementById('btnMonth');
 const btnWeek=document.getElementById('btnWeek');
 const btnSummary=document.getElementById('btnSummary');
@@ -1194,19 +1199,23 @@ const PROGRAM_COLORS = {
 };
 function getProgramColor(name){ return PROGRAM_COLORS[name] || '#1e293b'; }
 
-function openSideGrouped(items) {
+function shouldUseInstructorDaySheet(){
+  return userRole === 'instructor' && window.mode === 'month' && window.innerWidth <= 768;
+}
+
+function buildGroupedDetailsContent(items){
   const sortedItems = sortByDateAndTime(
     items.map(item => toDateAndTimeSortable(item, item.selectedDate || getEarliestDate(item.Dates), item.StartTime))
   );
 
-  if(sortedItems.length === 0) return;
+  if(sortedItems.length === 0) return null;
 
   const first = sortedItems[0];
+  let html = '';
 
-  // אירוע נקודתי — פאנל מיוחד
   if(isEvent(first)){
     const timeRange = (first.StartTime || first.EndTime) ? `${first.StartTime} – ${first.EndTime}` : '—';
-    sideContent.innerHTML = `
+    html = `
       <h2>${first.Program}</h2>
       <div class='subtitle'>מנהל: ${getManagerForCourseViews(first) || '—'}</div>
       <div style="border-top:1px solid var(--border); margin-top:10px; padding-top:10px;"></div>
@@ -1216,20 +1225,19 @@ function openSideGrouped(items) {
         ${first.Note ? `<div class='row'><span class='label'>הערה</span><span class='value'>${first.Note}</span></div>` : ''}
       </div>
     `;
-    openSidePanel();
-    return;
+    return { title: first.Program || 'פרטי פעילות', html };
   }
 
   const allSameProgram = sortedItems.every(i => i.Program === first.Program);
 
   if(allSameProgram){
-    sideContent.innerHTML = `
+    html = `
       <h2 style="color:${getProgramColor(first.Program)}">${first.Program}</h2>
       <div class='subtitle'>מנהל: ${getManagerForCourseViews(first) || '—'}</div>
       <div style="border-top:1px solid var(--border); margin-top:10px; padding-top:10px;"></div>
     `;
   } else {
-    sideContent.innerHTML = `
+    html = `
       <h2>פעילויות</h2>
       <div style="border-top:1px solid var(--border); margin-top:10px; padding-top:10px;"></div>
     `;
@@ -1247,7 +1255,7 @@ function openSideGrouped(items) {
     const programHeader = !allSameProgram ? `<div style="font-weight:700;font-size:14px;color:${getProgramColor(item.Program)};margin-bottom:8px">${item.Program || '—'}</div>` : '';
 
     if(isDaily){
-      sideContent.innerHTML += `
+      html += `
         <div class="group-item">
           ${programHeader}
           <div class='row'><span class='label'>תאריך</span><span class='value'>${activityDateText}</span></div>
@@ -1260,7 +1268,7 @@ function openSideGrouped(items) {
       return;
     }
 
-    sideContent.innerHTML += `
+    html += `
       <div class="group-item">
         ${programHeader}
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
@@ -1275,6 +1283,21 @@ function openSideGrouped(items) {
       </div>
     `;
   });
+
+  const sheetTitle = allSameProgram ? (first.Program || 'פרטי יום') : 'פרטי יום';
+  return { title: sheetTitle, html };
+}
+
+function openSideGrouped(items) {
+  const content = buildGroupedDetailsContent(items);
+  if(!content) return;
+
+  if(shouldUseInstructorDaySheet()){
+    openDaySheet(content.title, content.html);
+    return;
+  }
+
+  sideContent.innerHTML = content.html;
   applyNotesBoxColor();
   openSidePanel();
 }
@@ -2271,6 +2294,24 @@ managerFilter.onchange=render;
 employeeFilter.onchange=render;
 document.getElementById('clearFilters').onclick=()=>{managerFilter.value='';employeeFilter.value='';render();};
 summaryMonth.onchange=render;
+function openDaySheet(title, htmlContent){
+  if(!daySheet || !daySheetBackdrop || !daySheetContent) return;
+  closeSidePanel();
+  daySheetTitle.textContent = title || 'פרטי יום';
+  daySheetContent.innerHTML = htmlContent || '';
+  daySheet.classList.remove('day-sheet-hidden');
+  daySheetBackdrop.classList.remove('day-sheet-hidden');
+  document.body.style.overflow = 'hidden';
+  applyNotesBoxColor();
+}
+
+function closeDaySheet(){
+  if(!daySheet || !daySheetBackdrop) return;
+  daySheet.classList.add('day-sheet-hidden');
+  daySheetBackdrop.classList.add('day-sheet-hidden');
+  document.body.style.overflow = '';
+}
+
 const sideBackdrop = document.getElementById('side-backdrop');
 
 function openSidePanel(){
@@ -2289,6 +2330,17 @@ function closeSidePanel(){
 document.getElementById('closeSide').onclick = closeSidePanel;
 sideBackdrop.addEventListener('click', closeSidePanel);
 sideBackdrop.addEventListener('touchend', e=>{ e.preventDefault(); closeSidePanel(); }, { passive: false });
+
+if(daySheetClose) daySheetClose.addEventListener('click', closeDaySheet);
+if(daySheetBackdrop){
+  daySheetBackdrop.addEventListener('click', closeDaySheet);
+  daySheetBackdrop.addEventListener('touchend', e=>{ e.preventDefault(); closeDaySheet(); }, { passive: false });
+}
+document.addEventListener('keydown', e => {
+  if(e.key === 'Escape'){
+    closeDaySheet();
+  }
+});
 
 /* ===== סגירת bottom-sheet בהחלקה למטה (swipe down) ===== */
 (function(){
@@ -2312,6 +2364,7 @@ initFromRawData();
 window.addEventListener('popstate', (e)=>{
   if(isMobile() && (window.mode === 'month' || window.mode === 'week')){
     closeSidePanel();
+    closeDaySheet();
     view.innerHTML = '';
     renderMobileMonth();
   }
