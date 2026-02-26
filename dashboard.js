@@ -2489,7 +2489,22 @@ function openDaySheet(title, htmlContent){
   applyNotesBoxColor();
 }
 
-document.getElementById('closeSide').onclick = closeSidePanel;
+document.addEventListener('click', function (e) {
+  if (e.target.closest('#closeSide')) {
+    e.preventDefault();
+    e.stopPropagation();
+    closeSidePanel();
+  }
+});
+
+document.addEventListener('touchend', function (e) {
+  if (e.target.closest('#closeSide')) {
+    e.preventDefault();
+    e.stopPropagation();
+    closeSidePanel();
+  }
+}, { passive: false });
+
 sideBackdrop.addEventListener('click', closeSidePanel);
 sideBackdrop.addEventListener('touchend', e=>{ e.preventDefault(); closeSidePanel(); }, { passive: false });
 
