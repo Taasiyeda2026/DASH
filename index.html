@@ -132,7 +132,7 @@ button,select,a,[onclick]{touch-action:manipulation;}
 
 /* פידבק חזותי ללחיצה במובייל */
 .event:active{opacity:0.78;transform:scale(0.97);transition:transform 0.1s,opacity 0.1s;}
-.summary-col:active{transform:translateY(-2px);transition:transform 0.1s;}
+.manager-card:active{transform:translateY(-2px);transition:transform 0.1s;}
 .login-btn:active{transform:translateY(1px) !important;filter:brightness(0.93) !important;}
 .today-star:active{transform:scale(0.88) !important;}
 .today-calendar:active{transform:scale(0.88) !important;}
@@ -224,7 +224,7 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
 .grid{width:100%;max-width:1200px;margin:0 auto;padding:10px;display:grid;grid-template-columns:repeat(7,1fr);gap:12px;grid-auto-rows: 1fr;}
 
 #view,
-.summary-wrap,
+.summary-wrapper,
 .instructor-cal-wrap,
 .grid {
   max-width: 100%;
@@ -400,68 +400,34 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
 }
 
 /* --- שינויים בעמוד הסיכום --- */
-.summary-wrap{width:100%;max-width:1200px;margin:0 auto;padding:10px;display:grid;gap:16px}
-.summary-top{background:#fff;border:1px solid var(--border);border-radius:16px;padding:20px;text-align:center}
-
-.summary-split{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(260px,300px));
-  gap:24px;
-  justify-content:center;
-  align-items:start;
-}
-
-.summary-col{
-  background:#ffffff;
-  border:1px solid #e5e7eb;
-  border-radius:20px;
-  padding:24px;
-  box-shadow:0 10px 25px rgba(0,0,0,0.06);
-  transition:0.2s ease;
-  cursor:pointer;
-  text-align:center;
-}
-
-.summary-col:hover{
-  transform:translateY(-4px);
-  box-shadow:0 16px 35px rgba(0,0,0,0.12);
-}
-
-/* טיפול בטקסט ארוך בתוך התיבות בסיכום */
-.summary-col .event {
-  width: 100%;
-  white-space: normal;      /* מאפשר לטקסט לרדת שורה */
-  word-wrap: break-word;    /* שובר מילים ארוכות אם צריך */
-  height: auto;
-  min-height: unset;
-  padding: 10px;
-  margin-top: 8px;
-}
-
-/* ===== SUMMARY KPI ===== */
-
-.summary-wrap{
-  width:100%;
-  max-width:1200px;
+.summary-wrapper{
+  max-width:900px;
   margin:0 auto;
-  padding:30px 20px;
+  text-align:center;
+  padding:40px 20px;
   display:grid;
-  gap:30px;
-}
-
-.summary-top{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
   gap:20px;
 }
 
-.kpi-card{
-  background:#ffffff;
-  border:1px solid #e5e7eb;
-  border-radius:18px;
-  padding:26px;
-  box-shadow:0 8px 20px rgba(0,0,0,0.06);
-  text-align:center;
+.kpi-total{
+  background:#fff;
+  border-radius:20px;
+  padding:40px;
+  box-shadow:0 12px 28px rgba(15,23,42,0.08);
+}
+
+.kpi-title{
+  font-size:14px;
+  color:#64748b;
+  font-weight:600;
+  margin-bottom:8px;
+}
+
+.kpi-number{
+  font-size:60px;
+  font-weight:800;
+  line-height:1.1;
+  color:#0f172a;
 }
 
 .kpi-label{
@@ -477,25 +443,95 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
   color:#0f172a;
 }
 
-/* ===== MANAGER CARDS ===== */
-
-.summary-col h3{
-  margin:0 0 12px 0;
-  font-size:18px;
-  font-weight:800;
-  border-bottom:2px solid #f59e0b;
-  padding-bottom:6px;
+.kpi-row{
+  display:flex;
+  justify-content:center;
+  gap:20px;
+  flex-wrap:wrap;
 }
 
-.summary-course-box{
-  margin-top:12px;
-  padding:14px 16px;
+.kpi-small{
+  min-width:200px;
+  max-width:240px;
+  width:100%;
+  border-radius:16px;
+  padding:25px 15px;
+}
+
+.kpi-small .kpi-number{
+  font-size:38px;
+}
+
+.blue{background:rgba(59,130,246,0.08);}
+.green{background:rgba(34,197,94,0.08);}
+.orange{background:rgba(249,115,22,0.08);}
+
+.alert-missing{
+  max-width:900px;
+  margin:20px auto 0;
+  padding:16px 20px;
   border-radius:14px;
-  background:linear-gradient(135deg,#f8fafc,#eef2f7);
-  font-size:14px;
-  font-weight:600;
+  background:rgba(239,68,68,0.08);
+  border-right:4px solid #ef4444;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  cursor:pointer;
+  text-align:right;
+}
+
+.alert-missing strong{
+  color:#991b1b;
+}
+
+.alert-subtext{
+  font-size:12px;
+  color:#7f1d1d;
+  margin-top:4px;
+}
+
+.managers-row{
+  display:flex;
+  justify-content:center;
+  gap:20px;
+  flex-wrap:wrap;
+  margin-top:28px;
+}
+
+.manager-card{
+  width:320px;
+  background:#fff;
+  border-radius:18px;
+  padding:22px 18px;
+  box-shadow:0 10px 24px rgba(15,23,42,0.08);
+  text-align:right;
+  cursor:pointer;
+}
+
+.manager-name{
+  font-size:18px;
+  font-weight:800;
+  margin-bottom:14px;
   color:#0f172a;
-  box-shadow:inset 0 0 0 1px #e2e8f0;
+}
+
+.manager-metric{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:8px 0;
+  border-top:1px solid #e2e8f0;
+  font-size:14px;
+  color:#334155;
+}
+
+.manager-metric:first-of-type{
+  border-top:0;
+}
+
+.manager-metric strong{
+  color:#0f172a;
+  font-size:18px;
 }
 
 .manager-overlay-bg{
@@ -622,20 +658,21 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
   }
 
   /* סיכום - התאמה למסך קטן */
-  .summary-split{
-    grid-template-columns:1fr;
-    justify-items:center;
-    gap:18px;
+  .kpi-total{
+    padding:30px 20px;
   }
 
-  .summary-col{
-    width:92%;
-    max-width:380px;
-    min-width:unset;
+  .kpi-number{
+    font-size:52px;
   }
 
-  .summary-wrap{
-    padding: 0 !important;
+  .manager-card{
+    width:100%;
+    max-width:320px;
+  }
+
+  .summary-wrapper{
+    padding:20px 10px;
   }
 
   /* פילטרים - עמודה אנכית במובייל */
@@ -1017,9 +1054,6 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
     padding: 20px 16px;
     max-height: 88vh;
   }
-  .summary-top {
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  }
 }
 
 /* ===== INSTRUCTOR COMPACT CALENDAR GRID ===== */
@@ -1258,10 +1292,10 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
   .nav {
     top: 77px;
   }
-  .kpi-value {
-    font-size: 32px;
+  .kpi-number {
+    font-size: 34px;
   }
-  .kpi-label {
+  .kpi-title {
     font-size: 12px;
   }
   .nav-arrows #title {
