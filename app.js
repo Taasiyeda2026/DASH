@@ -34,36 +34,44 @@ async function sha256(text){
 
 function showLogin(){
   document.getElementById('loginScreen').innerHTML = `
-    <div class="login-page">
-      <div class="login-bg-shapes">
-        <div class="login-shape login-shape-1"></div>
-        <div class="login-shape login-shape-2"></div>
-        <div class="login-shape login-shape-3"></div>
-      </div>
-      <div class="login-card">
-        <div class="login-logo-wrap">
-          <img src="logo.png" class="login-logo" onerror="this.style.display='none'" />
+    <div style="display:flex;flex-direction:column;min-height:100dvh;min-height:100vh;">
+      <header style="flex-shrink:0;">
+        <div class="header-inner">
+          <img src="logo.png" class="app-logo" onerror="this.style.display='none'" />
+          <strong>דשבורד פעילויות</strong>
         </div>
-        <div class="login-title">כניסה למערכת</div>
-        <div class="login-subtitle">דשבורד פעילויות</div>
-        <div class="login-form">
-          <div class="login-field">
-            <label class="login-label">מספר עובד</label>
-            <input id="empId" class="login-input" placeholder="הכנס מספר עובד" autocomplete="username" />
+      </header>
+      <div class="login-page" style="flex:1;min-height:0;">
+        <div class="login-bg-shapes">
+          <div class="login-shape login-shape-1"></div>
+          <div class="login-shape login-shape-2"></div>
+          <div class="login-shape login-shape-3"></div>
+        </div>
+        <div class="login-card">
+          <div class="login-logo-wrap">
+            <img src="logo.png" class="login-logo" onerror="this.style.display='none'" />
           </div>
-          <div class="login-field">
-            <label class="login-label">קוד אישי</label>
-            <input id="empCode" class="login-input" type="password" placeholder="הכנס קוד אישי" autocomplete="current-password" />
+          <div class="login-title">כניסה למערכת</div>
+          <div class="login-subtitle">דשבורד פעילויות</div>
+          <div class="login-form">
+            <div class="login-field">
+              <label class="login-label">מספר עובד</label>
+              <input id="empId" class="login-input" placeholder="הכנס מספר עובד" autocomplete="username" />
+            </div>
+            <div class="login-field">
+              <label class="login-label">קוד אישי</label>
+              <input id="empCode" class="login-input" type="password" placeholder="הכנס קוד אישי" autocomplete="current-password" />
+            </div>
+            <div class="login-remember">
+              <input type="checkbox" id="rememberMe" class="remember-checkbox" />
+              <label for="rememberMe" class="remember-label">זכור אותי</label>
+            </div>
+            <button class="login-btn" onclick="login()">
+              <span class="login-btn-text">כניסה</span>
+              <span class="login-btn-icon">←</span>
+            </button>
+            <div id="loginError" class="login-error"></div>
           </div>
-          <div class="login-remember">
-            <input type="checkbox" id="rememberMe" class="remember-checkbox" />
-            <label for="rememberMe" class="remember-label">זכור אותי</label>
-          </div>
-          <button class="login-btn" onclick="login()">
-            <span class="login-btn-text">כניסה</span>
-            <span class="login-btn-icon">←</span>
-          </button>
-          <div id="loginError" class="login-error"></div>
         </div>
       </div>
     </div>
