@@ -26,6 +26,7 @@
 }
 
 html, body {
+  height: 100%;
   margin: 0;
   padding: 0;
   width: 100%;
@@ -35,12 +36,9 @@ html, body {
 
 body {
   -webkit-text-size-adjust: 100%;
+  overflow: hidden;
   /* מניעת גלילה אופקית במגע (iOS/Android) */
   touch-action: pan-y;
-}
-
-body.no-scroll {
-  overflow: hidden;
 }
 
 img {
@@ -242,11 +240,14 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
 .nav-arrows #title{width:100%;max-width:240px;text-align:center;font-weight:700;font-size:15px;white-space:nowrap;}
 
 #view{
+  height: calc(100vh - 120px);
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
   padding: 24px 20px 150px 20px;
+  overflow-y: auto;
   overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
 }
 
 .grid{width:100%;max-width:1200px;margin:0 auto;padding:10px;display:grid;grid-template-columns:repeat(7,1fr);gap:12px;grid-auto-rows: 1fr;}
