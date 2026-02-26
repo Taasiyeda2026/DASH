@@ -339,10 +339,11 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
 }
 
 .view-week .day-column.today .day-number{
-  background:#2563eb;
-  color:#ffffff;
-  border-radius:999px;
-  padding:4px 10px;
+  background:transparent !important;
+  color:inherit !important;
+  border-radius:0 !important;
+  padding:0 !important;
+  box-shadow:none !important;
   font-weight:700;
 }
 
@@ -1253,10 +1254,11 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
   writing-mode: vertical-rl;
   text-orientation: mixed;
 }
-.view-month .instructor-cal-cell {
+.view-month .instructor-cal-cell,
+.view-month .calendar-day {
   background: #fff;
   border:1px solid rgba(15,23,42,0.06);
-  border-radius: 14px;
+  border-radius: 18px;
   padding: 3px 2px;
   min-height: 64px;
   display: flex;
@@ -1270,9 +1272,11 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
   background: transparent;
   border-color: transparent;
 }
-.view-month .instructor-cal-cell.ic-today {
+.view-month .instructor-cal-cell.ic-today,
+.view-month .calendar-day.is-today {
+  background:#eaf2ff;
+  border:1px solid rgba(59,130,246,0.25) !important;
   box-shadow: none !important;
-  border-color:rgba(15,23,42,0.06) !important;
 }
 .view-month .instructor-cal-cell.ic-has-events {
   cursor: pointer;
@@ -1296,24 +1300,47 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
   padding: 1px 0;
 }
 .view-month .instructor-cal-day-num.ic-today-num {
-  display: inline-block;
-  background: #2563eb;
-  color: #fff;
-  border-radius: 999px;
-  padding: 4px 10px;
+  background: transparent;
+  color: inherit;
+  border-radius: 0;
+  padding: 1px 0;
   font-weight: 700;
-  margin: 0 auto;
 }
-.view-month .instructor-cal-pill {
-  border-radius: 999px;
+.view-month .instructor-cal-pill,
+.view-month .calendar-event {
+  position:relative;
+  background:#ffffff;
+  border-radius:16px;
+  border:1px solid rgba(15,23,42,0.06);
+  box-shadow:0 6px 18px rgba(0,0,0,0.06);
+  overflow:hidden;
   padding: 6px 10px;
   font-size: 13px;
   font-weight: 600;
   color: #1e293b;
   white-space: nowrap;
-  overflow: hidden;
   text-overflow: ellipsis;
   line-height: 1;
+}
+
+.view-month .calendar-event::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:var(--instructor-color, #93c5fd);
+  opacity:0.10;
+  pointer-events:none;
+}
+
+.view-month .calendar-event::after{
+  content:"";
+  position:absolute;
+  top:0;
+  right:0;
+  width:5px;
+  height:100%;
+  background:var(--instructor-color, #3b82f6);
+  pointer-events:none;
 }
 .view-month .instructor-cal-more {
   font-size: 8px;
