@@ -2454,6 +2454,21 @@ const sideBackdrop = document.getElementById('side-backdrop');
 let _scrollLocked = false;
 const _scrollLockSources = new Set();
 
+function _syncScrollLocks() {
+  const isSideOpen = !!(side && side.classList.contains('open'));
+  const isDaySheetOpen = !!(daySheet && !daySheet.classList.contains('day-sheet-hidden'));
+
+  if (!isMobile() || !isSideOpen) {
+    _scrollLockSources.delete('side-panel');
+  }
+
+  if (!isDaySheetOpen) {
+    _scrollLockSources.delete('day-sheet');
+  }
+
+  _applyScrollLockState();
+}
+
 function _applyScrollLockState() {
   const shouldLock = _scrollLockSources.size > 0;
   if (shouldLock && !_scrollLocked) {
@@ -2483,12 +2498,16 @@ function openSidePanel(){
   if(isMobile()){
     sideBackdrop.classList.add('active');
     _lockScroll('side-panel');
+    return;
   }
+
+  _syncScrollLocks();
 }
 function closeSidePanel(){
   side.classList.remove('open');
   sideBackdrop.classList.remove('active');
   _unlockScroll('side-panel');
+  _syncScrollLocks();
 }
 
 document.getElementById('closeSide').onclick = closeSidePanel;
@@ -2505,6 +2524,10 @@ document.addEventListener('keydown', e => {
     closeDaySheet();
   }
 });
+
+window.addEventListener('resize', _syncScrollLocks);
+window.addEventListener('orientationchange', _syncScrollLocks);
+document.addEventListener('visibilitychange', _syncScrollLocks);
 
 /* ===== סגירת bottom-sheet בהחלקה למטה (swipe down) ===== */
 (function(){
@@ -2524,6 +2547,7 @@ document.addEventListener('keydown', e => {
 })();
 
 initFromRawData();
+_syncScrollLocks();
 
 window.addEventListener('popstate', (e)=>{
   if(isMobile() && (window.mode === 'month' || window.mode === 'week')){
