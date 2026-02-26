@@ -281,23 +281,27 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
 .event-hour,
 .event-time{font-size:11px;opacity:0.9;font-weight:600;color:#334155;background:#f1f5f9;padding:2px 6px;border-radius:999px;align-self:flex-start;margin-bottom:4px;position:relative;z-index:1;}
 
-/* שבועי בלבד – ליטוש שקט למנהלים */
-.view-week{
+/* ליטוש שקט למנהלים – שבועי וחודשי */
+.view-week,
+.view-month{
   background:transparent;
 }
 
-#view.week-mode{
+#view.week-mode,
+#view.view-month{
   padding-top: 30px;
 }
 
-.view-week .grid{
+.view-week .grid,
+.view-month .grid{
   gap: 12px;
   background: transparent;
   border-radius: 14px;
   overflow: visible;
 }
 
-.view-week .day-column{
+.view-week .day-column,
+.view-month .day-column{
   background:#ffffff;
   border-radius:18px;
   border:1px solid #e5e7eb;
@@ -306,18 +310,21 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
   min-height: 180px;
 }
 
-.view-week .day-column:hover{
+.view-week .day-column:hover,
+.view-month .day-column:hover{
   background:#ffffff;
 }
 
-.view-week .day-column.today{
+.view-week .day-column.today,
+.view-month .day-column.today{
   background:#ffffff;
   border-top:none !important;
   box-shadow:0 0 0 3px #bae6fd;
   border-radius:18px;
 }
 
-.view-week .day-column.today .day-header{
+.view-week .day-column.today .day-header,
+.view-month .day-column.today .day-header{
   background:transparent;
   color:inherit;
   border-bottom:1px solid var(--border);
@@ -338,7 +345,8 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
   background:none !important;
 }
 
-.view-week .day-column.today .day-number{
+.view-week .day-column.today .day-number,
+.view-month .day-column.today .day-number{
   background:transparent !important;
   color:inherit !important;
   border-radius:0 !important;
@@ -347,22 +355,27 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
   font-weight:700;
 }
 
-.view-week .schedule-card:hover{
+.view-week .schedule-card:hover,
+.view-month .schedule-card:hover{
   transform:translateY(-1px);
   box-shadow:0 10px 24px rgba(0,0,0,0.08);
 }
 
-.view-week .day-column.today .schedule-card{
+.view-week .day-column.today .schedule-card,
+.view-month .day-column.today .schedule-card{
   background:#ffffff;
 }
 
 .view-week .schedule-card .title,
+.view-month .schedule-card .title,
 .event-title{font-size:14px;font-weight:800;color:#0f172a;margin-top:2px;position:relative;z-index:1;}
 
 .view-week .schedule-card .meta,
+.view-month .schedule-card .meta,
 .event-subtitle{font-size:12px;color:#475569;margin-top:2px;position:relative;z-index:1;}
 
-.view-week .group-count{
+.view-week .group-count,
+.view-month .group-count{
   position:absolute;
   top:8px;
   left:8px;
@@ -377,10 +390,13 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
   transition:0.2s ease;
 }
 
-.view-week .group-count:hover{ background:#e2e8f0; }
-.view-week .group-count:active{ transform:scale(0.96); }
+.view-week .group-count:hover,
+.view-month .group-count:hover{ background:#e2e8f0; }
+.view-week .group-count:active,
+.view-month .group-count:active{ transform:scale(0.96); }
 
-.view-week .empty-day{
+.view-week .empty-day,
+.view-month .empty-day{
   opacity:0.6;
   font-size:13px;
   padding:16px 8px;
@@ -1207,7 +1223,7 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
 }
 
 .view-month{
-  background:#f6f8fb;
+  /* background now handled in shared view styles above */
 }
 
 /* ===== INSTRUCTOR COMPACT CALENDAR GRID ===== */
@@ -1379,6 +1395,15 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
     box-shadow: none !important;
     border: 2px solid #22d3ee !important;
     background: #fff !important;
+  }
+  /* Day-column cards inside openMobileWeekDetail */
+  .view-month .day-column{
+    min-height: auto;
+    border-radius: 16px;
+    padding: 10px;
+  }
+  .view-month .day-column.today{
+    box-shadow: 0 0 0 2px #bae6fd;
   }
 }
 
