@@ -404,16 +404,16 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
   max-width:900px;
   margin:0 auto;
   text-align:center;
-  padding:40px 20px;
+  padding:60px 20px;
   display:grid;
   gap:20px;
 }
 
 .kpi-total{
-  background:#fff;
-  border-radius:20px;
-  padding:40px;
-  box-shadow:0 12px 28px rgba(15,23,42,0.08);
+  background:#ffffff;
+  border-radius:24px;
+  padding:32px 20px;
+  box-shadow:0 12px 40px rgba(0,0,0,0.06);
 }
 
 .kpi-title{
@@ -428,6 +428,11 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
   font-weight:800;
   line-height:1.1;
   color:#0f172a;
+}
+
+.kpi-total .kpi-number{
+  font-size:64px;
+  font-weight:800;
 }
 
 .kpi-label{
@@ -452,14 +457,21 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
 
 .kpi-small{
   min-width:200px;
-  max-width:240px;
+  max-width:220px;
   width:100%;
   border-radius:16px;
   padding:25px 15px;
+  font-weight:600;
+  backdrop-filter:blur(6px);
 }
 
 .kpi-small .kpi-number{
-  font-size:38px;
+  font-size:36px;
+}
+
+.kpi-small .kpi-title,
+.kpi-small .kpi-number{
+  color:#1e293b;
 }
 
 .blue{background:rgba(59,130,246,0.08);}
@@ -468,26 +480,13 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
 
 .alert-missing{
   max-width:900px;
-  margin:20px auto 0;
+  margin:24px auto 0;
   padding:16px 20px;
-  border-radius:14px;
+  border-radius:16px;
   background:rgba(239,68,68,0.08);
   border-right:4px solid #ef4444;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  cursor:pointer;
-  text-align:right;
-}
-
-.alert-missing strong{
+  font-weight:600;
   color:#991b1b;
-}
-
-.alert-subtext{
-  font-size:12px;
-  color:#7f1d1d;
-  margin-top:4px;
 }
 
 .managers-row{
@@ -500,12 +499,17 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
 
 .manager-card{
   width:320px;
-  background:#fff;
-  border-radius:18px;
-  padding:22px 18px;
-  box-shadow:0 10px 24px rgba(15,23,42,0.08);
+  background:#ffffff;
+  border-radius:20px;
+  padding:24px 20px;
+  box-shadow:0 10px 32px rgba(0,0,0,0.07);
+  border-right:4px solid #3b82f6;
   text-align:right;
   cursor:pointer;
+}
+
+.manager-card.secondary{
+  border-right-color:#22c55e;
 }
 
 .manager-name{
@@ -663,7 +667,7 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
   }
 
   .kpi-number{
-    font-size:52px;
+    font-size:48px;
   }
 
   .manager-card{
@@ -672,7 +676,7 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
   }
 
   .summary-wrapper{
-    padding:20px 10px;
+    padding:40px 10px;
   }
 
   /* פילטרים - עמודה אנכית במובייל */
