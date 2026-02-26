@@ -1489,50 +1489,61 @@ function renderSummary(){
 
   titleEl.textContent = currentMonthStart.toLocaleString('he-IL',{month:'long',year:'numeric'});
 
-  const wrap = document.createElement('div'); wrap.className = 'summary-wrap';
+  const wrap = document.createElement('div');
+  wrap.className = 'summary-wrapper';
   wrap.innerHTML = `
-    <div class="summary-top">
-
-      <div class="kpi-card">
-        <div class="kpi-label">סה"כ קורסים פעילים</div>
-        <div class="kpi-value">${totalCourses}</div>
-      </div>
-
-      <div class="kpi-card">
-        <div class="kpi-label">פעילים החודש</div>
-        <div class="kpi-value">${activeThisMonth}</div>
-      </div>
-
-      <div class="kpi-card">
-        <div class="kpi-label">נפתחים בעתיד</div>
-        <div class="kpi-value">${startingFuture}</div>
-      </div>
-
-      <div class="kpi-card">
-        <div class="kpi-label">סדנאות וסיורים</div>
-        <div class="kpi-value">${dailyCount}</div>
-      </div>
-
-      ${missingInstructorCount > 0 ? `
-      <div class="kpi-card missing-card"
-           style="border:2px solid #dc2626; cursor:pointer;">
-        <div class="kpi-label" style="color:#dc2626">קורסים ללא מדריך</div>
-        <div class="kpi-value" style="color:#dc2626">${missingInstructorCount}</div>
-      </div>` : ''}
-
+    <div class="kpi-total">
+      <div class="kpi-title">סה"כ קורסים פעילים</div>
+      <div class="kpi-number">${totalCourses}</div>
     </div>
+
+    <div class="kpi-row">
+      <div class="kpi-small blue">
+        <div class="kpi-title">פעילים החודש</div>
+        <div class="kpi-number">${activeThisMonth}</div>
+      </div>
+
+      <div class="kpi-small green">
+        <div class="kpi-title">נפתחים בעתיד</div>
+        <div class="kpi-number">${startingFuture}</div>
+      </div>
+
+      <div class="kpi-small orange">
+        <div class="kpi-title">סדנאות וסיורים</div>
+        <div class="kpi-number">${dailyCount}</div>
+      </div>
+    </div>
+
+    ${missingInstructorCount > 0 ? `
+      <div class="alert-missing" role="button" tabindex="0">
+        <div>
+          <strong>⚠ חסרים ${missingInstructorCount} מדריכים לשיבוץ</strong>
+          <div class="alert-subtext">לחץ לצפייה בקורסים</div>
+        </div>
+        <span>›</span>
+      </div>
+    ` : ''}
   `;
 
-  const missingCard = wrap.querySelector('.missing-card');
-  if (missingCard) {
-    missingCard.addEventListener('click', (e) => {
+  const missingAlert = wrap.querySelector('.alert-missing');
+  if (missingAlert) {
+    missingAlert.addEventListener('click', (e) => {
       e.stopPropagation();
       openMissingCourses(currentYear, currentMonth);
     });
+    missingAlert.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        openMissingCourses(currentYear, currentMonth);
+      }
+    });
   }
 
-  const managers = [...new Set(courses.map(r=>getCourseManager(r)).filter(Boolean))];
-  const split = document.createElement('div'); split.className = 'summary-split';
+  const managers = [...new Set(courses.map(r=>getCourseManager(r)).filter(Boolean))]
+    .sort((a,b)=>a.localeCompare(b,'he'))
+    .slice(0,2);
+  const split = document.createElement('div');
+  split.className = 'managers-row';
 
   managers.forEach(mgr=>{
     const mgrCourses = courses.filter(r=>getCourseManager(r) === mgr);
@@ -1543,16 +1554,26 @@ function renderSummary(){
       isCourseEndingInMonth(r, currentYear, currentMonth)
     ).sort((a,b)=>parseDate(a.End)-parseDate(b.End));
 
-    const col = document.createElement('div'); col.className = 'summary-col';
+    const mgrFuture = mgrCourses.filter(r => {
+      const start = getCourseStartDate(r);
+      return start && start >= nextMonthStart;
+    }).length;
+
+    const col = document.createElement('div'); col.className = 'manager-card';
     col.dataset.manager = mgr;
     col.innerHTML = `
-      <div style="text-align:center;margin-bottom:10px">
-        <div style="font-size:13px;color:#64748b">קורסים פעילים</div>
-        <div style="font-size:26px;font-weight:800">${mgrActive}</div>
+      <div class="manager-name">${mgr}</div>
+      <div class="manager-metric">
+        <span>קורסים פעילים</span>
+        <strong>${mgrActive}</strong>
       </div>
-      <div class="manager-header" style="text-align:center; border-bottom:2px solid #f59e0b; margin-bottom:12px;"><h3>${mgr}</h3></div>
-      <div class="summary-course-box">
-        קורסים שמסתיימים החודש: ${mgrEndedThisMonth.length}
+      <div class="manager-metric">
+        <span>מסתיימים החודש</span>
+        <strong>${mgrEndedThisMonth.length}</strong>
+      </div>
+      <div class="manager-metric">
+        <span>נפתחים בעתיד</span>
+        <strong>${mgrFuture}</strong>
       </div>`;
 
     split.appendChild(col);
