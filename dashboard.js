@@ -2415,7 +2415,7 @@ function openDaySheet(title, htmlContent){
   daySheetContent.innerHTML = htmlContent || '';
   daySheet.classList.remove('day-sheet-hidden');
   daySheetBackdrop.classList.remove('day-sheet-hidden');
-  document.body.style.overflow = 'hidden';
+  _lockScroll();
   applyNotesBoxColor();
 }
 
@@ -2423,22 +2423,41 @@ function closeDaySheet(){
   if(!daySheet || !daySheetBackdrop) return;
   daySheet.classList.add('day-sheet-hidden');
   daySheetBackdrop.classList.add('day-sheet-hidden');
-  document.body.style.overflow = '';
+  _unlockScroll();
 }
 
 const sideBackdrop = document.getElementById('side-backdrop');
+
+let _scrollLockY = 0;
+let _scrollLocked = false;
+function _lockScroll() {
+  if (_scrollLocked) return;
+  _scrollLockY = window.scrollY;
+  document.body.style.position = 'fixed';
+  document.body.style.top = -_scrollLockY + 'px';
+  document.body.style.width = '100%';
+  _scrollLocked = true;
+}
+function _unlockScroll() {
+  if (!_scrollLocked) return;
+  document.body.style.position = '';
+  document.body.style.top = '';
+  document.body.style.width = '';
+  window.scrollTo(0, _scrollLockY);
+  _scrollLocked = false;
+}
 
 function openSidePanel(){
   side.classList.add('open');
   if(isMobile()){
     sideBackdrop.classList.add('active');
-    document.body.style.overflow = 'hidden';
+    _lockScroll();
   }
 }
 function closeSidePanel(){
   side.classList.remove('open');
   sideBackdrop.classList.remove('active');
-  document.body.style.overflow = '';
+  _unlockScroll();
 }
 
 document.getElementById('closeSide').onclick = closeSidePanel;
