@@ -646,7 +646,7 @@ async function initFromRawData(){
   updateSchedulingButtonVisibility();
   updateEndDatesButtonVisibility();
 
-  window.mode='week';
+  window.mode='month';
 
   if(userRole === 'instructor'){
     await loadSchedulingJson();
@@ -740,7 +740,7 @@ function initSummaryMonths(){
 function render(){
 
   enforceInstructorMode();
-  view.innerHTML=''; view.style.display=''; view.style.flexDirection=''; view.style.alignItems=''; view.style.justifyContent=''; view.style.width=''; view.scrollTop=0; view.classList.toggle('week-mode', window.mode === 'week');
+  view.innerHTML=''; view.style.display=''; view.style.flexDirection=''; view.style.alignItems=''; view.style.justifyContent=''; view.style.width=''; view.scrollTop=0; window.scrollTo(0,0); document.documentElement.scrollTop=0; document.body.scrollTop=0; view.classList.toggle('week-mode', window.mode === 'week');
   view.classList.toggle('view-week', window.mode === 'week');
   view.classList.toggle('view-month', window.mode === 'month');
   closeSidePanel();
