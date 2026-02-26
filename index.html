@@ -165,18 +165,11 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
   background: linear-gradient(135deg, #fbbf24, #f59e0b);
   cursor: pointer;
   border: none;
-  clip-path: polygon(
-    50% 0%,
-    61% 35%,
-    98% 35%,
-    68% 57%,
-    79% 91%,
-    50% 70%,
-    21% 91%,
-    32% 57%,
-    2% 35%,
-    39% 35%
-  );
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
   transition: all 0.18s ease;
   box-shadow: 0 4px 10px rgba(0,0,0,0.15);
 }
@@ -198,19 +191,13 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
   background: linear-gradient(135deg, #3b82f6, #2563eb);
   cursor: pointer;
   border: none;
-  clip-path: inset(0 round 10px);
-  transition: all 0.18s ease;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-}
-
-.today-calendar::before {
-  content: "📅";
-  font-size: 18px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  width:100%;
-  height:100%;
+  padding: 0;
+  transition: all 0.18s ease;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
 }
 
 .today-calendar:hover {
@@ -1318,8 +1305,8 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
   </div>
   <div class="nav-arrows">
     <button id="prev" aria-label="הקודם">▶</button>
-    <button id="goToday" class="today-star" title="היום" aria-label="היום"></button>
-    <button id="goCalendar" class="today-calendar" aria-label="חודש" title="חודש"></button>
+    <button id="goToday" class="today-star" title="היום" aria-label="היום"><img src="icon-today.svg" width="22" height="22" alt=""></button>
+    <button id="goCalendar" class="today-calendar" aria-label="חודש" title="חודש"><img src="icon-calendar.svg" width="22" height="22" alt=""></button>
     <span id="title"></span>
     <button id="next" aria-label="הבא">◀</button>
   </div>
