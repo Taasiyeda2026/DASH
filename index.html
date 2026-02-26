@@ -1215,7 +1215,7 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
 .instructor-cal-cell {
   background: #fff;
   border: 1px solid #e2e8f0;
-  border-radius: 6px;
+  border-radius: 14px;
   padding: 3px 2px;
   min-height: 64px;
   display: flex;
@@ -1230,11 +1230,17 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
   border-color: transparent;
 }
 .instructor-cal-cell.ic-today {
-  border: 3px solid #3b82f6;
-  background: #eff6ff;
+  box-shadow: none !important;
+  border-color: #e5e7eb !important;
+  background: #fff;
 }
 .instructor-cal-cell.ic-has-events {
   cursor: pointer;
+}
+.instructor-cal-cell.ic-has-events:hover {
+  background: #f8fafc;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+  transform: translateY(-1px);
 }
 .instructor-cal-cell.ic-has-events:active {
   opacity: 0.7;
@@ -1250,28 +1256,24 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
   padding: 1px 0;
 }
 .instructor-cal-day-num.ic-today-num {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  display: inline-block;
   background: #2563eb;
   color: #fff;
-  border-radius: 50%;
-  width: 18px;
-  height: 18px;
-  font-size: 10px;
-  font-weight: 800;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-weight: 700;
   margin: 0 auto;
 }
 .instructor-cal-pill {
-  border-radius: 3px;
-  padding: 1px 3px;
-  font-size: 9px;
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 13px;
   font-weight: 600;
   color: #1e293b;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  line-height: 1.4;
+  line-height: 1;
 }
 .instructor-cal-more {
   font-size: 8px;
@@ -1382,7 +1384,7 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
 /* Desktop: cells a bit taller */
 @media(min-width:800px) {
   .instructor-cal-wrap {
-    padding: 8px 8px 40px;
+    padding: 8px 8px 34px;
     max-width: 1200px;
     margin: 0 auto;
   }
@@ -1397,24 +1399,37 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
     padding: 5px 4px;
     gap: 3px;
   }
-  .instructor-cal-pill {
-    font-size: 11px;
-    padding: 2px 5px;
-    border-radius: 4px;
-  }
   .instructor-cal-day-num {
     font-size: 14px;
     padding: 2px 0;
   }
   .instructor-cal-day-num.ic-today-num {
-    width: 24px;
-    height: 24px;
+    min-width: 24px;
     font-size: 13px;
   }
   .instructor-cal-header-row > div {
     font-size: 12px;
     padding: 4px 0 8px;
   }
+}
+
+.today-icon {
+  width: 18px;
+  height: 18px;
+  opacity: 0.9;
+  margin: 0 6px;
+  vertical-align: middle;
+}
+
+.kpi-value.summary-number {
+  font-size: 30px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.kpi-label.summary-label {
+  font-size: 13px;
+  opacity: 0.7;
 }
 
 /* ===== MANAGER MOBILE WEEK GRID ===== */

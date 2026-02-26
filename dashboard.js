@@ -727,7 +727,8 @@ function renderMonthView(){
 function renderInstructorGridMonth(){
   const y = currentDate.getFullYear();
   const m = currentDate.getMonth();
-  titleEl.textContent = new Date(y,m,1).toLocaleString('he-IL',{month:'long',year:'numeric'});
+  const monthTitle = new Date(y,m,1).toLocaleString('he-IL',{month:'long',year:'numeric'});
+  titleEl.innerHTML = `${monthTitle} <img class="today-icon" src="icon-today.svg" alt="TODAY">`;
 
   const data = applyFilters();
   const today = new Date(); today.setHours(0,0,0,0);
@@ -886,16 +887,16 @@ function renderInstructorGridMonth(){
 
     personalSummary.innerHTML = `
       <div class="kpi-card" style="padding:12px 10px;">
-        <div class="kpi-label">קורסים פעילים</div>
-        <div class="kpi-value">${activeCourses}</div>
+        <div class="kpi-label summary-label">קורסים פעילים</div>
+        <div class="kpi-value summary-number">${activeCourses}</div>
       </div>
       <div class="kpi-card" style="padding:12px 10px;">
-        <div class="kpi-label">סדנאות/סיורים</div>
-        <div class="kpi-value">${dailyActivitiesCount}</div>
+        <div class="kpi-label summary-label">סדנאות/סיורים</div>
+        <div class="kpi-value summary-number">${dailyActivitiesCount}</div>
       </div>
       <div class="kpi-card" style="padding:12px 10px;">
-        <div class="kpi-label">ימי פעילות</div>
-        <div class="kpi-value">${distinctDays}</div>
+        <div class="kpi-label summary-label">ימי פעילות</div>
+        <div class="kpi-value summary-number">${distinctDays}</div>
       </div>
     `;
 
