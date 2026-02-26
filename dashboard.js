@@ -740,7 +740,7 @@ function initSummaryMonths(){
 function render(){
 
   enforceInstructorMode();
-  view.innerHTML=''; view.style.display='flex'; view.style.flexDirection='column'; view.style.alignItems='center'; view.style.justifyContent='center'; view.style.width='100%'; view.classList.toggle('week-mode', window.mode === 'week');
+  view.innerHTML=''; view.style.display=''; view.style.flexDirection=''; view.style.alignItems=''; view.style.justifyContent=''; view.style.width=''; view.classList.toggle('week-mode', window.mode === 'week');
   view.classList.toggle('view-week', window.mode === 'week');
   view.classList.toggle('view-month', window.mode === 'month');
   closeSidePanel();
@@ -1664,7 +1664,7 @@ function renderSummary(){
   titleEl.textContent = currentMonthStart.toLocaleString('he-IL',{month:'long',year:'numeric'});
 
   const wrap = document.createElement('div');
-  wrap.className = 'summary-wrapper'; wrap.style.width='100%'; wrap.style.maxWidth='1200px'; wrap.style.display='flex'; wrap.style.flexDirection='column'; wrap.style.alignItems='center'; wrap.style.margin='0 auto'; wrap.style.gap='24px';
+  wrap.className = 'summary-wrapper'; wrap.style.maxWidth='1200px';
   wrap.innerHTML = `
     <div class="kpi-total">
       <div class="kpi-title">סה"כ קורסים פעילים</div>
@@ -1699,10 +1699,6 @@ function renderSummary(){
   
   const split = document.createElement('div');
   split.className = 'managers-row';
-  split.style.display = 'grid';
-  split.style.display='flex'; split.style.flexWrap='wrap'; split.style.justifyContent='center'; split.style.gap='24px'; split.style.width='100%';
-  split.style.justifyContent = 'center';
-  split.style.gap = '20px';
   split.style.marginTop = '20px';
 
   managers.forEach((mgr,index)=>{

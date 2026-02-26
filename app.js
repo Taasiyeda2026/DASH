@@ -173,7 +173,7 @@ function startApp(jsonData, role, hash, remember){
   window.EmployeeID = sessionStorage.getItem('dash_empId') || '';
 
   document.getElementById('loginScreen').style.display='none';
-  document.getElementById('app').style.display='block';
+  document.getElementById('app').style.display='flex';
 
   // החזרת גלילה לראש הדף לאחר כניסה (במובייל הדפדפן יכול להישאר גלול למטה)
   window.scrollTo(0, 0);
