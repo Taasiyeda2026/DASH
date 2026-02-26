@@ -213,13 +213,13 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
 #btnEndDates.active{background:#fce7f3;border-color:#f9a8d4}
 
 .nav{position:sticky;top:0;background:#fff;border-bottom:1px solid var(--border);z-index:10;display:flex;gap:8px;justify-content:center;align-items:center;flex-wrap:wrap;margin:0;padding:10px}
-.week-header{position:sticky;top:0;z-index:20;background:#ffffff;padding-top:10px;padding-bottom:10px;}
+.week-header{position:sticky;top:0;z-index:10;background:#ffffff;padding-top:10px;padding-bottom:10px;}
 
 /* ===== STICKY WRAPPER – header + nav קבועים בגלילה ===== */
 .mobile-sticky-wrapper{
   position:sticky;
   top:0;
-  z-index:30; /* מתחת לסייד-פאנל (50), לאוברליי (100) ולשיט (9999) */
+  z-index:10;
   background:#fff;
   box-shadow:0 1px 4px rgba(0,0,0,0.06);
   /* מניעת גלילה אופקית שנגרמת מהעטיפה */
@@ -431,7 +431,7 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
 }
 
 /* side panel */
-.side,.side-panel{position:fixed;top:0;left:0;width:320px;max-width:100%;height:100%;background:#fff;box-shadow:-6px 0 24px rgba(0,0,0,.18);transform:translateX(-100%);transition:.28s ease;z-index:50;padding:0;overflow:hidden;display:flex;flex-direction:column;}
+.side,.side-panel{position:fixed;top:0;left:0;width:320px;max-width:100%;height:100%;background:#fff;box-shadow:-6px 0 24px rgba(0,0,0,.18);transform:translateX(-100%);transition:.28s ease;z-index:200;padding:0;overflow:hidden;display:flex;flex-direction:column;}
 #side {
   max-width: 100%;
   pointer-events: none;
@@ -742,7 +742,7 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
   inset:0;
   background:rgba(15,23,42,0.55);
   backdrop-filter:blur(4px);
-  z-index:99;
+  z-index:390;
   animation:fadeIn .2s ease;
 }
 
@@ -756,7 +756,7 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
   top:50%;
   left:50%;
   transform:translate(-50%,-50%);
-  z-index:100;
+  z-index:400;
   width:100%;
   max-width:600px;
   background:linear-gradient(135deg,#ffffff,#f8fafc);
@@ -1002,7 +1002,7 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
     border-radius: 20px 20px 0 0 !important;
     box-shadow: 0 -6px 32px rgba(0,0,0,.22) !important;
     transition: transform .32s cubic-bezier(.32,.72,0,1) !important;
-    z-index: 1100 !important;
+    z-index: 200 !important;
   }
   .side.open, .side-panel.open {
     transform: translateY(0) !important;
@@ -1152,12 +1152,16 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
 }
 
 /* ===== SIDE PANEL BACKDROP (mobile bottom sheet) ===== */
+body.no-scroll {
+  overflow: hidden;
+}
+
 #side-backdrop {
   display: none;
   position: fixed;
   inset: 0;
   background: rgba(15,23,42,.45);
-  z-index: 49;
+  z-index: 190;
   pointer-events: none;
   backdrop-filter: blur(2px);
   -webkit-backdrop-filter: blur(2px);
@@ -1167,7 +1171,7 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
   pointer-events: auto;
 }
 @media(max-width:800px) {
-  #side-backdrop { z-index: 1050; }
+  #side-backdrop { z-index: 190; }
 }
 
 /* ===== MANAGER OVERLAY CLOSE BUTTON ===== */
@@ -1440,7 +1444,7 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
   position: fixed;
   inset: 0;
   background: rgba(0,0,0,0.35);
-  z-index: 9998;
+  z-index: 290;
 }
 
 .day-sheet {
@@ -1452,7 +1456,7 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
   border-top-left-radius: 18px;
   border-top-right-radius: 18px;
   box-shadow: 0 -12px 40px rgba(0,0,0,0.12);
-  z-index: 9999;
+  z-index: 300;
   max-height: 82vh;
   transform: translateY(12px);
   opacity: 0;
