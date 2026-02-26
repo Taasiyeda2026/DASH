@@ -1666,7 +1666,7 @@ function renderSummary(){
   const wrap = document.createElement('div');
   wrap.className = 'summary-wrapper'; wrap.style.width='100%'; wrap.style.maxWidth='1200px'; wrap.style.display='flex'; wrap.style.flexDirection='column'; wrap.style.alignItems='center'; wrap.style.margin='0 auto'; wrap.style.gap='24px';
   wrap.innerHTML = `
-    <div class="kpi-total" style="margin: 0 auto 24px auto; text-align: center;">
+    <div class="kpi-total">
       <div class="kpi-title">סה"כ קורסים פעילים</div>
       <div class="kpi-number">${totalCourses}</div>
     </div>
