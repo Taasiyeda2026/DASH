@@ -796,38 +796,7 @@ function renderMonthView(){
 }
 
 function renderInstructorMobileWeek(){
-  const weekStart = new Date(currentDate);
-  weekStart.setDate(currentDate.getDate() - currentDate.getDay());
-  weekStart.setHours(0,0,0,0);
-
-  const weekEnd = new Date(weekStart);
-  weekEnd.setDate(weekStart.getDate() + 6);
-
-  titleEl.textContent = `${weekStart.toLocaleDateString('he-IL')} – ${weekEnd.toLocaleDateString('he-IL')}`;
-
-  const data = applyFilters();
-  const container = document.createElement('div');
-  container.style.cssText = 'display:flex;flex-direction:column;gap:12px;padding:10px 10px 200px;';
-
-  for(let i = 0; i < 7; i++){
-    const date = new Date(weekStart);
-    date.setDate(weekStart.getDate() + i);
-    container.appendChild(buildDay(date, data));
-  }
-
-  view.appendChild(container);
-
-  requestAnimationFrame(() => {
-    const todayEl = container.querySelector('.today');
-    if(todayEl){
-      const headerHeight = document.querySelector('.mobile-sticky-wrapper')?.offsetHeight || 0;
-      const y = todayEl.getBoundingClientRect().top + window.scrollY - headerHeight - 10;
-      window.scrollTo({
-        top: y,
-        behavior: 'auto'
-    });
-  }
-  });
+  renderMobileMonthAccordion(applyFilters());
 }
 
 function renderInstructorGridMonth(){
@@ -1071,10 +1040,11 @@ function renderMobileWeekView(){
   requestAnimationFrame(() => {
     const todayEl = container.querySelector('.today');
     if(todayEl){
-      const headerHeight = document.querySelector('.mobile-sticky-wrapper')?.offsetHeight || 0;
-      const y = todayEl.getBoundingClientRect().top + window.scrollY - headerHeight - 10;
-      window.scrollTo({
-        top: y,
+      const viewEl = document.getElementById('view');
+      const rect = todayEl.getBoundingClientRect();
+      const viewRect = viewEl.getBoundingClientRect();
+      viewEl.scrollTo({
+        top: viewEl.scrollTop + rect.top - viewRect.top - 10,
         behavior: 'auto'
     });
   }
@@ -1108,12 +1078,12 @@ function initMobileAccordion(){
 }
 
 
-function renderMobileMonth(){
+function renderMobileMonthAccordion(data){
   const y = currentDate.getFullYear();
   const m = currentDate.getMonth();
   titleEl.textContent = new Date(y,m,1).toLocaleString('he-IL',{month:'long',year:'numeric'});
 
-  const data  = applyFilters();
+  if(!data) data = applyFilters();
   const first = new Date(y,m,1);
   const last  = new Date(y,m+1,0);
   const start = new Date(first);
@@ -1123,9 +1093,9 @@ function renderMobileMonth(){
   const today = new Date(); today.setHours(0,0,0,0);
 
   const container = document.createElement('div');
-  container.style.cssText = 'display:flex;flex-direction:column;gap:14px;padding:10px 10px 80px;';
+  container.className = 'mobile-accordion';
 
-  let todayWeekStart = null;
+  let todayWeekEl = null;
   let cursor = new Date(start);
 
   while(cursor <= last){
@@ -1134,75 +1104,90 @@ function renderMobileMonth(){
     weekEnd.setDate(weekStart.getDate() + 6);
 
     const containsToday = today >= weekStart && today <= weekEnd;
-    if(containsToday) todayWeekStart = new Date(weekStart);
 
-    const box = document.createElement('div');
-    box.style.cssText = `
-      background:#fff;
-      border-radius:18px;
-      padding:16px;
-      box-shadow:0 6px 16px rgba(0,0,0,0.06);
-      cursor:pointer;
-      border:${containsToday ? '3px solid #3b82f6' : '1px solid #e2e8f0'};
-      -webkit-tap-highlight-color:transparent;
-  `;
-    box.innerHTML = `
-      <div style="font-weight:800;font-size:15px;text-align:center;color:${containsToday ? '#2563eb' : '#0f172a'}">
-        ${weekStart.toLocaleDateString('he-IL')} – ${weekEnd.toLocaleDateString('he-IL')}
-    </div>
-  `;
+    let eventCount = 0;
+    for(let i = 0; i < 7; i++){
+      const d = new Date(weekStart);
+      d.setDate(weekStart.getDate() + i);
+      data.forEach(r => r.Dates.forEach(dd => {
+        if(sameDay(dd, d)) eventCount++;
+      }));
+    }
 
-    const ws = new Date(weekStart);
-    box.addEventListener('click', () => openMobileWeekDetail(ws, data));
-    if(containsToday) box.dataset.today = 'true';
-    container.appendChild(box);
+    const weekEl = document.createElement('div');
+    weekEl.className = 'accordion-week' + (containsToday ? ' accordion-today' : '');
+
+    const header = document.createElement('div');
+    header.className = 'accordion-header';
+    header.innerHTML = `
+      <div>
+        <div class="accordion-header-text">${weekStart.toLocaleDateString('he-IL')} – ${weekEnd.toLocaleDateString('he-IL')}</div>
+        <div class="accordion-header-meta">${eventCount} פעילויות</div>
+      </div>
+      <span class="accordion-arrow">▼</span>
+    `;
+
+    const content = document.createElement('div');
+    content.className = 'accordion-content';
+
+    header.addEventListener('click', () => {
+      const isOpen = weekEl.classList.contains('open');
+      container.querySelectorAll('.accordion-week.open').forEach(w => w.classList.remove('open'));
+      if(!isOpen){
+        weekEl.classList.add('open');
+        if(!content.dataset.loaded){
+          for(let i = 0; i < 7; i++){
+            const date = new Date(weekStart);
+            date.setDate(weekStart.getDate() + i);
+            content.appendChild(buildDay(date, data));
+          }
+          content.dataset.loaded = 'true';
+        }
+        setTimeout(() => {
+          const viewEl = document.getElementById('view');
+          const rect = weekEl.getBoundingClientRect();
+          const viewRect = viewEl.getBoundingClientRect();
+          viewEl.scrollTo({ top: viewEl.scrollTop + rect.top - viewRect.top - 10, behavior: 'smooth' });
+        }, 50);
+      }
+    });
+
+    weekEl.appendChild(header);
+    weekEl.appendChild(content);
+
+    if(containsToday){
+      weekEl.classList.add('open');
+      for(let i = 0; i < 7; i++){
+        const date = new Date(weekStart);
+        date.setDate(weekStart.getDate() + i);
+        content.appendChild(buildDay(date, data));
+      }
+      content.dataset.loaded = 'true';
+      todayWeekEl = weekEl;
+    }
+
+    container.appendChild(weekEl);
     cursor.setDate(cursor.getDate() + 7);
   }
 
   view.appendChild(container);
 
-  // גלול לשבוע TODAY בלי להחליף את התצוגה
-  const todayBox = container.querySelector('[data-today="true"]');
-  if(todayBox) {
+  if(todayWeekEl){
     setTimeout(() => {
-      const headerHeight = document.querySelector('.mobile-sticky-wrapper')?.offsetHeight || 0;
-      const y = todayBox.getBoundingClientRect().top + window.scrollY - headerHeight - 10;
-      window.scrollTo({
-        top: y,
-        behavior: 'auto'
-    });
-  }, 80);
+      const viewEl = document.getElementById('view');
+      const rect = todayWeekEl.getBoundingClientRect();
+      const viewRect = viewEl.getBoundingClientRect();
+      viewEl.scrollTo({ top: viewEl.scrollTop + rect.top - viewRect.top - 10, behavior: 'auto' });
+    }, 80);
   }
 }
 
+function renderMobileMonth(){
+  renderMobileMonthAccordion();
+}
+
 function openMobileWeekDetail(weekStart, data){
-  view.innerHTML = '';
-  closeSidePanel();
-
-  const weekEnd = new Date(weekStart);
-  weekEnd.setDate(weekStart.getDate() + 6);
-  titleEl.textContent = `${weekStart.toLocaleDateString('he-IL')} – ${weekEnd.toLocaleDateString('he-IL')}`;
-
-  const container = document.createElement('div');
-  container.style.cssText = 'display:flex;flex-direction:column;gap:12px;padding:10px 10px 200px;';
-
-  // כפתור חזרה לרשימת השבועות
-  const backBtn = document.createElement('button');
-  backBtn.textContent = '← חזרה לחודש';
-  backBtn.style.cssText = 'background:none;border:none;color:#3b82f6;font-size:14px;font-weight:700;text-align:right;padding:4px 2px 8px;cursor:pointer;align-self:flex-end;';
-  backBtn.addEventListener('click', () => {
-    view.innerHTML = '';
-    renderMobileMonth();
-  });
-  container.appendChild(backBtn);
-
-  for(let i = 0; i < 7; i++){
-    const date = new Date(weekStart);
-    date.setDate(weekStart.getDate() + i);
-    container.appendChild(buildDay(date, data));
-  }
-
-  view.appendChild(container);
+  renderMobileMonthAccordion(data);
 }
 
 function toggleWeek(weekId) {

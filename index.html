@@ -33,7 +33,7 @@ html, body {
   margin: 0;
   padding: 0;
   height: 100vh;
-  width: 100vw;
+  width: 100%;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -50,6 +50,7 @@ button, input, select { width: auto; }
   flex-direction: column;
   height: 100%;
   overflow: hidden;
+  max-width: 100%;
 }
 
 #app {
@@ -57,6 +58,7 @@ button, input, select { width: auto; }
   flex-direction: column;
   height: 100%;
   overflow: hidden;
+  max-width: 100%;
 }
 
 .mobile-sticky-wrapper {
@@ -596,6 +598,22 @@ body.no-scroll{overflow:hidden;}
 .day-sheet-close{border:none;background:#f1f5f9;width:34px;height:34px;border-radius:10px;cursor:pointer;}
 .day-sheet-content{overflow-y:auto;max-height:calc(82vh - 101px);}
 .day-sheet-hidden{display:none;}
+
+/* ===== MOBILE ACCORDION ===== */
+.mobile-accordion{display:flex;flex-direction:column;gap:12px;padding:10px 10px 80px;width:100%;}
+.accordion-week{border-radius:16px;overflow:hidden;border:1px solid #e2e8f0;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,0.04);}
+.accordion-week.accordion-today{border:2px solid #3b82f6;box-shadow:0 4px 16px rgba(59,130,246,0.12);}
+.accordion-header{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none;background:#fff;transition:background 0.15s;}
+.accordion-header:active{background:#f8fafc;}
+.accordion-week.accordion-today .accordion-header{background:#eff6ff;}
+.accordion-header-text{font-weight:700;font-size:14px;color:#0f172a;}
+.accordion-week.accordion-today .accordion-header-text{color:#1d4ed8;}
+.accordion-header-meta{font-size:12px;color:#64748b;margin-top:2px;}
+.accordion-arrow{font-size:12px;color:#94a3b8;transition:transform 0.25s ease;flex-shrink:0;margin-right:4px;}
+.accordion-week.open .accordion-arrow{transform:rotate(180deg);}
+.accordion-content{display:none;padding:0 12px 12px;border-top:1px solid #f1f5f9;}
+.accordion-week.open .accordion-content{display:block;}
+.accordion-content .day-column{margin-top:10px;}
 
 /* ===== MANAGER MOBILE WEEK GRID ===== */
 .mwg-wrap{padding:10px 6px 80px;}
