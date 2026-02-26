@@ -216,9 +216,12 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
 .mobile-sticky-wrapper{
   position:sticky;
   top:0;
-  z-index:1000;
+  z-index:30; /* מתחת לסייד-פאנל (50), לאוברליי (100) ולשיט (9999) */
   background:#fff;
   box-shadow:0 1px 4px rgba(0,0,0,0.06);
+  /* מניעת גלילה אופקית שנגרמת מהעטיפה */
+  max-width:100%;
+  overflow-x:hidden;
 }
 /* הפנימיים לא יתחרו עם ה-wrapper על sticky */
 .mobile-sticky-wrapper header,
@@ -1129,7 +1132,7 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
 
 #app-wrapper{
   transform-origin: top center;
-  overflow-x: hidden;
+  overflow-x: clip; /* clip לא יוצר scroll-container, כך שposition:sticky עובד */
 }
 
 /* ===== SIDE PANEL BACKDROP (mobile bottom sheet) ===== */
