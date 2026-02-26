@@ -211,6 +211,24 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
 
 .nav{position:sticky;top:0;background:#fff;border-bottom:1px solid var(--border);z-index:10;display:flex;gap:8px;justify-content:center;align-items:center;flex-wrap:wrap;margin:0;padding:10px}
 .week-header{position:sticky;top:0;z-index:20;background:#ffffff;padding-top:10px;padding-bottom:10px;}
+
+/* ===== STICKY WRAPPER – header + nav קבועים בגלילה ===== */
+.mobile-sticky-wrapper{
+  position:sticky;
+  top:0;
+  z-index:1000;
+  background:#fff;
+  box-shadow:0 1px 4px rgba(0,0,0,0.06);
+}
+/* הפנימיים לא יתחרו עם ה-wrapper על sticky */
+.mobile-sticky-wrapper header,
+.mobile-sticky-wrapper .nav{
+  position:static;
+}
+/* scroll-margin כדי שכרטיס "היום" לא יוסתר מתחת לסרגל */
+.today{
+  scroll-margin-top:130px;
+}
 .nav-modes{display:flex;gap:8px;align-items:center}
 .nav-arrows{display:flex;gap:8px;align-items:center}
 .nav-arrows #title{width:100%;max-width:240px;text-align:center;font-weight:700;font-size:15px;white-space:nowrap;}
@@ -1029,11 +1047,6 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
 
 
 @media (max-width: 768px){
-  header,
-  .nav{
-    position: static;
-  }
-
   /* Horizontal overflow protection */
   *{
     max-width: 100%;
@@ -1181,13 +1194,6 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
 
 /* ===== HEADER MOBILE – wrap & hide redundant title ===== */
 @media(max-width:800px) {
-  .mobile-sticky-wrapper{
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-    background: #fff;
-  }
-
   /* offset scrollIntoView so today card isn't hidden under the sticky header */
   .today {
     scroll-margin-top: 160px;
@@ -1620,9 +1626,6 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
   .header-inner {
     padding: 8px 10px !important;
     gap: 6px !important;
-  }
-  .nav {
-    top: 77px;
   }
   .kpi-number {
     font-size: 34px;

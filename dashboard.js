@@ -784,7 +784,7 @@ function renderInstructorGridMonth(){
   const y = currentDate.getFullYear();
   const m = currentDate.getMonth();
   const monthTitle = new Date(y,m,1).toLocaleString('he-IL',{month:'long',year:'numeric'});
-  titleEl.innerHTML = `${monthTitle} <img class="today-icon" src="icon-today.svg" alt="TODAY">`;
+  titleEl.textContent = monthTitle;
 
   const data = applyFilters();
   const today = new Date(); today.setHours(0,0,0,0);
