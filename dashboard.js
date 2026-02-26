@@ -231,6 +231,17 @@ function getEmployeeColor(name) {
   return employeeColors[name.trim()] || "#f1f5f9";
 }
 
+function hashStringToHue(str) {
+  let h = 0;
+  for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) >>> 0;
+  return h % 360;
+}
+
+function instructorColor(name) {
+  const hue = hashStringToHue(String(name || ''));
+  return `hsl(${hue} 70% 52%)`;
+}
+
 function formatTime(v){
   if(v==null||v==='') return '';
   if(typeof v==='number'){
@@ -1146,21 +1157,20 @@ function buildDay(date,data){
   sortedGroups.forEach(g => {
     const evDiv = document.createElement('div');
     const first = g.items[0];
+    const instructorName = first.Employee || first.Instructor || first.EmployeeName || '';
+    evDiv.style.setProperty('--instructor-color', instructorColor(instructorName));
 
     if(g.type === 'holiday') {
       evDiv.className = 'event schedule-card';
-      evDiv.style.setProperty('--card-color', '#fda4af');
       evDiv.innerHTML = `<div class="title">${first.Program}</div><div class="meta">חג</div>`;
     } else if(g.type === 'event') {
       evDiv.className = 'event schedule-card';
-      evDiv.style.setProperty('--card-color', '#f59e0b');
       const hourStr = (first.StartTime || first.EndTime) ? `<div class="event-hour">${first.StartTime || '—'}–${first.EndTime || '—'}</div>` : '';
       evDiv.innerHTML = `${hourStr}<strong class="title">${first.Program}</strong><div class="meta">פעילות יומית</div>`;
       evDiv.onclick = (e) => { e.stopPropagation(); openSideGrouped(g.items); };
     } else {
       const hasEmp = !!(first.Employee && first.Employee.trim());
       evDiv.className = 'event schedule-card' + (!hasEmp ? ' missing' : '');
-      evDiv.style.setProperty('--card-color', getEmployeeColor(first.Employee));
 
       const count = g.items.length > 1 ? `<div class="group-count" role="button" tabindex="0" aria-label="צפייה בקבוצות">👥 ${g.items.length}</div>` : '';
       const hourStr = first.StartTime ? `<div class="event-hour">${first.StartTime}</div>` : '';
