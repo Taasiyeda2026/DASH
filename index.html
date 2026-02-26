@@ -776,31 +776,34 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
   border-right-color:#22c55e;
 }
 
-.manager-name{
-  font-size:18px;
-  font-weight:800;
-  margin-bottom:14px;
-  color:#0f172a;
-}
+.manager-name {
+    font-size: 18px;
+    font-weight: 800;
+    text-align: center;
+    margin-bottom: 16px;
+    color: #0f172a;
+  }
 
-.manager-metric{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:8px 0;
-  border-top:1px solid #e2e8f0;
-  font-size:14px;
-  color:#334155;
-}
+.manager-metric {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #f1f5f9;
+    width: 100%;
+    gap: 4px;
+  }
 
 .manager-metric:first-of-type{
   border-top:0;
 }
 
-.manager-metric strong{
-  color:#0f172a;
-  font-size:18px;
-}
+.manager-metric strong {
+    font-size: 24px;
+    color: #1d4ed8;
+    font-weight: 800;
+  }
 
 .manager-overlay-bg{
   position:fixed;
