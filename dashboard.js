@@ -1156,6 +1156,20 @@ function buildDay(date,data){
   return cell;
 }
 
+const PROGRAM_COLORS = {
+  'ביומימיקרי': '#02b79c',
+  'מנהיגות ירוקה': '#4caf50',
+  'טכנולוגיות החלל': '#3b82f6',
+  'ביומימיקרי לחטיבה': '#32cd15',
+  'בינה מלאכותית': '#800080',
+  'רוקחים עולם': '#a91515',
+  'השמיים אינם הגבול': '#545454',
+  'פורצות דרך': '#e61ca1',
+  'יישומי AI': '#8106cd',
+  'פרימיום': '#ff6700',
+};
+function getProgramColor(name){ return PROGRAM_COLORS[name] || '#1e293b'; }
+
 function openSideGrouped(items) {
   const sortedItems = sortByDateAndTime(
     items.map(item => toDateAndTimeSortable(item, item.selectedDate || getEarliestDate(item.Dates), item.StartTime))
@@ -1186,7 +1200,7 @@ function openSideGrouped(items) {
 
   if(allSameProgram){
     sideContent.innerHTML = `
-      <h2>${first.Program}</h2>
+      <h2 style="color:${getProgramColor(first.Program)}">${first.Program}</h2>
       <div class='subtitle'>מנהל: ${getManagerForCourseViews(first) || '—'}</div>
       <div style="border-top:1px solid var(--border); margin-top:10px; padding-top:10px;"></div>
     `;
@@ -1206,7 +1220,7 @@ function openSideGrouped(items) {
     const notesHtml = renderNotesBlock(getNotesForCourseItem(item), item.Employee || '');
     const activityDate = item.selectedDate || getEarliestDate(item.Dates);
     const activityDateText = activityDate ? activityDate.toLocaleDateString('he-IL') : '—';
-    const programHeader = !allSameProgram ? `<div style="font-weight:700;font-size:14px;color:#1e293b;margin-bottom:8px">${item.Program || '—'}</div>` : '';
+    const programHeader = !allSameProgram ? `<div style="font-weight:700;font-size:14px;color:${getProgramColor(item.Program)};margin-bottom:8px">${item.Program || '—'}</div>` : '';
 
     if(isDaily){
       sideContent.innerHTML += `
