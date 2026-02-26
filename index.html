@@ -229,16 +229,20 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
 .week-header{position:sticky;top:0;z-index:10;background:#ffffff;padding-top:10px;padding-bottom:10px;}
 
 /* ===== STICKY WRAPPER – header + nav קבועים בגלילה ===== */
-.mobile-sticky-wrapper{
-  position:sticky;
-  top:0;
-  z-index:10;
-  background:#fff;
-  box-shadow:0 1px 4px rgba(0,0,0,0.06);
-  /* מניעת גלילה אופקית שנגרמת מהעטיפה */
-  max-width:100%;
-  overflow-x:hidden;
-}
+.mobile-sticky-wrapper {
+    position: fixed; /* Changed from sticky to fixed to be safer */
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 20000;
+    background: #fff;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    width: 100%;
+    height: 80px; /* Fixed height for consistency */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
 /* הפנימיים לא יתחרו עם ה-wrapper על sticky */
 .mobile-sticky-wrapper header,
 .mobile-sticky-wrapper .nav{
@@ -246,18 +250,18 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
 }
 /* scroll-margin כדי שכרטיס "היום" לא יוסתר מתחת לסרגל */
 .today{
-  scroll-margin-top:130px;
+  scroll-margin-top: 170px;
 }
 .nav-modes{display:flex;gap:8px;align-items:center}
 .nav-arrows{display:flex;gap:8px;align-items:center}
 .nav-arrows #title{width:100%;max-width:240px;text-align:center;font-weight:700;font-size:15px;white-space:nowrap;}
 
 #view {
-    height: calc(100vh - 80px); /* Adjusting height */
+    height: calc(100vh - 80px);
     width: 100%;
     max-width: 100%;
     margin: 0;
-    padding: 20px 20px 250px 20px; /* Large bottom padding for scrolling */
+    padding: 80px 20px 250px 20px; /* Increased top padding to ensure content starts below header */
     overflow-y: scroll;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
@@ -935,11 +939,11 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
   }
 
   #view {
-    height: calc(100vh - 80px); /* Adjusting height */
+    height: calc(100vh - 80px);
     width: 100%;
     max-width: 100%;
     margin: 0;
-    padding: 20px 20px 250px 20px; /* Large bottom padding for scrolling */
+    padding: 80px 20px 250px 20px; /* Increased top padding to ensure content starts below header */
     overflow-y: scroll;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
@@ -1236,11 +1240,11 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
   .dashboard-grid,
   .grid,
   #view {
-    height: calc(100vh - 80px); /* Adjusting height */
+    height: calc(100vh - 80px);
     width: 100%;
     max-width: 100%;
     margin: 0;
-    padding: 20px 20px 250px 20px; /* Large bottom padding for scrolling */
+    padding: 80px 20px 250px 20px; /* Increased top padding to ensure content starts below header */
     overflow-y: scroll;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
@@ -1393,7 +1397,7 @@ body.no-scroll {
 @media(max-width:800px) {
   /* offset scrollIntoView so today card isn't hidden under the sticky header */
   .today {
-    scroll-margin-top: 160px;
+    scroll-margin-top: 170px;
   }
 
   .header-inner {
