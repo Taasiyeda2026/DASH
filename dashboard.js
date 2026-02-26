@@ -1162,7 +1162,7 @@ function buildDay(date,data){
 
     if(g.type === 'holiday') {
       evDiv.className = 'event schedule-card';
-      evDiv.innerHTML = `<div class="title">${first.Program}</div><div class="meta">חג</div>`;
+      evDiv.innerHTML = `<div class="title">${first.Program || ""}</div>`;
     } else if(g.type === 'event') {
       evDiv.className = 'event schedule-card';
       const hourStr = (first.StartTime || first.EndTime) ? `<div class="event-hour">${first.StartTime || '—'}–${first.EndTime || '—'}</div>` : '';
