@@ -2451,26 +2451,19 @@ function closeDaySheet(){
 
 const sideBackdrop = document.getElementById('side-backdrop');
 
-let _scrollLockY = 0;
 let _scrollLocked = false;
 const _scrollLockSources = new Set();
 
 function _applyScrollLockState() {
   const shouldLock = _scrollLockSources.size > 0;
   if (shouldLock && !_scrollLocked) {
-    _scrollLockY = window.scrollY;
-    document.body.style.position = 'fixed';
-    document.body.style.top = -_scrollLockY + 'px';
-    document.body.style.width = '100%';
+    document.body.classList.add('no-scroll');
     _scrollLocked = true;
     return;
   }
 
   if (!shouldLock && _scrollLocked) {
-    document.body.style.position = '';
-    document.body.style.top = '';
-    document.body.style.width = '';
-    window.scrollTo(0, _scrollLockY);
+    document.body.classList.remove('no-scroll');
     _scrollLocked = false;
   }
 }
