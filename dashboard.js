@@ -271,12 +271,13 @@ function getNotesForCourseItem(item){
   if(!noteData || typeof noteData !== 'object') return null;
 
   const toArray = (v) => Array.isArray(v) ? v.filter(Boolean) : [];
-  const message = toArray(noteData.message);
+  // The Rem of session X is the note (הודעה) for session X
+  const message = toArray(noteData.reminder);
   const general = toArray(noteData.general);
 
-  const totalSessions = Array.isArray(item.Dates) ? item.Dates.length : 0;
-  const isLastSession = totalSessions > 0 && sessionNumber >= totalSessions;
-  const reminder = isLastSession ? [] : toArray(noteData.reminder);
+  // "תזכורת לשיעור הבא" = the Rem of the next session (if exists)
+  const nextNoteData = notesByKey.get(`${program}|${sessionNumber + 1}`);
+  const reminder = nextNoteData ? toArray(nextNoteData.reminder) : [];
 
   if(!message.length && !reminder.length && !general.length) return null;
 
