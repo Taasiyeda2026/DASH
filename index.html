@@ -1194,6 +1194,7 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
   gap: 2px;
   overflow: hidden;
   -webkit-tap-highlight-color: transparent;
+  transition: 0.15s ease;
 }
 .instructor-cal-cell.ic-empty {
   background: transparent;
@@ -1249,6 +1250,105 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
   font-weight: 700;
   text-align: center;
   margin-top: 1px;
+}
+@media (max-width:768px) {
+  .instructor-cal-cell {
+    min-height: 92px;
+    padding: 8px;
+    border-radius: 14px;
+  }
+  .instructor-cal-cell:active {
+    transform: scale(0.985);
+    background: #f1f5f9;
+  }
+  .instructor-cal-day-num {
+    font-size: 16px;
+    font-weight: 600;
+  }
+  .instructor-cal-pill {
+    font-size: 14px;
+    padding: 6px 10px;
+    border-radius: 10px;
+  }
+  .instructor-cal-cell.ic-today {
+    box-shadow: none !important;
+    border: none !important;
+  }
+}
+
+.day-sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.35);
+  z-index: 9998;
+}
+
+.day-sheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #fff;
+  border-top-left-radius: 18px;
+  border-top-right-radius: 18px;
+  box-shadow: 0 -12px 40px rgba(0,0,0,0.12);
+  z-index: 9999;
+  max-height: 82vh;
+  transform: translateY(12px);
+  opacity: 0;
+  transition: 0.2s ease;
+  padding: 12px 14px 16px;
+}
+
+.day-sheet:not(.day-sheet-hidden) {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.day-sheet-handle {
+  width: 44px;
+  height: 5px;
+  border-radius: 999px;
+  background: #e2e8f0;
+  margin: 6px auto 10px;
+}
+
+.day-sheet-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.day-sheet-title {
+  font-weight: 700;
+  font-size: 16px;
+  color: #0f172a;
+}
+
+.day-sheet-close {
+  border: none;
+  background: #f1f5f9;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.day-sheet-content {
+  overflow: auto;
+  max-height: calc(82vh - 70px);
+}
+
+.day-sheet-hidden {
+  display: none;
+}
+
+@media (min-width:769px) {
+  #daySheet,
+  #daySheetBackdrop {
+    display: none !important;
+  }
 }
 /* Desktop: cells a bit taller */
 @media(min-width:800px) {
@@ -1445,6 +1545,17 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
   <div id="sideContent"></div>
 </div>
 <div id="side-backdrop"></div>
+
+<div id="daySheetBackdrop" class="day-sheet-backdrop day-sheet-hidden"></div>
+
+<div id="daySheet" class="day-sheet day-sheet-hidden" role="dialog" aria-modal="true" aria-label="פרטי פעילות">
+  <div class="day-sheet-handle"></div>
+  <div class="day-sheet-header">
+    <div id="daySheetTitle" class="day-sheet-title">פרטי יום</div>
+    <button id="daySheetClose" class="day-sheet-close" type="button">✕</button>
+  </div>
+  <div id="daySheetContent" class="day-sheet-content"></div>
+</div>
 
 <script src="feature-flags.js"></script>
 <script src="app.js"></script>
