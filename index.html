@@ -26,20 +26,23 @@
 }
 
 html, body {
-  height: 100%;
-  margin: 0;
-  padding: 0;
-  width: 100%;
-  max-width: 100%;
-  overflow-x: hidden;
-}
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+  }
 
 body {
-  -webkit-text-size-adjust: 100%;
-  overflow: hidden;
-  /* מניעת גלילה אופקית במגע (iOS/Android) */
-  touch-action: pan-y;
-}
+    -webkit-text-size-adjust: 100%;
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+    font-family: system-ui, Arial;
+    background: var(--bg);
+    color: var(--text);
+  }
 
 img {
   max-width: 100%;
@@ -126,7 +129,17 @@ button, input, select {
   --bg:#f8fafc;--card:#ffffff;--border:#e2e8f0;--text:#0f172a;--muted:#64748b;--danger:#dc2626;
 }
 *{-webkit-tap-highlight-color:transparent;}
-body{font-family:system-ui,Arial;background:var(--bg);color:var(--text)}
+body {
+    -webkit-text-size-adjust: 100%;
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+    font-family: system-ui, Arial;
+    background: var(--bg);
+    color: var(--text);
+  }
 
 /* ===== MOBILE TOUCH OPTIMIZATIONS ===== */
 
@@ -240,16 +253,15 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
 .nav-arrows #title{width:100%;max-width:240px;text-align:center;font-weight:700;font-size:15px;white-space:nowrap;}
 
 #view {
-    height: calc(100vh - 120px);
+    height: calc(100vh - 80px); /* Adjusting height */
     width: 100%;
     max-width: 100%;
     margin: 0;
-    padding: 20px 20px 180px 20px;
-    overflow-y: auto;
-    overflow-x: hidden;
+    padding: 20px 20px 250px 20px; /* Large bottom padding for scrolling */
+    overflow-y: scroll;
+    overflow-x: auto;
     -webkit-overflow-scrolling: touch;
-    display: flex;
-    flex-direction: column;
+    position: relative;
   }
 
 .grid {
@@ -258,10 +270,10 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
     margin: 0;
     padding: 10px;
     display: grid;
-    grid-template-columns: repeat(7, minmax(0, 1fr));
+    grid-template-columns: repeat(7, minmax(180px, 1fr));
     gap: 15px;
     grid-auto-rows: minmax(140px, auto);
-    flex-shrink: 0;
+    overflow: visible;
   }
 .event strong, .calendar-event strong, .schedule-item strong, .schedule-card strong { font-size: 0.82em; }
 .day.today .day-header { font-weight: 800; color: #1d4ed8; }
@@ -281,10 +293,10 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
     margin: 0;
     padding: 10px;
     display: grid;
-    grid-template-columns: repeat(7, minmax(0, 1fr));
+    grid-template-columns: repeat(7, minmax(180px, 1fr));
     gap: 15px;
     grid-auto-rows: minmax(140px, auto);
-    flex-shrink: 0;
+    overflow: visible;
   }
 
 @media (max-width: 800px){
@@ -294,10 +306,10 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
     margin: 0;
     padding: 10px;
     display: grid;
-    grid-template-columns: repeat(7, minmax(0, 1fr));
+    grid-template-columns: repeat(7, minmax(180px, 1fr));
     gap: 15px;
     grid-auto-rows: minmax(140px, auto);
-    flex-shrink: 0;
+    overflow: visible;
   }
 }
 .day{background:var(--card);border-radius:12px;padding:8px;min-height:140px;border:1px solid var(--border); display: flex; flex-direction: column; gap: 4px;}
@@ -366,10 +378,10 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
     margin: 0;
     padding: 10px;
     display: grid;
-    grid-template-columns: repeat(7, minmax(0, 1fr));
+    grid-template-columns: repeat(7, minmax(180px, 1fr));
     gap: 15px;
     grid-auto-rows: minmax(140px, auto);
-    flex-shrink: 0;
+    overflow: visible;
   }
 
 .view-week .day-column,
@@ -923,16 +935,15 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
   }
 
   #view {
-    height: calc(100vh - 120px);
+    height: calc(100vh - 80px); /* Adjusting height */
     width: 100%;
     max-width: 100%;
     margin: 0;
-    padding: 20px 20px 180px 20px;
-    overflow-y: auto;
-    overflow-x: hidden;
+    padding: 20px 20px 250px 20px; /* Large bottom padding for scrolling */
+    overflow-y: scroll;
+    overflow-x: auto;
     -webkit-overflow-scrolling: touch;
-    display: flex;
-    flex-direction: column;
+    position: relative;
   }
 
   /* גריד עמודה אחת */
@@ -942,10 +953,10 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
     margin: 0;
     padding: 10px;
     display: grid;
-    grid-template-columns: repeat(7, minmax(0, 1fr));
+    grid-template-columns: repeat(7, minmax(180px, 1fr));
     gap: 15px;
     grid-auto-rows: minmax(140px, auto);
-    flex-shrink: 0;
+    overflow: visible;
   }
 
   /* ביטול גובה אחיד של ימים במובייל */
@@ -955,10 +966,10 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
     margin: 0;
     padding: 10px;
     display: grid;
-    grid-template-columns: repeat(7, minmax(0, 1fr));
+    grid-template-columns: repeat(7, minmax(180px, 1fr));
     gap: 15px;
     grid-auto-rows: minmax(140px, auto);
-    flex-shrink: 0;
+    overflow: visible;
   }
 
   .day{
@@ -1225,16 +1236,15 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
   .dashboard-grid,
   .grid,
   #view {
-    height: calc(100vh - 120px);
+    height: calc(100vh - 80px); /* Adjusting height */
     width: 100%;
     max-width: 100%;
     margin: 0;
-    padding: 20px 20px 180px 20px;
-    overflow-y: auto;
-    overflow-x: hidden;
+    padding: 20px 20px 250px 20px; /* Large bottom padding for scrolling */
+    overflow-y: scroll;
+    overflow-x: auto;
     -webkit-overflow-scrolling: touch;
-    display: flex;
-    flex-direction: column;
+    position: relative;
   }
 
   .dashboard-grid,
@@ -1244,10 +1254,10 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
     margin: 0;
     padding: 10px;
     display: grid;
-    grid-template-columns: repeat(7, minmax(0, 1fr));
+    grid-template-columns: repeat(7, minmax(180px, 1fr));
     gap: 15px;
     grid-auto-rows: minmax(140px, auto);
-    flex-shrink: 0;
+    overflow: visible;
   }
 
   .mobile-week{

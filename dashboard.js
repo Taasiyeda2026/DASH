@@ -807,7 +807,7 @@ function renderInstructorMobileWeek(){
 
   const data = applyFilters();
   const container = document.createElement('div');
-  container.style.cssText = 'display:flex;flex-direction:column;gap:12px;padding:10px 10px 80px;';
+  container.style.cssText = 'display:flex;flex-direction:column;gap:12px;padding:10px 10px 200px;';
 
   for(let i = 0; i < 7; i++){
     const date = new Date(weekStart);
@@ -1058,7 +1058,7 @@ function renderMobileWeekView(){
 
   const data = applyFilters();
   const container = document.createElement('div');
-  container.style.cssText = 'display:flex;flex-direction:column;gap:12px;padding:10px 10px 80px;';
+  container.style.cssText = 'display:flex;flex-direction:column;gap:12px;padding:10px 10px 200px;';
 
   for(let i = 0; i < 7; i++){
     const date = new Date(weekStart);
@@ -1184,7 +1184,7 @@ function openMobileWeekDetail(weekStart, data){
   titleEl.textContent = `${weekStart.toLocaleDateString('he-IL')} – ${weekEnd.toLocaleDateString('he-IL')}`;
 
   const container = document.createElement('div');
-  container.style.cssText = 'display:flex;flex-direction:column;gap:12px;padding:10px 10px 80px;';
+  container.style.cssText = 'display:flex;flex-direction:column;gap:12px;padding:10px 10px 200px;';
 
   // כפתור חזרה לרשימת השבועות
   const backBtn = document.createElement('button');
