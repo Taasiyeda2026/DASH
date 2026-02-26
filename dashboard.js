@@ -803,14 +803,14 @@ function renderInstructorGridMonth(){
 
     const isShabbat = date.getDay() === 6;
     const cell = document.createElement('div');
-    cell.className = 'instructor-cal-cell' +
+    cell.className = 'instructor-cal-cell calendar-day' +
       (isShabbat ? ' ic-shabbat' : '') +
-      (isToday ? ' ic-today' : '') +
+      (isToday ? ' ic-today is-today' : '') +
       (groups.some(g => g.type !== 'holiday') ? ' ic-has-events' : '');
 
     // מספר יום
     const numWrap = document.createElement('div');
-    numWrap.className = 'instructor-cal-day-num' + (isToday ? ' ic-today-num' : '');
+    numWrap.className = 'instructor-cal-day-num date-number' + (isToday ? ' ic-today-num' : '');
     numWrap.textContent = d;
     cell.appendChild(numWrap);
 
@@ -819,10 +819,11 @@ function renderInstructorGridMonth(){
     if(!isShabbat) groups.slice(0, maxPills).forEach(g => {
       const firstItem = g.items[0];
       const pill = document.createElement('div');
-      pill.className = 'instructor-cal-pill';
-      pill.style.background = g.type === 'holiday'
-        ? '#c0fff6'
-        : getEmployeeColor(firstItem.Employee);
+      pill.className = 'instructor-cal-pill calendar-event';
+      const instructorName = firstItem.Employee || firstItem.Instructor || firstItem.EmployeeName || '';
+      const eventColor = g.type === 'holiday' ? '#5eead4' : instructorColor(instructorName);
+      pill.style.setProperty('--instructor-color', eventColor);
+      pill.style.background = g.type === 'holiday' ? '#c0fff6' : '';
       if(g.type === 'holiday') pill.addEventListener('click', e => e.stopPropagation());
       const txt = firstItem.Program || '';
       pill.textContent = txt.length > 10 ? txt.slice(0,9)+'…' : txt;
