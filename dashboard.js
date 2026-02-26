@@ -1233,7 +1233,7 @@ function buildDay(date,data){
   cell.className='day day-column';
   const isToday = sameDay(date, new Date());
   const dayNumberMarkup = isToday ? `<span class='day-number'>${date.getDate()}</span>` : `${date.getDate()}`;
-  cell.innerHTML=`<div class='day-header'>${dayNumberMarkup}/${date.getMonth()+1} | ${dayNames[date.getDay()]}</div>`;
+  cell.innerHTML=`<div class='day-header' style='text-align:center;'>${dayNames[date.getDay()]} | <span dir='ltr'>${dayNumberMarkup}/${date.getMonth()+1}</span></div>`;
   if(isToday){
     cell.classList.add('today');
   }
