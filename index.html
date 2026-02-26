@@ -1357,14 +1357,28 @@ body.no-scroll {
 
 /* ===== INSTRUCTOR COMPACT CALENDAR GRID ===== */
 .view-month .instructor-cal-wrap {
-  padding: 4px 4px 80px;
-}
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    overflow-x: auto;
+    padding: 20px;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+  }
 .view-month .instructor-cal-header-row {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr) 24px;
-  gap: 2px;
-  margin-bottom: 3px;
-}
+    display: grid;
+    grid-template-columns: repeat(7, minmax(180px, 1fr));
+    gap: 12px;
+    background: #f8fafc;
+    font-weight: 800;
+    text-align: center;
+    padding: 10px 0;
+    border-bottom: 2px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 5;
+  }
 .view-month .instructor-cal-header-row > div {
   text-align: center;
   font-size: 10px;
@@ -1377,10 +1391,14 @@ body.no-scroll {
   color: #cbd5e1;
 }
 .view-month .instructor-cal-grid {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr) 24px;
-  gap: 2px;
-}
+    display: grid;
+    grid-template-columns: repeat(7, minmax(180px, 1fr));
+    gap: 12px;
+    width: 100%;
+    background: #e2e8f0;
+    border: 1px solid var(--border);
+    overflow-x: auto;
+  }
 .view-month .instructor-cal-cell.ic-shabbat {
   min-height: 0;
   background: #f8fafc;
@@ -1503,9 +1521,13 @@ body.no-scroll {
 }
 @media (max-width:768px) {
   .view-month .instructor-cal-cell {
-    min-height: 92px;
-    padding: 8px;
-    border-radius: 14px;
+    background: #fff;
+    min-height: 180px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    position: relative;
   }
   .view-month .instructor-cal-cell:active {
     transform: scale(0.985);
@@ -1614,20 +1636,45 @@ body.no-scroll {
 /* Desktop: cells a bit taller */
 @media(min-width:800px) {
   .view-month .instructor-cal-wrap {
-    padding: 8px 8px 34px;
+    width: 100%;
     max-width: 100%;
-    margin: 0 auto;
+    margin: 0;
+    overflow-x: auto;
+    padding: 20px;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
   }
   .view-month .instructor-cal-grid {
-    gap: 4px;
+    display: grid;
+    grid-template-columns: repeat(7, minmax(180px, 1fr));
+    gap: 12px;
+    width: 100%;
+    background: #e2e8f0;
+    border: 1px solid var(--border);
+    overflow-x: auto;
   }
   .view-month .instructor-cal-header-row {
-    gap: 4px;
+    display: grid;
+    grid-template-columns: repeat(7, minmax(180px, 1fr));
+    gap: 12px;
+    background: #f8fafc;
+    font-weight: 800;
+    text-align: center;
+    padding: 10px 0;
+    border-bottom: 2px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 5;
   }
   .view-month .instructor-cal-cell {
-    min-height: 88px;
-    padding: 5px 4px;
-    gap: 3px;
+    background: #fff;
+    min-height: 180px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    position: relative;
   }
   .view-month .instructor-cal-day-num {
     font-size: 14px;
