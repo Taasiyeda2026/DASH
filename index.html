@@ -28,7 +28,16 @@
 }
 *{-webkit-tap-highlight-color:transparent;}
 
-html, body {
+html {
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  width: 100%;
+  overflow: hidden;
+  overflow-x: hidden;
+  overscroll-behavior: none;
+}
+body {
   -webkit-text-size-adjust: 100%;
   margin: 0;
   padding: 0;
@@ -37,6 +46,8 @@ html, body {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  overflow-x: hidden;
+  overscroll-behavior: none;
   font-family: system-ui, Arial;
   background: var(--bg);
   color: var(--text);
@@ -355,7 +366,7 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
 .course-card{background:#ffffff;border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:0 4px 10px rgba(0,0,0,0.05);transition:0.2s;display:flex;flex-direction:column;gap:10px;}
 .course-card span{line-height:1.7;}
 .course-card:hover{transform:translateY(-2px);box-shadow:0 8px 18px rgba(0,0,0,0.08);}
-.course-title{font-weight:700;font-size:15px;margin-bottom:8px;}
+.course-title{font-weight:800;font-size:16px;padding:8px 12px;border-radius:10px;margin-bottom:0;}
 .course-meta{display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:13px;color:#475569;}
 
 /* ===== END DATES ===== */
@@ -680,9 +691,17 @@ body.no-scroll{overflow:hidden;}
   .nav-arrows #prev,.nav-arrows #next{width:40px;height:36px;font-size:15px;display:flex;align-items:center;justify-content:center;padding:0;}
   .nav-arrows #title{font-size:13px;min-width:0;flex:1 1 auto;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 
-  .day{min-height:auto !important;height:auto !important;padding:10px !important;}
+  .day{min-height:auto !important;height:auto !important;padding:8px !important;border-radius:12px !important;}
   .day.empty,.day.inactive{display:none !important;}
-  .event{font-size:14px !important;padding:10px !important;min-height:52px !important;}
+  .day-header{font-size:11px !important;padding-bottom:3px !important;margin-bottom:3px !important;}
+  .event{font-size:12px !important;padding:8px !important;min-height:auto !important;}
+  .grid{grid-template-columns:1fr !important;gap:8px !important;}
+  .instructor-cal-header-row{grid-template-columns:repeat(7,minmax(0,1fr)) !important;}
+  .course-card{padding:10px !important;font-size:13px !important;}
+  .course-title{font-size:14px !important;padding:6px 10px !important;}
+  .instructor-name{font-size:16px !important;}
+  .instructor-badges .badge{font-size:11px !important;padding:4px 8px !important;}
+  .instructor-header{padding:12px !important;}
 
   .kpi-number{font-size:48px;}
 

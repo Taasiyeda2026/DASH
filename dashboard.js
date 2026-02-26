@@ -740,7 +740,7 @@ function initSummaryMonths(){
 function render(){
 
   enforceInstructorMode();
-  view.innerHTML=''; view.style.display=''; view.style.flexDirection=''; view.style.alignItems=''; view.style.justifyContent=''; view.style.width=''; view.classList.toggle('week-mode', window.mode === 'week');
+  view.innerHTML=''; view.style.display=''; view.style.flexDirection=''; view.style.alignItems=''; view.style.justifyContent=''; view.style.width=''; view.scrollTop=0; view.classList.toggle('week-mode', window.mode === 'week');
   view.classList.toggle('view-week', window.mode === 'week');
   view.classList.toggle('view-month', window.mode === 'month');
   closeSidePanel();
@@ -1105,15 +1105,6 @@ function renderMobileMonthAccordion(data){
 
     const containsToday = today >= weekStart && today <= weekEnd;
 
-    let eventCount = 0;
-    for(let i = 0; i < 7; i++){
-      const d = new Date(weekStart);
-      d.setDate(weekStart.getDate() + i);
-      data.forEach(r => r.Dates.forEach(dd => {
-        if(sameDay(dd, d)) eventCount++;
-      }));
-    }
-
     const weekEl = document.createElement('div');
     weekEl.className = 'accordion-week' + (containsToday ? ' accordion-today' : '');
 
@@ -1122,7 +1113,6 @@ function renderMobileMonthAccordion(data){
     header.innerHTML = `
       <div>
         <div class="accordion-header-text">${weekStart.toLocaleDateString('he-IL')} – ${weekEnd.toLocaleDateString('he-IL')}</div>
-        <div class="accordion-header-meta">${eventCount} פעילויות</div>
       </div>
       <span class="accordion-arrow">▼</span>
     `;
@@ -1155,31 +1145,11 @@ function renderMobileMonthAccordion(data){
     weekEl.appendChild(header);
     weekEl.appendChild(content);
 
-    if(containsToday){
-      weekEl.classList.add('open');
-      for(let i = 0; i < 7; i++){
-        const date = new Date(weekStart);
-        date.setDate(weekStart.getDate() + i);
-        content.appendChild(buildDay(date, data));
-      }
-      content.dataset.loaded = 'true';
-      todayWeekEl = weekEl;
-    }
-
     container.appendChild(weekEl);
     cursor.setDate(cursor.getDate() + 7);
   }
 
   view.appendChild(container);
-
-  if(todayWeekEl){
-    setTimeout(() => {
-      const viewEl = document.getElementById('view');
-      const rect = todayWeekEl.getBoundingClientRect();
-      const viewRect = viewEl.getBoundingClientRect();
-      viewEl.scrollTo({ top: viewEl.scrollTop + rect.top - viewRect.top - 10, behavior: 'auto' });
-    }, 80);
-  }
 }
 
 function renderMobileMonth(){
@@ -2082,26 +2052,15 @@ function openInstructorModal(name, courses, selectedMonth, selectedYear){
 
     sideContent.innerHTML += `
       <div class="course-card">
-
-        <div style="
-          font-weight:800;
-          font-size:16px;
-          padding:8px 12px;
-          border-radius:10px;
-          background:${getEmployeeColor(name)};
-        ">
-          ${r.Program || '—'}
-      </div>
-
+        <div class="course-title" style="background:${getEmployeeColor(name)};">${r.Program || '—'}</div>
         <div>
           <span style="font-weight:700;color:#0f172a;">בית ספר:</span> ${r.School || '—'}<br>
           <span style="font-weight:700;color:#0f172a;">רשות:</span> ${r.Authority || '—'}
-      </div>
-
+        </div>
         <div>
           <div style="font-weight:700;color:#0f172a;">תאריכי פעילות</div>
           <div>(${startDate}) - (${endDateFormatted})</div>
-      </div>
+        </div>
       </div>
   `;
   });
@@ -2120,26 +2079,19 @@ function openInstructorModal(name, courses, selectedMonth, selectedYear){
       const timeRange = (r.StartTime || r.EndTime) ? `${r.StartTime || ''} – ${r.EndTime || ''}` : '—';
       sideContent.innerHTML += `
         <div class="course-card">
-          <div style="
-            font-weight:800;
-            font-size:16px;
-            padding:8px 12px;
-            border-radius:10px;
-            background:#d1fae5;
-            color:#065f46;
-          ">
+          <div class="course-title" style="background:#d1fae5;color:#065f46;">
             ${r.Program || typeLabel}
             <span style="font-size:12px;font-weight:600;margin-right:6px;">(${typeLabel})</span>
-      </div>
+          </div>
           <div>
             <span style="font-weight:700;color:#0f172a;">בית ספר:</span> ${r.School || '—'}<br>
             <span style="font-weight:700;color:#0f172a;">רשות:</span> ${r.Authority || '—'}
-      </div>
+          </div>
           <div>
             <div style="font-weight:700;color:#0f172a;">תאריך</div>
             <div>${activityDateText}${timeRange !== '—' ? ' | ' + timeRange : ''}</div>
-      </div>
-      </div>
+          </div>
+        </div>
   `;
   });
   }
@@ -2414,6 +2366,7 @@ function closeAllOverlays(){
 
 function openSidePanel(){
   closeAllOverlays();
+  sideContent.scrollTop = 0;
   side.classList.add('open');
   if(isMobile()){
     sideBackdrop.classList.add('active');
@@ -2426,6 +2379,7 @@ function openDaySheet(title, htmlContent){
   closeAllOverlays();
   daySheetTitle.textContent = title || 'פרטי יום';
   daySheetContent.innerHTML = htmlContent || '';
+  daySheetContent.scrollTop = 0;
   daySheet.classList.remove('day-sheet-hidden');
   daySheetBackdrop.classList.remove('day-sheet-hidden');
 
