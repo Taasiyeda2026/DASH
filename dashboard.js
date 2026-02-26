@@ -1667,7 +1667,7 @@ function renderSummary(){
   const wrap = document.createElement('div');
   wrap.className = 'summary-wrapper'; wrap.style.width='100%'; wrap.style.display='flex'; wrap.style.flexDirection='column'; wrap.style.gap='20px';
   wrap.innerHTML = `
-    <div class="kpi-total">
+    <div class="kpi-total" style="margin: 0 auto 24px auto; text-align: center;">
       <div class="kpi-title">סה"כ קורסים פעילים</div>
       <div class="kpi-number">${totalCourses}</div>
     </div>
@@ -1701,7 +1701,8 @@ function renderSummary(){
   const split = document.createElement('div');
   split.className = 'managers-row';
   split.style.display = 'grid';
-  split.style.gridTemplateColumns = 'repeat(auto-fit, minmax(250px, 1fr))';
+  split.style.gridTemplateColumns = 'repeat(auto-fit, minmax(280px, 320px))';
+  split.style.justifyContent = 'center';
   split.style.gap = '20px';
   split.style.marginTop = '20px';
 
