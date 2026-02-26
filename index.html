@@ -250,7 +250,16 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
   -webkit-overflow-scrolling: touch;
 }
 
-.grid{width:100%;max-width:1200px;margin:0 auto;padding:10px;display:grid;grid-template-columns:repeat(7,minmax(0,1.05fr));gap:12px;grid-auto-rows: 1fr;}
+.grid{width:100%;max-width:1400px;margin:0 auto;padding:10px;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:12px;grid-auto-rows: 1fr;}
+.event strong, .calendar-event strong, .schedule-item strong, .schedule-card strong { font-size: 0.82em; }
+.day.today .day-header { font-weight: 800; color: #1d4ed8; }
+.day.today .day-header .date-number { font-weight: 800; }
+.view-week .day-column.today .day-number,
+.view-month .day-column.today .day-number,
+.view-month .instructor-cal-day-num.ic-today-num {
+  font-weight: 800;
+  color: #1d4ed8;
+}
 
 .summary-wrapper,
 .instructor-cal-wrap,
