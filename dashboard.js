@@ -670,6 +670,7 @@ function render(){
 
   enforceInstructorMode();
   view.innerHTML='';
+  view.classList.toggle('week-mode', window.mode === 'week');
   closeSidePanel();
 
   if(userRole === 'instructor' || window.mode === 'summary' || window.mode === 'instructors' || window.mode === 'enddates'){
@@ -1094,9 +1095,11 @@ function toggleWeek(weekId) {
 }
 
 function buildDay(date,data){
-  const cell=document.createElement('div'); cell.className='day';
-  cell.innerHTML=`<div class='day-header'>${date.getDate()}/${date.getMonth()+1} | ${dayNames[date.getDay()]}</div>`;
-  if(sameDay(date, new Date())){
+  const cell=document.createElement('div');
+  cell.className='day day-column';
+  const isToday = sameDay(date, new Date());
+  cell.innerHTML=`<div class='day-header'>${isToday ? "<span class='today-badge'>TODAY</span>" : ''}${date.getDate()}/${date.getMonth()+1} | ${dayNames[date.getDay()]}</div>`;
+  if(isToday){
     cell.classList.add('today');
   }
 
@@ -1123,33 +1126,54 @@ function buildDay(date,data){
 
   const sortedGroups = Object.values(groupsMap).sort((a, b) => a.time.localeCompare(b.time));
 
-  if(sortedGroups.length === 0) cell.classList.add('empty');
+  if(sortedGroups.length === 0) {
+    cell.classList.add('empty');
+    const emptyDay = document.createElement('div');
+    emptyDay.className = 'empty-day';
+    emptyDay.textContent = 'אין פעילות';
+    cell.appendChild(emptyDay);
+  }
 
   sortedGroups.forEach(g => {
     const evDiv = document.createElement('div');
     const first = g.items[0];
 
     if(g.type === 'holiday') {
-      evDiv.className = 'event'; evDiv.style.background = '#fee2e2';
-      evDiv.innerHTML = `<div>${first.Program}</div>`;
+      evDiv.className = 'event schedule-card';
+      evDiv.style.setProperty('--card-color', '#fda4af');
+      evDiv.innerHTML = `<div class="title">${first.Program}</div><div class="meta">חג</div>`;
     } else if(g.type === 'event') {
-      evDiv.className = 'event';
-      evDiv.style.background = '#fef3c7';
-      evDiv.style.border = '1px solid #f59e0b';
+      evDiv.className = 'event schedule-card';
+      evDiv.style.setProperty('--card-color', '#f59e0b');
       const hourStr = (first.StartTime || first.EndTime) ? `<div class="event-hour">${first.StartTime || '—'}–${first.EndTime || '—'}</div>` : '';
-      evDiv.innerHTML = `${hourStr}<strong>${first.Program}</strong>`;
+      evDiv.innerHTML = `${hourStr}<strong class="title">${first.Program}</strong><div class="meta">פעילות יומית</div>`;
       evDiv.onclick = (e) => { e.stopPropagation(); openSideGrouped(g.items); };
     } else {
       const hasEmp = !!(first.Employee && first.Employee.trim());
-      evDiv.className = 'event' + (!hasEmp ? ' missing' : '');
-      evDiv.style.background = getEmployeeColor(first.Employee);
+      evDiv.className = 'event schedule-card' + (!hasEmp ? ' missing' : '');
+      evDiv.style.setProperty('--card-color', getEmployeeColor(first.Employee));
 
-      const count = g.items.length > 1 ? `<span class="badge-count">x${g.items.length}</span>` : '';
+      const count = g.items.length > 1 ? `<div class="group-count" role="button" tabindex="0" aria-label="צפייה בקבוצות">👥 ${g.items.length}</div>` : '';
       const hourStr = first.StartTime ? `<div class="event-hour">${first.StartTime}</div>` : '';
-      const empName = hasEmp ? `<strong>${first.Employee}</strong>` : `<strong style="color:var(--danger)">חסר מדריך</strong>`;
+      const empName = hasEmp ? `<strong class="title">${first.Employee}</strong>` : `<strong class="title" style="color:var(--danger)">חסר מדריך</strong>`;
+      const meta = `<div class="meta">${first.Program}</div>`;
 
-      evDiv.innerHTML = `${count}${hourStr}${empName}<div>${first.Program}</div>`;
+      evDiv.innerHTML = `${count}${hourStr}${empName}${meta}`;
       evDiv.onclick = (e) => { e.stopPropagation(); openSideGrouped(g.items); };
+      const groupCountEl = evDiv.querySelector('.group-count');
+      if(groupCountEl){
+        const openGroup = (e) => {
+          e.stopPropagation();
+          openSideGrouped(g.items);
+        };
+        groupCountEl.addEventListener('click', openGroup);
+        groupCountEl.addEventListener('keydown', (e) => {
+          if(e.key === 'Enter' || e.key === ' '){
+            e.preventDefault();
+            openGroup(e);
+          }
+        });
+      }
     }
     cell.appendChild(evDiv);
   });
