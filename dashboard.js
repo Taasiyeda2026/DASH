@@ -2431,35 +2431,62 @@ managerFilter.onchange=render;
 employeeFilter.onchange=render;
 document.getElementById('clearFilters').onclick=()=>{managerFilter.value='';employeeFilter.value='';render();};
 summaryMonth.onchange=render;
-function openDaySheet(title, htmlContent){
-  if(!daySheet || !daySheetBackdrop || !daySheetContent) return;
-  closeSidePanel();
-  daySheetTitle.textContent = title || 'פרטי יום';
-  daySheetContent.innerHTML = htmlContent || '';
-  daySheet.classList.remove('day-sheet-hidden');
-  daySheetBackdrop.classList.remove('day-sheet-hidden');
 
-  applyNotesBoxColor();
+const sideBackdrop = document.getElementById('side-backdrop');
+
+function isManagerOverlayOpen(){
+  return !!document.querySelector('.manager-overlay-bg, .manager-details-overlay');
+}
+
+function syncBodyScrollLock(){
+  const sideIsOpen = !!side && side.classList.contains('open');
+  const daySheetIsOpen = !!daySheet && !daySheet.classList.contains('day-sheet-hidden');
+  document.body.classList.toggle('no-scroll', sideIsOpen || daySheetIsOpen || isManagerOverlayOpen());
+}
+
+function closeManagerOverlay(){
+  document.querySelectorAll('.manager-overlay-bg, .manager-details-overlay').forEach(el => el.remove());
+  syncBodyScrollLock();
+}
+
+function closeSidePanel(){
+  side.classList.remove('open');
+  sideBackdrop.classList.remove('active');
+  syncBodyScrollLock();
 }
 
 function closeDaySheet(){
   if(!daySheet || !daySheetBackdrop) return;
   daySheet.classList.add('day-sheet-hidden');
   daySheetBackdrop.classList.add('day-sheet-hidden');
+  syncBodyScrollLock();
 }
 
-const sideBackdrop = document.getElementById('side-backdrop');
+function closeAllOverlays(){
+  closeSidePanel();
+  closeDaySheet();
+  closeManagerOverlay();
+}
 
 function openSidePanel(){
+  closeAllOverlays();
   side.classList.add('open');
   if(isMobile()){
     sideBackdrop.classList.add('active');
-    return;
   }
+  syncBodyScrollLock();
 }
-function closeSidePanel(){
-  side.classList.remove('open');
-  sideBackdrop.classList.remove('active');
+
+function openDaySheet(title, htmlContent){
+  if(!daySheet || !daySheetBackdrop || !daySheetContent) return;
+  closeAllOverlays();
+  daySheetTitle.textContent = title || 'פרטי יום';
+  daySheetContent.innerHTML = htmlContent || '';
+  daySheet.classList.remove('day-sheet-hidden');
+  daySheetBackdrop.classList.remove('day-sheet-hidden');
+
+  syncBodyScrollLock();
+  applyNotesBoxColor();
 }
 
 document.getElementById('closeSide').onclick = closeSidePanel;
@@ -2473,7 +2500,7 @@ if(daySheetBackdrop){
 }
 document.addEventListener('keydown', e => {
   if(e.key === 'Escape'){
-    closeDaySheet();
+    closeAllOverlays();
   }
 });
 
@@ -2498,8 +2525,7 @@ initFromRawData();
 
 window.addEventListener('popstate', (e)=>{
   if(isMobile() && (window.mode === 'month' || window.mode === 'week')){
-    closeSidePanel();
-    closeDaySheet();
+    closeAllOverlays();
     view.innerHTML = '';
     renderMobileMonth();
   }
