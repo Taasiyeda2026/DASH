@@ -772,8 +772,11 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
     justify-content: center;
     text-align: center;
     box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transition: transform 0.2s, box-shadow 0.2s, background-color 0.2s;
+    cursor: pointer;
     margin: 0;
     border-top: 5px solid #e2e8f0;
+    user-select: none;
   }
 
 .manager-card.secondary {
@@ -991,8 +994,11 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
     justify-content: center;
     text-align: center;
     box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transition: transform 0.2s, box-shadow 0.2s, background-color 0.2s;
+    cursor: pointer;
     margin: 0;
     border-top: 5px solid #e2e8f0;
+    user-select: none;
   }
 
   .summary-wrapper {
@@ -1881,6 +1887,16 @@ body.no-scroll {
     width: 100%;
     margin-top: 20px;
     flex-wrap: wrap;
+  }
+  
+  .manager-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    filter: brightness(0.98);
+  }
+  .manager-card:active {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
   }
   </style>
 </head>
