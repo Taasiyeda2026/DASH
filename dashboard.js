@@ -2120,6 +2120,7 @@ function renderEndDates(){
   view.innerHTML = `
     <div class="end-dates-wrap">
       <div class="end-dates-title">תאריכי סיום</div>
+      <input id="endDatesSearch" type="text" placeholder="חיפוש לפי בית ספר / רשות..." style="display:block;width:100%;box-sizing:border-box;margin:0 0 14px;padding:8px 12px;font-size:14px;border:1px solid #e2e8f0;border-radius:8px;outline:none;direction:rtl">
       <div style="overflow-x:auto">
         <table class="end-dates-table">
           <thead>
@@ -2146,6 +2147,19 @@ function renderEndDates(){
       const course = courses[idx];
       if(!course) return;
       openEndDateDetail(course);
+    });
+  }
+
+  const searchInput = document.getElementById('endDatesSearch');
+  if(searchInput){
+    searchInput.addEventListener('input', () => {
+      const q = searchInput.value.trim().toLowerCase();
+      tbody.querySelectorAll('tr[data-idx]').forEach(tr => {
+        const cells = tr.querySelectorAll('td');
+        const school = (cells[0]?.textContent || '').toLowerCase();
+        const authority = (cells[1]?.textContent || '').toLowerCase();
+        tr.style.display = (!q || school.includes(q) || authority.includes(q)) ? '' : 'none';
+      });
     });
   }
 }
