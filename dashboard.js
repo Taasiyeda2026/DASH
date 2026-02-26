@@ -851,10 +851,14 @@ function renderInstructorGridMonth(){
       (isToday ? ' ic-today is-today' : '') +
       (groups.some(g => g.type !== 'holiday') ? ' ic-has-events' : '');
 
-    // מספר יום
+    // תצוגת יום: יום בשבוע מקוצר + יום/חודש
     const numWrap = document.createElement('div');
     numWrap.className = 'instructor-cal-day-num date-number' + (isToday ? ' ic-today-num' : '');
-    numWrap.textContent = d;
+    const day = date.getDate();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const weekdays = ['א׳','ב׳','ג׳','ד׳','ה׳','ו׳','ש׳'];
+    const weekday = weekdays[date.getDay()];
+    numWrap.textContent = `${weekday} ${day}/${month}`;
     cell.appendChild(numWrap);
 
     // פילים של אירועים (מקסימום 3) – לא בשבת
