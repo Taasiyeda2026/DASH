@@ -992,8 +992,7 @@ function renderInstructorGridMonth(){
     const personalSummary = document.createElement('div');
     personalSummary.style.maxWidth = '600px';
     personalSummary.style.margin = '24px auto';
-    personalSummary.style.display = 'grid';
-    personalSummary.style.gridTemplateColumns = 'repeat(3,minmax(0,1fr))';
+    personalSummary.className = 'personal-summary-row'; personalSummary.style.display = 'flex'; personalSummary.style.justifyContent = 'center';
     personalSummary.style.gap = '10px';
 
     personalSummary.innerHTML = `

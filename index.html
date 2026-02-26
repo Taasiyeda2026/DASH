@@ -1408,13 +1408,13 @@ body.no-scroll {
 /* ===== INSTRUCTOR COMPACT CALENDAR GRID ===== */
 .view-month .instructor-cal-wrap {
     width: 100%;
-    max-width: 100%;
-    margin: 0;
-    overflow-x: auto;
+    max-width: 1400px;
+    margin: 0 auto;
     padding: 20px;
-    background: #fff;
-    border-radius: 16px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    align-items: center;
   }
 .view-month .instructor-cal-header-row {
     display: grid;
@@ -1442,12 +1442,13 @@ body.no-scroll {
 }
 .view-month .instructor-cal-grid {
     display: grid;
-    grid-template-columns: repeat(7, minmax(180px, 1fr));
-    gap: 12px;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 8px;
     width: 100%;
-    background: #e2e8f0;
+    background: #f8fafc;
+    border-radius: 12px;
     border: 1px solid var(--border);
-    overflow-x: auto;
+    padding: 8px;
   }
 .view-month .instructor-cal-cell.ic-shabbat {
   min-height: 0;
@@ -1687,22 +1688,23 @@ body.no-scroll {
 @media(min-width:800px) {
   .view-month .instructor-cal-wrap {
     width: 100%;
-    max-width: 100%;
-    margin: 0;
-    overflow-x: auto;
+    max-width: 1400px;
+    margin: 0 auto;
     padding: 20px;
-    background: #fff;
-    border-radius: 16px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    align-items: center;
   }
   .view-month .instructor-cal-grid {
     display: grid;
-    grid-template-columns: repeat(7, minmax(180px, 1fr));
-    gap: 12px;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 8px;
     width: 100%;
-    background: #e2e8f0;
+    background: #f8fafc;
+    border-radius: 12px;
     border: 1px solid var(--border);
-    overflow-x: auto;
+    padding: 8px;
   }
   .view-month .instructor-cal-header-row {
     display: grid;
@@ -1870,6 +1872,15 @@ body.no-scroll {
     border-bottom: 2px solid currentColor;
     padding-bottom: 4px;
     width: fit-content;
+  }
+  
+  .personal-summary-row {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    width: 100%;
+    margin-top: 20px;
+    flex-wrap: wrap;
   }
   </style>
 </head>
