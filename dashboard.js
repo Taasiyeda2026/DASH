@@ -745,7 +745,7 @@ function render(){
   view.classList.toggle('view-month', window.mode === 'month');
   closeSidePanel();
 
-  if(userRole === 'instructor' || window.mode === 'summary' || window.mode === 'instructors' || window.mode === 'enddates'){
+  if(userRole === 'instructor' || window.mode === 'summary' || window.mode === 'instructors' || window.mode === 'enddates' || isMobile()){
     filtersEl.style.display = 'none';
   }else{
     filtersEl.style.display = 'flex';
@@ -985,7 +985,7 @@ function renderInstructorGridMonth(){
 
 function renderWeekView(){
   if (isMobile()) {
-    renderMobileWeekView();
+    renderMobileMonthAccordion();
   } else {
     renderDesktopWeekView();
   }
