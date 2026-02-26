@@ -431,8 +431,12 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
 .side,.side-panel{position:fixed;top:0;left:0;width:320px;max-width:100%;height:100%;background:#fff;box-shadow:-6px 0 24px rgba(0,0,0,.18);transform:translateX(-100%);transition:.28s ease;z-index:50;padding:0;overflow:hidden;display:flex;flex-direction:column;}
 #side {
   max-width: 100%;
+  pointer-events: none;
 }
-.side.open{transform:translateX(0)}
+.side.open{
+  transform:translateX(0);
+  pointer-events:auto;
+}
 .side .close,
 .side-close{position:relative;top:auto;left:auto;flex-shrink:0;align-self:flex-start;margin:14px 0 4px 14px;z-index:1000;background:#fff;border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;border:none;box-shadow:0 1px 6px rgba(0,0,0,0.12);}
 #sideContent{flex:1;overflow-y:auto;overflow-x:hidden;padding:0 18px 18px 18px;overscroll-behavior:contain;}
@@ -1151,10 +1155,14 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
   inset: 0;
   background: rgba(15,23,42,.45);
   z-index: 49;
+  pointer-events: none;
   backdrop-filter: blur(2px);
   -webkit-backdrop-filter: blur(2px);
 }
-#side-backdrop.active { display: block; }
+#side-backdrop.active {
+  display: block;
+  pointer-events: auto;
+}
 @media(max-width:800px) {
   #side-backdrop { z-index: 1050; }
 }
