@@ -2450,6 +2450,7 @@ function closeManagerOverlay(){
 }
 
 function closeSidePanel(){
+  console.log('סגירת פאנל צדדי');
   side.classList.remove('open');
   sideBackdrop.classList.remove('active');
   syncBodyScrollLock();
