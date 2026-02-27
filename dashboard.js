@@ -2075,7 +2075,7 @@ function openInstructorModal(name, courses, selectedMonth, selectedYear){
 
   if(dailyRecords.length > 0){
     sideContent.innerHTML += `
-      <div style="font-weight:800;font-size:15px;margin:16px 0 8px;color:#065f46;border-top:1px solid var(--border);padding-top:14px;">
+      <div style="font-weight:800;font-size:15px;margin:16px 0 8px;color:#1b7895;border-top:1px solid var(--border);padding-top:14px;">
         סדנאות וסיורים
       </div>
   `;
