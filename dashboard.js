@@ -1240,7 +1240,7 @@ function buildDay(date,data){
       const hasEmp = !!(first.Employee && first.Employee.trim());
       evDiv.className = 'event schedule-card' + (!hasEmp ? ' missing' : '');
 
-      const count = g.items.length > 1 ? `<div class="group-count" role="button" tabindex="0" aria-label="צפייה בקבוצות">👥 ${g.items.length}</div>` : '';
+      const count = g.items.length > 1 ? `<div class="group-count" role="button" tabindex="0" aria-label="צפייה בקבוצות">➕ ${g.items.length}</div>` : '';
       const hourStr = first.StartTime ? `<div class="event-hour">${first.StartTime}</div>` : '';
       const empName = hasEmp ? `<strong class="title">${first.Employee}</strong>` : `<strong class="title" style="color:var(--danger)">חסר מדריך</strong>`;
       const meta = `<div class="meta">${first.Program}</div>`;
