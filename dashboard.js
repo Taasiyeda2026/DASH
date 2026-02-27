@@ -737,6 +737,21 @@ function initSummaryMonths(){
   if(idx >= 0) summaryMonth.selectedIndex = idx;
 }
 
+function fitViewToScreen() {
+  if (window.innerWidth <= 800) return;
+  const view = document.getElementById('view');
+  if (!view) return;
+  Array.from(view.children).forEach(c => { c.style.zoom = ''; });
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    const viewH = view.clientHeight;
+    const contentH = view.scrollHeight;
+    if (contentH <= viewH) return;
+    const z = Math.max(0.70, viewH / contentH);
+    Array.from(view.children).forEach(c => { c.style.zoom = z; });
+  }));
+}
+window.addEventListener('resize', fitViewToScreen);
+
 function render(){
 
   enforceInstructorMode();
@@ -778,6 +793,7 @@ function render(){
   }
 
   applyNotesBoxColor();
+  fitViewToScreen();
 }
 
 function renderMonthView(){
