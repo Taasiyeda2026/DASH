@@ -170,8 +170,7 @@ button,select,a,[onclick]{touch-action:manipulation;}
 .login-btn:active{transform:translateY(1px) !important;filter:brightness(0.93) !important;}
 .today-star:active{transform:scale(0.88) !important;}
 .today-calendar:active{transform:scale(0.88) !important;}
-#prev:active,#next:active{transform:scale(0.9);}
-#btnMonth:active,#btnWeek:active,#btnSummary:active,#btnInstructors:active,#btnEndDates:active{filter:brightness(0.93);}
+.nav-modes button:active,#prev:active,#next:active,#clearFilters:active{transform:translateY(2px);box-shadow:0 1px 0 #94a3b8 !important;}
 
 /* ===== HEADER & NAV ===== */
 header{background:#fff;border-bottom:1px solid var(--border)}
@@ -180,6 +179,16 @@ header{background:#fff;border-bottom:1px solid var(--border)}
 
 .instructors-count-title{width:100%;max-width:100%;margin:18px auto 0;padding:0 10px;text-align:right;font-size:16px;font-weight:700;}
 select,button{height:32px;border:1px solid var(--border);border-radius:8px;background:#fff;padding:0 10px;cursor:pointer}
+
+/* ===== NAV BUTTONS 3D DEPTH ===== */
+.nav-modes button,#prev,#next,#clearFilters{
+  background:linear-gradient(to bottom,#ffffff,#f1f5f9);
+  color:#334155;border:none;height:30px;
+  font-size:13px;font-weight:600;
+  box-shadow:0 3px 0 #94a3b8,0 5px 8px rgba(0,0,0,0.07);
+  transition:transform .1s,box-shadow .1s,background .1s;
+}
+.nav-modes button:hover,#prev:hover,#next:hover,#clearFilters:hover{background:linear-gradient(to bottom,#f8fafc,#e2e8f0);}
 
 /* ===== HEADER ACTION BUTTONS ===== */
 .btn-attendance{
@@ -220,11 +229,11 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
 .today-calendar:hover { transform: scale(1.12); }
 .today-calendar:active { transform: scale(0.92); }
 
-#btnMonth.active{background:#e0f2fe;border-color:#7dd3fc}
-#btnWeek.active{background:#ecfeff;border-color:#67e8f9}
-#btnSummary.active{background:#f0fdf4;border-color:#86efac}
-#btnInstructors.active{background:#fef3c7;border-color:#fcd34d}
-#btnEndDates.active{background:#fce7f3;border-color:#f9a8d4}
+#btnMonth.active{background:linear-gradient(to bottom,#e0f2fe,#bae6fd);border:none;color:#0369a1;box-shadow:0 3px 0 #0284c7,0 4px 8px rgba(2,132,199,0.18);}
+#btnWeek.active{background:linear-gradient(to bottom,#ecfeff,#a5f3fc);border:none;color:#0891b2;box-shadow:0 3px 0 #0891b2,0 4px 8px rgba(8,145,178,0.18);}
+#btnSummary.active{background:linear-gradient(to bottom,#f0fdf4,#bbf7d0);border:none;color:#166534;box-shadow:0 3px 0 #16a34a,0 4px 8px rgba(22,163,74,0.18);}
+#btnInstructors.active{background:linear-gradient(to bottom,#fef3c7,#fde68a);border:none;color:#92400e;box-shadow:0 3px 0 #ca8a04,0 4px 8px rgba(202,138,4,0.18);}
+#btnEndDates.active{background:linear-gradient(to bottom,#fce7f3,#fbcfe8);border:none;color:#9d174d;box-shadow:0 3px 0 #db2777,0 4px 8px rgba(219,39,119,0.18);}
 
 .nav{background:#fff;border-bottom:1px solid var(--border);z-index:10;display:flex;gap:8px;justify-content:center;align-items:center;flex-wrap:wrap;margin:0;padding:10px}
 .week-header{z-index:10;background:#ffffff;padding-top:10px;padding-bottom:10px;}
@@ -708,8 +717,10 @@ body.no-scroll{overflow:hidden;}
   #btnMonth,#btnWeek{display:none !important;}
 
   .nav-modes{width:100%;display:flex !important;justify-content:center !important;align-items:center !important;gap:10px !important;margin-bottom:8px !important;}
-  .nav-modes button{flex:1 1 0;font-size:11px;height:32px;padding:0 4px;white-space:nowrap;}
-  #btnSummary,#btnInstructors,#btnEndDates{flex:1 1 0 !important;width:auto !important;height:32px !important;font-size:11px !important;border-radius:10px !important;padding:0 4px !important;}
+  .nav-modes button{flex:1 1 0;font-size:11px;height:28px !important;padding:0 4px;white-space:nowrap;box-shadow:0 2px 0 #94a3b8,0 3px 6px rgba(0,0,0,0.07) !important;}
+  #btnSummary,#btnInstructors,#btnEndDates{flex:1 1 0 !important;width:auto !important;height:28px !important;font-size:11px !important;border-radius:8px !important;padding:0 4px !important;}
+  .nav-arrows #prev,.nav-arrows #next{box-shadow:0 2px 0 #94a3b8,0 3px 6px rgba(0,0,0,0.07) !important;}
+  #btnMonth.active,#btnWeek.active,#btnSummary.active,#btnInstructors.active,#btnEndDates.active{box-shadow:0 2px 0 currentColor,0 3px 6px rgba(0,0,0,0.10) !important;}
   .nav-modes select{height:38px;font-size:14px;}
 
   .nav-arrows{width:100%;justify-content:center;}
