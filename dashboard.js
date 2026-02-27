@@ -2227,17 +2227,9 @@ function renderEndDates(){
   const today = new Date();
   today.setHours(0,0,0,0);
 
-  const seen = new Set();
   const courses = rawData
     .filter(r => isCourse(r) && r.End instanceof Date && !isNaN(r.End.getTime()))
-    .filter(r => {
-      const key = `${r.Program}||${r.School}||${r.Authority}`;
-      if(seen.has(key)) return false;
-      seen.add(key);
-      return true;
-  })
-    .filter(r => r.End.getMonth() >= 0 && r.End.getMonth() <= 5)
-    .sort((a, b) => a.End - b.End);
+    .filter(r => r.End.getMonth() >= 0 && r.End.getMonth() <= 5);
 
   const monthMap = new Map();
   courses.forEach(course => {
@@ -2305,7 +2297,13 @@ function renderEndDates(){
     if(activeMonthObj){
       const monthLabel = monthNames[activeMonthObj.month] || '';
       const monthMatches = !q || monthLabel.toLowerCase().includes(q);
-      const schoolEntries = [...activeMonthObj.schools.entries()].map(([schoolKey, schoolObj]) => {
+      const schoolEntries = [...activeMonthObj.schools.entries()]
+        .sort(([, schoolA], [, schoolB]) => {
+          const minA = schoolA.courses.reduce((min, course) => Math.min(min, course.End.getTime()), Infinity);
+          const minB = schoolB.courses.reduce((min, course) => Math.min(min, course.End.getTime()), Infinity);
+          return minA - minB;
+        })
+        .map(([schoolKey, schoolObj]) => {
         const schoolText = `${schoolObj.school} | ${schoolObj.authority}`;
         const visibleCourses = schoolObj.courses
           .filter(course => {

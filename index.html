@@ -420,8 +420,8 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
 .end-search-bar{margin-bottom:16px}
 .end-search-bar input{width:100%;height:42px;padding:0 14px;border-radius:12px;border:1px solid #d7dbe2;background:#ffffff;box-shadow:0 2px 6px rgba(15,23,42,0.04);transition:0.22s ease;box-sizing:border-box}
 .end-search-bar input:focus{border-color:#b7aee4;box-shadow:0 0 0 3px rgba(183,174,228,0.2);outline:none}
-.end-months-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:14px}
-.end-month-card{min-height:66px;border:none;border-radius:16px;padding:12px 14px;cursor:pointer;transition:0.22s ease;box-shadow:0 3px 10px rgba(15,23,42,0.05);display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:4px;color:#1f2937}
+.end-months-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:14px}
+.end-month-card{min-height:48px;border:none;border-radius:16px;padding:8px 12px;cursor:pointer;transition:0.22s ease;box-shadow:0 3px 10px rgba(15,23,42,0.05);display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:4px;color:#1f2937}
 .end-month-card:hover{transform:translateY(-1px);box-shadow:0 6px 14px rgba(15,23,42,0.08)}
 .end-month-card.active{transform:translateY(-2px);box-shadow:0 8px 16px rgba(15,23,42,0.1);border:1px solid rgba(31,41,55,0.18)}
 .end-month-card.month-0{background:#f9e4ea}
@@ -433,7 +433,7 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
 .end-month-name{font-weight:700;font-size:17px}
 .end-month-count{font-size:12px;color:#4b5563}
 .end-content-wrapper{max-width:780px;margin:0 auto;width:100%;padding:16px 20px;box-sizing:border-box}
-.end-content-panel{background:#ffffff;border:1px solid #e6e8ed;border-radius:16px;box-shadow:0 4px 12px rgba(15,23,42,0.05);padding:6px 0 4px;min-height:160px;transition:0.22s ease}
+.end-content-panel{background:#ffffff;border:1px solid #e6e8ed;border-radius:16px;box-shadow:0 4px 12px rgba(15,23,42,0.05);padding:6px 0 4px;min-height:auto;transition:0.22s ease}
 .end-content-wrapper table{width:100%;max-width:100%;table-layout:fixed}
 .end-content-wrapper table td,
 .end-content-wrapper table th{width:50%}
@@ -795,7 +795,7 @@ body.no-scroll{overflow:hidden;}
 
   .end-dates-wrapper{max-width:100%;padding:0 10px}
   .end-months-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-  .end-month-card{min-height:60px;padding:10px 12px}
+  .end-month-card{min-height:48px;padding:8px 12px}
   .end-month-name{font-size:15px}
   .end-content-wrapper{max-width:100%;padding:12px}
   .end-content-panel{padding-top:2px}
