@@ -1374,11 +1374,6 @@ function openSideGrouped(items) {
   const content = buildGroupedDetailsContent(items);
   if(!content) return;
 
-  if(shouldUseInstructorDaySheet()){
-    openDaySheet(content.title, content.html);
-    return;
-  }
-
   sideContent.innerHTML = content.html;
   applyNotesBoxColor();
   openSidePanel();
