@@ -902,6 +902,36 @@ body.no-scroll{overflow:hidden;}
   gap: 10px !important;
 }
 
+/* ===== COMPACT LEVEL 2 – Desktop Month/Week (no font changes) ===== */
+@media (min-width: 801px){
+
+  /* grid spacing */
+  #view.view-month .grid,
+  #view.view-week .grid{
+    gap: 8px !important;
+    padding: 8px !important;
+  }
+
+  /* day card size (do not change font-size) */
+  #view.view-month .day,
+  #view.view-month .day-column,
+  #view.view-week .day,
+  #view.view-week .day-column{
+    min-height: 140px !important;
+    padding: 8px !important;
+    border-radius: 14px !important;
+  }
+
+  /* event card compact (do not change font-size) */
+  #view.view-month .event,
+  #view.view-week .event{
+    min-height: 42px !important;
+    padding: 6px 8px !important;
+    margin-bottom: 6px !important;
+    border-radius: 14px !important;
+  }
+}
+
 </style>
 </head>
 <body>
