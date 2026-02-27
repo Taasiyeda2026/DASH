@@ -761,7 +761,7 @@ body.no-scroll{overflow:hidden;}
 
   .header-inner{padding:10px;gap:8px;flex-wrap:wrap;}
   .header-inner > strong{display:none;}
-  .btn-attendance,#logoutBtn{font-size:12px !important;padding:6px 0 !important;border-radius:8px !important;min-width:70px !important;width:70px !important;text-align:center !important;}
+  .btn-attendance,#logoutBtn{font-size:12px !important;padding:6px 0 !important;border-radius:8px !important;text-align:center !important;}
   .btn-attendance,.btn-attendance:hover{box-shadow:0 3px 0 #0369a1,0 4px 8px rgba(14,165,233,0.25) !important;}
   #logoutBtn,#logoutBtn:hover{box-shadow:0 3px 0 #b91c1c,0 4px 8px rgba(239,68,68,0.25) !important;}
   .btn-attendance:active{transform:translateY(3px);box-shadow:0 1px 0 #0369a1 !important;}
@@ -805,6 +805,49 @@ body.no-scroll{overflow:hidden;}
   .course-meta{grid-template-columns:1fr;}
   .course-card{padding:14px;}
   .manager-details-overlay{width:calc(100% - 24px);max-width:calc(100% - 24px);padding:20px 16px;max-height:88vh;}
+
+  .btn-attendance,
+  #logoutBtn{
+    width: 45px !important;
+    height: 45px !important;
+    min-width: 45px !important;
+    min-height: 45px !important;
+
+    padding: 0 !important;
+    border-radius: 50% !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    background: linear-gradient(to bottom, #ffffff, #f1f5f9) !important;
+
+    box-shadow:
+      0 4px 0 rgba(0,0,0,0.15),
+      0 6px 14px rgba(0,0,0,0.12);
+
+    transition: all 0.15s ease !important;
+  }
+
+  .btn-attendance img,
+  #logoutBtn img{
+    width: 22px !important;
+    height: 22px !important;
+    transition: transform 0.15s ease !important;
+  }
+
+  .btn-attendance:active,
+  #logoutBtn:active{
+    transform: translateY(3px) !important;
+    box-shadow:
+      0 1px 0 rgba(0,0,0,0.15),
+      0 3px 8px rgba(0,0,0,0.15) !important;
+  }
+
+  .btn-attendance:active img,
+  #logoutBtn:active img{
+    transform: scale(0.92);
+  }
 }
 
 /* ===== VERY SMALL SCREENS (≤400px) ===== */
@@ -828,8 +871,12 @@ body.no-scroll{overflow:hidden;}
     <img src="logo.png" class="app-logo" />
     <strong>דשבורד פעילויות</strong>
     <span id="greetingName" style="font-size:14px;font-weight:600;color:#334155;white-space:nowrap;"></span>
-    <a href="https://taasiyeda2026.github.io/attendance/" target="_blank" rel="noopener" style="margin-right:auto;text-decoration:none"><button class="btn-attendance">נוכחות</button></a>
-    <button id="logoutBtn">יציאה</button>
+    <a href="https://taasiyeda2026.github.io/attendance/" target="_blank" rel="noopener" class="btn-attendance" style="margin-right:auto;text-decoration:none">
+      <img src="icon-att.svg" alt="נוכחות">
+    </a>
+    <button id="logoutBtn">
+      <img src="icon-logout.svg" alt="יציאה">
+    </button>
   </div>
 </header>
 
