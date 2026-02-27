@@ -849,34 +849,57 @@ body.no-scroll{overflow:hidden;}
 }
 
 
-/* ===== SAFE ZOOM 25% – Month / Week only ===== */
+/* ===== COMPACT LEVEL 2 – Month / Week ===== */
 
-#view.view-month .grid,
-#view.view-week .grid{
-  transform: scale(0.75);
-  transform-origin: top center;
+.view-month .day-column,
+.view-week .day-column{
+  min-height: 140px !important;
 }
 
-/* ===== SAFE ZOOM 25% – Summary only ===== */
+.view-month .grid,
+.view-week .grid{
+  gap: 8px !important;
+}
+
+.schedule-card,
+.event{
+  min-height: 44px !important;
+  padding: 6px 8px !important;
+  margin-bottom: 6px !important;
+}
+
+/* ===== COMPACT LEVEL 2 – Summary ===== */
 
 .summary-wrapper{
-  transform: scale(0.70);
-  transform-origin: top center;
+  gap: 14px !important;
+  padding-bottom: 20px !important;
 }
 
-/* ===== SAFE ZOOM 35% – Instructors only ===== */
-
-#view.view-instructors .instructors-grid{
-  transform: scale(0.65);
-  transform-origin: top center;
+.managers-row{
+  gap: 12px !important;
 }
 
-/* Prevent empty scroll area after scale */
-#view.view-month,
-#view.view-week,
-#view.view-instructors,
-.summary-wrapper{
-  overflow-y: auto;
+/* ===== COMPACT LEVEL 2 – Instructors Page ===== */
+
+.view-instructors .instructor-card{
+  min-height: 110px !important;
+  padding: 10px !important;
+}
+
+.view-instructors .instructors-grid{
+  gap: 10px !important;
+}
+
+/* ===== COMPACT LEVEL 2 – Instructor Dashboard ===== */
+
+.instructor-card,
+.kpi-card{
+  min-height: 110px !important;
+  padding: 10px !important;
+}
+
+.kpi-row{
+  gap: 10px !important;
 }
 
 </style>
