@@ -616,7 +616,7 @@ function updatePageUserName(user){
   }
 
   if(user.Role === 'manager' || user.Role === 'admin'){
-    header.textContent = user.Manager || user.Name || user.Employee || '';
+    header.textContent = user.Employee || user.Name || user.Manager || '';
     return;
   }
 
@@ -2342,9 +2342,22 @@ function isManagerOverlayOpen(){
 }
 
 function syncBodyScrollLock(){
-  const sideIsOpen = !!side && side.classList.contains('open');
-  const daySheetIsOpen = !!daySheet && !daySheet.classList.contains('day-sheet-hidden');
-  document.body.classList.toggle('no-scroll', sideIsOpen || daySheetIsOpen || isManagerOverlayOpen());
+  const shouldLock = (!!side && side.classList.contains('open')) ||
+                     (!!daySheet && !daySheet.classList.contains('day-sheet-hidden')) ||
+                     isManagerOverlayOpen();
+  if(shouldLock){
+    if(view.dataset.savedScroll === undefined){
+      view.dataset.savedScroll = view.scrollTop;
+    }
+    view.style.overflow = 'hidden';
+  } else {
+    const saved = view.dataset.savedScroll;
+    view.style.overflow = '';
+    if(saved !== undefined){
+      view.scrollTop = parseInt(saved, 10);
+      delete view.dataset.savedScroll;
+    }
+  }
 }
 
 function closeManagerOverlay(){
@@ -2436,7 +2449,7 @@ document.addEventListener('keydown', e => {
     const dx = Math.abs(e.changedTouches[0].clientX - _tx);
     const dy = e.changedTouches[0].clientY - _ty;
     // החלקה למטה (סגירה) — לפחות 60px ואנכית יותר מאופקית
-    if(dy > 60 && dx < dy * 0.8){
+    if(dy > 60 && dx < dy * 0.8 && sideContent.scrollTop <= 0){
       closeSidePanel();
   }
   }, { passive: true });
