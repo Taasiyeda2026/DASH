@@ -2227,64 +2227,160 @@ function renderEndDates(){
       seen.add(key);
       return true;
   })
+    .filter(r => r.End.getMonth() >= 0 && r.End.getMonth() <= 5)
     .sort((a, b) => a.End - b.End);
 
-  const rows = courses.map((r, i) => {
-    const isPast = r.End < today;
-    const rowClass = isPast ? 'end-dates-past' : '';
-    const dateStr = r.End.toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit', year: 'numeric' });
-    return `<tr class="${rowClass}" data-idx="${i}" style="cursor:pointer">
-      <td>${r.School || '—'}</td>
-      <td>${r.Authority || '—'}</td>
-      <td style="white-space:nowrap">${dateStr}</td>
-    </tr>`;
-  }).join('');
+  const monthMap = new Map();
+  courses.forEach(course => {
+    const monthKey = `${course.End.getFullYear()}-${course.End.getMonth()}`;
+    if(!monthMap.has(monthKey)){
+      monthMap.set(monthKey, {
+        year: course.End.getFullYear(),
+        month: course.End.getMonth(),
+        schools: new Map()
+      });
+    }
+    const monthObj = monthMap.get(monthKey);
+    const schoolName = course.School || '—';
+    const authorityName = course.Authority || '—';
+    const schoolKey = `${schoolName}||${authorityName}`;
+    if(!monthObj.schools.has(schoolKey)){
+      monthObj.schools.set(schoolKey, {
+        school: schoolName,
+        authority: authorityName,
+        courses: []
+      });
+    }
+    monthObj.schools.get(schoolKey).courses.push(course);
+  });
+
+  const months = [...monthMap.entries()]
+    .sort((a, b) => {
+      const mA = a[1];
+      const mB = b[1];
+      return (mA.year - mB.year) || (mA.month - mB.month);
+    })
+    .map(([key, value]) => ({ key, ...value }));
+
+  let openMonthKey = null;
+  const openSchoolByMonth = {};
+
+  const getEndClass = endDate => {
+    const daysDiff = Math.ceil((endDate - today) / 86400000);
+    if(daysDiff >= 0 && daysDiff <= 7) return 'end-soon';
+    if(daysDiff >= 8 && daysDiff <= 21) return 'end-warning';
+    return '';
+  };
+
+  const renderMonths = query => {
+    const q = (query || '').trim().toLowerCase();
+    const html = months.map(monthObj => {
+      const monthLabel = new Date(monthObj.year, monthObj.month, 1)
+        .toLocaleDateString('he-IL', { month: 'long', year: 'numeric' });
+      const monthMatches = !q || monthLabel.toLowerCase().includes(q);
+      const schoolEntries = [...monthObj.schools.entries()].map(([schoolKey, schoolObj]) => {
+        const schoolText = `${schoolObj.school} | ${schoolObj.authority}`;
+        const courseHtml = schoolObj.courses
+          .filter(course => {
+            if(!q || monthMatches) return true;
+            const endDateText = course.End.toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit', year: 'numeric' }).toLowerCase();
+            const datesText = (course.Dates || [])
+              .filter(d => d instanceof Date && !isNaN(d.getTime()))
+              .map(d => d.toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit', year: 'numeric' }).toLowerCase())
+              .join(' ');
+            return schoolText.toLowerCase().includes(q) ||
+              (course.Program || '').toLowerCase().includes(q) ||
+              endDateText.includes(q) ||
+              datesText.includes(q);
+          })
+          .sort((a, b) => a.End - b.End)
+          .map(course => {
+            const dateStr = course.End.toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit', year: 'numeric' });
+            const meetings = (course.Dates || [])
+              .filter(d => d instanceof Date && !isNaN(d.getTime()))
+              .sort((a, b) => a - b)
+              .map((d, i) => `<div class="meeting-item">מפגש ${i + 1}: ${d.toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit', year: 'numeric' })}</div>`)
+              .join('');
+            return `
+              <div class="course-container">
+                <div class="course-title">${course.Program || '—'}</div>
+                <div class="course-end-date ${getEndClass(course.End)}">תאריך סיום: ${dateStr}</div>
+                <div>${meetings || '<div class="meeting-item">אין מפגשים</div>'}</div>
+              </div>
+            `;
+          })
+          .join('');
+
+        if(!courseHtml) return '';
+        const isOpen = openMonthKey === monthObj.key && openSchoolByMonth[monthObj.key] === schoolKey;
+        return `
+          <div>
+            <div class="school-row" data-month-key="${monthObj.key}" data-school-key="${schoolKey}">
+              <span>${schoolText}</span>
+              <span>(${schoolObj.courses.length})</span>
+            </div>
+            ${isOpen ? courseHtml : ''}
+          </div>
+        `;
+      }).filter(Boolean).join('');
+
+      if(!schoolEntries) return '';
+      const isOpen = openMonthKey === monthObj.key;
+      return `
+        <div class="month-block">
+          <div class="month-header" data-month-key="${monthObj.key}">
+            <span>${monthLabel}</span>
+            <span>${isOpen ? '▲' : '▼'}</span>
+          </div>
+          ${isOpen ? `<div>${schoolEntries}</div>` : ''}
+        </div>
+      `;
+    }).filter(Boolean).join('');
+
+    const container = document.getElementById('endDatesMonths');
+    container.innerHTML = html || '<div class="month-block"><div class="month-header">אין נתונים</div></div>';
+  };
 
   view.innerHTML = `
-    <div class="end-dates-wrap">
-      <div class="end-dates-title">תאריכי סיום</div>
-      <input id="endDatesSearch" type="text" placeholder="חיפוש לפי בית ספר / רשות..." style="display:block;width:100%;box-sizing:border-box;margin:0 0 14px;padding:8px 12px;font-size:14px;border:1px solid #e2e8f0;border-radius:8px;outline:none;direction:rtl">
-      <div style="overflow-x:auto">
-        <table class="end-dates-table">
-          <thead>
-            <tr>
-              <th>בית ספר</th>
-              <th>רשות</th>
-              <th>תאריך סיום</th>
-            </tr>
-          </thead>
-          <tbody id="endDatesBody">
-            ${rows || '<tr><td colspan="3" style="text-align:center;padding:20px;color:#94a3b8">אין נתונים</td></tr>'}
-          </tbody>
-        </table>
-    </div>
+    <div class="end-dates-wrapper">
+      <div class="end-search-bar">
+        <input id="endDatesSearch" type="text" placeholder="חיפוש לפי חודש / בית ספר / רשות / קורס / תאריך">
+      </div>
+      <div id="endDatesMonths" class="months-container"></div>
     </div>
   `;
 
-  const tbody = document.getElementById('endDatesBody');
-  if(tbody){
-    tbody.addEventListener('click', e => {
-      const tr = e.target.closest('tr[data-idx]');
-      if(!tr) return;
-      const idx = parseInt(tr.dataset.idx, 10);
-      const course = courses[idx];
-      if(!course) return;
-      openEndDateDetail(course);
-  });
-  }
+  renderMonths('');
 
+  const monthsContainer = document.getElementById('endDatesMonths');
   const searchInput = document.getElementById('endDatesSearch');
-  if(searchInput){
-    searchInput.addEventListener('input', () => {
-      const q = searchInput.value.trim().toLowerCase();
-      tbody.querySelectorAll('tr[data-idx]').forEach(tr => {
-        const cells = tr.querySelectorAll('td');
-        const school = (cells[0]?.textContent || '').toLowerCase();
-        const authority = (cells[1]?.textContent || '').toLowerCase();
-        tr.style.display = (!q || school.includes(q) || authority.includes(q)) ? '' : 'none';
-    });
+
+  monthsContainer.addEventListener('click', e => {
+    const monthHeader = e.target.closest('.month-header');
+    if(monthHeader){
+      const monthKey = monthHeader.dataset.monthKey;
+      if(openMonthKey === monthKey){
+        openMonthKey = null;
+      } else {
+        openMonthKey = monthKey;
+      }
+      renderMonths(searchInput.value);
+      return;
+    }
+
+    const schoolRow = e.target.closest('.school-row');
+    if(schoolRow){
+      const monthKey = schoolRow.dataset.monthKey;
+      const schoolKey = schoolRow.dataset.schoolKey;
+      openMonthKey = monthKey;
+      openSchoolByMonth[monthKey] = openSchoolByMonth[monthKey] === schoolKey ? null : schoolKey;
+      renderMonths(searchInput.value);
+    }
   });
-  }
+
+  searchInput.addEventListener('input', () => {
+    renderMonths(searchInput.value);
+  });
 }
 function openEndDateDetail(course){
   const dates = (course.Dates || [])
