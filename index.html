@@ -555,25 +555,6 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
 .overlay-close-btn{position:absolute;top:12px;left:14px;background:#f1f5f9;border:none;border-radius:50%;width:32px;height:32px;font-size:20px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#64748b;z-index:2;flex-shrink:0;padding:0;}
 .overlay-close-btn:hover{background:#e2e8f0;}
 
-/* ===== INSTRUCTORS VIEW: shrink tiles only (no font changes, no side panel changes) ===== */
-#view.view-instructors{
-  /* לא נוגעים בפונטים כאן */
-}
-
-/* הקטנת ה-grid כדי שייכנסו יותר כרטיסים בשורה */
-#view.view-instructors .instructors-grid{
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)) !important;
-  gap: 10px !important;
-  padding: 8px !important;
-}
-
-/* הקטנת הריבועים עצמם (רק מימדים/ריווחים), בלי font-size */
-#view.view-instructors .instructors-grid > *{
-  min-height: 108px !important;
-  padding: 10px !important;
-  border-radius: 14px !important;
-}
-
 /* ===== SIDE PANEL BACKDROP ===== */
 body.no-scroll{overflow:hidden;}
 #side-backdrop{display:none;position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:29000;pointer-events:none;backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);}
@@ -868,36 +849,20 @@ body.no-scroll{overflow:hidden;}
 }
 
 
-/* ===== INSTRUCTOR MAIN DASHBOARD – shrink tiles only ===== */
-
-/* הקטנת גריד – יותר כרטיסים במסך */
-#view.view-instructors .grid{
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)) !important;
-  gap: 10px !important;
-  padding: 10px !important;
-}
-
-/* הקטנת הריבועים עצמם – בלי לשנות פונט */
-#view.view-instructors .grid > *{
-  min-height: 100px !important;
-  padding: 10px !important;
-  border-radius: 14px !important;
-}
-
-/* ===== INSTRUCTORS VIEW – scale grid only ===== */
-
-#view.view-instructors .instructors-grid{
-  transform: scale(0.88);
-  transform-origin: top center;
-  will-change: transform;
-}
-
 /* ===== ZOOM OUT 25% – Month / Week / Summary only ===== */
 
 #view.view-month,
 #view.view-week,
 #view.view-summary{
   transform: scale(0.75);
+  transform-origin: top center;
+  will-change: transform;
+}
+
+/* ===== ZOOM OUT 35% – Instructors view only ===== */
+
+#view.view-instructors{
+  transform: scale(0.65);
   transform-origin: top center;
   will-change: transform;
 }
