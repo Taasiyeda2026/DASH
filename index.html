@@ -1156,6 +1156,119 @@ body.no-scroll{overflow:hidden;}
   }
 }
 
+/* ===== SaaS 2026 Visual Refresh (CSS only, no logic change) ===== */
+body{background:#f8fafc;}
+header{border-bottom:1px solid #e2e8f0;}
+
+.nav-arrows #title{
+  font-size:20px;
+  font-weight:600;
+  color:#0f172a;
+}
+
+.day,
+.view-week .day-column,
+.view-month .day-column{
+  background:#ffffff;
+  border:1px solid #e2e8f0;
+  box-shadow:0 2px 6px rgba(15,23,42,0.04);
+  transition:transform .2s ease, box-shadow .2s ease;
+}
+
+.day:hover,
+.day-column:hover{
+  transform:translateY(-2px);
+  box-shadow:0 4px 10px rgba(15,23,42,0.06);
+}
+
+.day.today,
+.view-week .day-column.today,
+.view-month .day-column.today{
+  background:rgba(2,146,183,0.06) !important;
+  border:2px solid #0292b7 !important;
+  box-shadow:0 2px 6px rgba(15,23,42,0.04);
+}
+
+.day-header,
+.day-header .date-number{
+  font-weight:600;
+  color:#0f172a;
+}
+
+.day-header .day-name,
+.day-header .weekday,
+.day-header .day-of-week,
+.day-name,
+.weekday{
+  font-size:12px;
+  color:#64748b;
+}
+
+.event,
+.calendar-event,
+.schedule-item,
+.schedule-card{
+  background:rgba(var(--instructor-color-rgb,148,163,184),0.08);
+  border:1px solid rgba(15,23,42,0.08);
+  border-left:4px solid var(--instructor-color,#94a3b8);
+  border-right:1px solid rgba(15,23,42,0.08);
+  border-radius:12px;
+  padding:6px 10px;
+  font-weight:500;
+  color:#0f172a;
+  box-shadow:0 2px 6px rgba(15,23,42,0.05);
+  transition:transform .2s ease, box-shadow .2s ease;
+}
+
+.event-title,
+.event-subtitle,
+.event-hour,
+.event-time{
+  color:#0f172a;
+}
+
+.kpi-total,
+.kpi-small,
+.kpi-card{
+  background:#ffffff;
+  border:1px solid #e2e8f0;
+  border-radius:14px;
+  box-shadow:0 2px 6px rgba(15,23,42,0.04);
+  padding:16px;
+  text-align:center;
+}
+
+.kpi-title{
+  font-size:13px;
+  color:#64748b;
+  font-weight:500;
+}
+
+.kpi-number,
+.kpi-value{
+  font-size:28px;
+  font-weight:700;
+  color:#0f172a;
+}
+
+.kpi-total .kpi-number,
+.kpi-small .kpi-number{
+  font-size:28px;
+  color:#0f172a;
+}
+
+.blue,
+.green,
+.orange{
+  background:#ffffff;
+}
+
+.kpi-card[style*="--instructor-color"],
+.kpi-small[style*="--instructor-color"],
+.kpi-total[style*="--instructor-color"]{
+  border-top:4px solid var(--instructor-color);
+}
+
 </style>
 </head>
 <body>
