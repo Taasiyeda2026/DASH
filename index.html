@@ -178,7 +178,8 @@ button,select,a,[onclick]{touch-action:manipulation;}
 
 /* ===== HEADER & NAV ===== */
 header{background:#fff;border-bottom:1px solid var(--border)}
-.header-inner{width:100%;max-width:100%;margin:0 auto;padding:14px;display:flex;gap:12px;align-items:center}
+.header-inner{width:100%;max-width:100%;margin:0 auto;padding:14px;display:flex;gap:12px;align-items:center;position:relative}
+.header-center-actions{position:absolute;left:50%;transform:translateX(-50%);display:flex;gap:12px;align-items:center}
 .app-logo{height:40px}
 
 .instructors-count-title{width:100%;max-width:100%;margin:18px auto 0;padding:0 10px;text-align:right;font-size:16px;font-weight:700;}
@@ -1078,16 +1079,18 @@ body.no-scroll{overflow:hidden;}
     <img src="logo.png" class="app-logo" />
     <strong>דשבורד פעילויות</strong>
     <span id="greetingName" style="font-size:14px;font-weight:600;color:#334155;white-space:nowrap;"></span>
-    <a href="https://taasiyeda2026.github.io/attendance/"
-       target="_blank"
-       rel="noopener"
-       class="btn-attendance"
-       title="מערכת נוכחות">
-      <img src="icon-att.svg" alt="מערכת נוכחות">
-    </a>
-    <button id="logoutBtn" title="יציאה">
-      <img src="icon-logout.svg" alt="יציאה">
-    </button>
+    <div class="header-center-actions">
+      <a href="https://taasiyeda2026.github.io/attendance/"
+         target="_blank"
+         rel="noopener"
+         class="btn-attendance"
+         title="מערכת נוכחות">
+        <img src="icon-att.svg" alt="מערכת נוכחות">
+      </a>
+      <button id="logoutBtn" title="יציאה">
+        <img src="icon-logout.svg" alt="יציאה">
+      </button>
+    </div>
   </div>
 </header>
 
