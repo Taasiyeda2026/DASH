@@ -871,6 +871,13 @@ body.no-scroll{overflow:hidden;}
   transform-origin: top center;
 }
 
+/* Prevent empty scroll area after scale */
+#view.view-month,
+#view.view-week,
+#view.view-instructors{
+  overflow-y: hidden;
+}
+
 </style>
 </head>
 <body>
