@@ -17,6 +17,16 @@ function excelDecimalToTime(v) {
   return String(v);
 }
 
+function escapeHtml(str){
+  if(typeof str !== 'string') return '';
+  return str
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/\"/g,"&quot;")
+    .replace(/'/g,"&#039;");
+}
+
 function normalizeData(data){
   return data.map(r=>({
     ...r,
