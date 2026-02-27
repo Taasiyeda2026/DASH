@@ -773,7 +773,7 @@ body.no-scroll{overflow:hidden;}
 
   .nav-modes{width:100%;display:flex !important;justify-content:center !important;align-items:center !important;gap:10px !important;margin-bottom:8px !important;}
   .nav-modes button{flex:1 1 0;font-size:11px;height:28px !important;padding:0 4px;white-space:nowrap;box-shadow:0 2px 0 #94a3b8,0 3px 6px rgba(0,0,0,0.07) !important;}
-  #btnSummary,#btnInstructors,#btnEndDates{flex:1 1 0 !important;width:auto !important;height:28px !important;font-size:11px !important;border-radius:8px !important;padding:0 4px !important;}
+  #btnSummary,#btnInstructors,#btnEndDates{flex:0 1 31% !important;width:31% !important;max-width:132px !important;height:28px !important;font-size:11px !important;border-radius:8px !important;padding:0 4px !important;}
   .nav-arrows #prev,.nav-arrows #next{box-shadow:0 2px 0 #94a3b8,0 3px 6px rgba(0,0,0,0.07) !important;}
   #btnMonth.active,#btnWeek.active,#btnSummary.active,#btnInstructors.active,#btnEndDates.active{box-shadow:0 2px 0 currentColor,0 3px 6px rgba(0,0,0,0.10) !important;}
   .nav-modes select{height:38px;font-size:14px;}
@@ -974,6 +974,13 @@ body.no-scroll{overflow:hidden;}
     min-height: 28px !important;
     width: auto !important;
     min-width: unset !important;
+  }
+
+  #btnSummary,
+  #btnInstructors,
+  #btnEndDates{
+    width: 31% !important;
+    max-width: 124px !important;
   }
 }
 
