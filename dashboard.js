@@ -743,6 +743,7 @@ function render(){
   view.innerHTML=''; view.style.display=''; view.style.flexDirection=''; view.style.alignItems=''; view.style.justifyContent=''; view.style.width=''; view.scrollTop=0; window.scrollTo(0,0); document.documentElement.scrollTop=0; document.body.scrollTop=0; view.classList.toggle('week-mode', window.mode === 'week');
   view.classList.toggle('view-week', window.mode === 'week');
   view.classList.toggle('view-month', window.mode === 'month');
+  view.classList.toggle('view-instructors', window.mode === 'instructors');
   closeSidePanel();
 
   if(userRole === 'instructor' || window.mode === 'summary' || window.mode === 'instructors' || window.mode === 'enddates' || isMobile()){
