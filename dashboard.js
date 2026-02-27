@@ -2356,7 +2356,7 @@ function renderEndDates(){
     }
 
     const container = document.getElementById('endDatesMonths');
-    const panelClass = `end-content-panel end-content-wrapper ${activeMonthObj ? 'is-open' : ''}`;
+    const panelClass = `end-content-panel end-content-wrapper ${activeMonthObj ? 'open' : ''}`;
     container.innerHTML = `
       <div class="end-months-grid">${monthCards}</div>
       <div class="${panelClass}">${contentHtml}</div>
