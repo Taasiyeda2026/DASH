@@ -433,11 +433,13 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
 
 /* ===== END DATES ===== */
 .end-dates-wrapper{max-width:1400px;margin:0 auto;width:100%;padding:0 16px;box-sizing:border-box}
-.end-search-bar{margin-bottom:16px}
+.end-search-bar{width:min(30%,420px);min-width:260px;margin:0 auto 16px}
 .end-search-bar input{width:100%;height:42px;padding:0 14px;border-radius:12px;border:1px solid #d7dbe2;background:#ffffff;box-shadow:0 2px 6px rgba(15,23,42,0.04);transition:0.22s ease;box-sizing:border-box}
 .end-search-bar input:focus{border-color:#b7aee4;box-shadow:0 0 0 3px rgba(183,174,228,0.2);outline:none}
-.end-months-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,140px));justify-content:start;gap:8px;margin-bottom:14px}
-.month-card{display:contents}
+.end-months-row{display:flex;justify-content:center;width:100%}
+.end-months-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,140px));justify-content:center;gap:8px;margin-bottom:14px;width:fit-content;max-width:100%}
+.month-card{display:block}
+.end-active-panel{width:100%}
 .month-panel{display:none;grid-column:1 / -1}
 .month-card.open .month-panel{display:block}
 .end-month-card{min-height:48px;width:auto;border:none;border-radius:16px;padding:8px 12px;cursor:pointer;transition:0.22s ease;box-shadow:0 3px 10px rgba(15,23,42,0.05);display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:4px;color:#1f2937}
@@ -814,6 +816,7 @@ body.no-scroll{overflow:hidden;}
   .today{scroll-margin-top:170px;}
 
   .end-dates-wrapper{max-width:100%;padding:0 10px}
+  .end-search-bar{width:70%;min-width:0}
   .end-months-grid{grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px}
   .end-month-card{min-height:48px;padding:8px 12px}
   .end-month-name{font-size:15px}
@@ -835,6 +838,9 @@ body.no-scroll{overflow:hidden;}
   .mobile-week.open .mobile-week-content{display:block;}
 
   .end-content-wrapper{max-width:100%;}
+  .end-search-bar{width:100%;}
+  .end-months-row{display:block;}
+  .end-months-grid{width:100%;}
 
   .view-month .instructor-cal-cell{background:#fff;min-height:180px;padding:10px;display:flex;flex-direction:column;gap:6px;position:relative;}
   .view-month .instructor-cal-cell:active{transform:scale(0.985);background:#f1f5f9;}
