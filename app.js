@@ -163,6 +163,7 @@ function startApp(jsonData, role, hash, remember){
   rawData = records;
   userRole = role;
   window.currentUserRole = role;
+  document.body.dataset.role = role;
 
   if(remember !== null){
     const store = remember ? localStorage : sessionStorage;
