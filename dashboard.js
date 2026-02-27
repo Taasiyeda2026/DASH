@@ -2328,8 +2328,7 @@ function renderEndDates(){
     return schoolEntries || '<div class="end-empty-state">אין תוצאות לחיפוש בחודש הנבחר</div>';
   };
 
-  const buildMonthsDom = query => {
-    const q = (query || '').trim().toLowerCase();
+  const buildMonthsDom = () => {
     return monthNames.map((monthName, monthIndex) => {
       const key = `${monthIndex}`;
       const monthObj = monthMap.get(key);
@@ -2337,17 +2336,23 @@ function renderEndDates(){
         ? [...monthObj.schools.values()].reduce((sum, schoolObj) => sum + schoolObj.courses.length, 0)
         : 0;
       const isOpen = openMonthKey === key;
-      const panelHtml = buildMonthPanelHtml(monthObj, q);
       return `
         <div class="month-card ${isOpen ? 'open' : ''}" data-month-key="${key}">
           <button class="end-month-card month-${monthIndex} ${isOpen ? 'active' : ''}" data-month-key="${key}" type="button">
             <span class="end-month-name">${monthName}</span>
             <span class="end-month-count">${coursesCount} קורסים</span>
           </button>
-          <div class="month-panel end-content-panel end-content-wrapper ${isOpen ? 'open' : ''}">${panelHtml}</div>
         </div>
       `;
     }).join('');
+  };
+
+  const buildOpenPanelDom = query => {
+    const q = (query || '').trim().toLowerCase();
+    if(openMonthKey === null) return '';
+    const monthObj = monthMap.get(openMonthKey);
+    const panelHtml = buildMonthPanelHtml(monthObj, q);
+    return `<div class="month-panel end-content-panel end-content-wrapper open">${panelHtml}</div>`;
   };
 
   view.innerHTML = `
@@ -2363,36 +2368,17 @@ function renderEndDates(){
   const searchInput = document.getElementById('endDatesSearch');
 
   const renderMonths = query => {
-    monthsContainer.innerHTML = `<div class="end-months-grid">${buildMonthsDom(query)}</div>`;
+    monthsContainer.innerHTML = `
+      <div class="end-months-row">
+        <div class="end-months-grid">${buildMonthsDom()}</div>
+      </div>
+      <div class="end-active-panel">${buildOpenPanelDom(query)}</div>
+    `;
   };
 
-  const closeOpenSchools = monthCard => {
-    monthCard.querySelectorAll('.end-school-group.open').forEach(group => {
-      group.classList.remove('open');
-      const schoolRow = group.querySelector('.end-school-row');
-      if(schoolRow) schoolRow.classList.remove('open');
-    });
-  };
-
-  const toggleMonth = monthCard => {
-    const wasOpen = monthCard.classList.contains('open');
-
-    monthsContainer.querySelectorAll('.month-card.open').forEach(card => {
-      card.classList.remove('open');
-      card.querySelector('.end-month-card')?.classList.remove('active');
-      card.querySelector('.month-panel')?.classList.remove('open');
-      closeOpenSchools(card);
-    });
-
-    if(wasOpen){
-      openMonthKey = null;
-      return;
-    }
-
-    monthCard.classList.add('open');
-    monthCard.querySelector('.end-month-card')?.classList.add('active');
-    monthCard.querySelector('.month-panel')?.classList.add('open');
-    openMonthKey = monthCard.dataset.monthKey || null;
+  const toggleMonth = monthKey => {
+    openMonthKey = openMonthKey === monthKey ? null : monthKey;
+    renderMonths(searchInput.value);
   };
 
   renderMonths('');
@@ -2400,20 +2386,9 @@ function renderEndDates(){
   monthsContainer.addEventListener('click', e => {
     const monthButton = e.target.closest('.end-month-card');
     if(monthButton){
-      console.log('month clicked');
-      const monthCard = monthButton.closest('.month-card');
-      if(!monthCard){
-        console.warn('month-card container not found for clicked month button');
-        return;
-      }
-
-      toggleMonth(monthCard);
-
-      const monthPanel = monthCard.querySelector('.month-panel');
-      console.log('month-card classList:', [...monthCard.classList]);
-      if(monthPanel){
-        console.log('month-panel computed display:', getComputedStyle(monthPanel).display);
-      }
+      const monthKey = monthButton.dataset.monthKey;
+      if(monthKey === undefined) return;
+      toggleMonth(monthKey);
       return;
     }
 
@@ -2421,10 +2396,10 @@ function renderEndDates(){
     if(schoolRow){
       const schoolGroup = schoolRow.closest('.end-school-group');
       if(!schoolGroup) return;
-      const monthRoot = schoolGroup.closest('.month-card');
-      if(!monthRoot || !monthRoot.classList.contains('open')) return;
+      const panelRoot = schoolGroup.closest('.month-panel');
+      if(!panelRoot || !panelRoot.classList.contains('open')) return;
 
-      monthRoot.querySelectorAll('.end-school-group.open').forEach(group => {
+      panelRoot.querySelectorAll('.end-school-group.open').forEach(group => {
         if(group !== schoolGroup){
           group.classList.remove('open');
           group.querySelector('.end-school-row')?.classList.remove('open');
