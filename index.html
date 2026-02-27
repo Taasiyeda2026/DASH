@@ -837,18 +837,34 @@ body.no-scroll{overflow:hidden;}
 
 /* ===== MOBILE (max-width:768px) ===== */
 @media(max-width:768px){
+  #view{
+    width:100%;
+    min-height:0;
+    overflow-y:auto;
+    align-items:stretch;
+  }
+
   table{width:100%;}
   .mobile-week{margin-bottom:14px;}
   .mobile-week-header{background:#fff;padding:16px;border-radius:16px;font-weight:700;cursor:pointer;box-shadow:0 6px 16px rgba(0,0,0,0.06);}
   .mobile-week-content{display:none;margin-top:8px;}
   .mobile-week.open .mobile-week-content{display:block;}
 
+  .end-dates-wrapper{width:100%;max-width:100%;padding:0 12px;}
   .end-content-wrapper{max-width:100%;}
   .end-search-bar{width:100%;}
   .end-months-row{display:block;}
   .end-months-grid{width:100%;gap:12px;}
-  .month-card{width:100%;max-width:320px;margin:0 auto;}
-  .month-panel{width:min(320px,calc(100vw - 24px));}
+  .month-card{width:100%;max-width:100%;margin:0 auto;}
+  .month-panel,
+  .month-panel.end-content-panel{
+    position:relative;
+    top:auto;
+    left:auto;
+    transform:none;
+    width:100%;
+    max-width:100%;
+  }
 
   .view-month .instructor-cal-cell{background:#fff;min-height:180px;padding:10px;display:flex;flex-direction:column;gap:6px;position:relative;}
   .view-month .instructor-cal-cell:active{transform:scale(0.985);background:#f1f5f9;}
