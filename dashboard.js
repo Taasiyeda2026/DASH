@@ -1645,7 +1645,7 @@ function renderSummary(){
     </div>
 
     ${missingInstructorCount > 0 ? `
-      <div class="alert-missing">
+      <div class="alert-missing" data-action="missing" style="cursor:pointer">
         ⚠ חסרים ${missingInstructorCount} מדריכים לשיבוץ
     </div>
     ` : ''}
@@ -1695,6 +1695,13 @@ function renderSummary(){
   view.appendChild(wrap);
 
   wrap.addEventListener('click', function(e){
+
+    // === חסר מדריך ===
+    if(e.target.closest('[data-action="missing"]')){
+      e.stopPropagation();
+      openMissingCourses(currentYear, currentMonth);
+      return;
+    }
 
     // === מנהל ===
     const managerCol = e.target.closest('[data-manager]');
