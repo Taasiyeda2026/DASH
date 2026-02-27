@@ -194,13 +194,33 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
 }
 .nav-modes button:hover,#prev:hover,#next:hover,#clearFilters:hover{background:linear-gradient(to bottom,#f8fafc,#e2e8f0);}
 
+.top-header-btn {
+  position: relative;
+  box-shadow:
+    0 4px 10px rgba(0,0,0,0.08),
+    0 2px 4px rgba(0,0,0,0.05);
+  transition: transform 0.2s ease,
+              box-shadow 0.2s ease;
+}
+
+.top-header-btn:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 8px 18px rgba(0,0,0,0.12),
+    0 4px 8px rgba(0,0,0,0.08);
+}
+
+.top-header-btn:active {
+  transform: translateY(0) scale(0.97);
+  box-shadow:
+    0 2px 4px rgba(0,0,0,0.12);
+}
+
 .today-star,
 .today-calendar {
   width: 58px; height: 58px; background: transparent; cursor: pointer;
   border: none; border-radius: 50%; display: flex; align-items: center;
-  justify-content: center; padding: 0; position: relative;
-  box-shadow:0 6px 14px rgba(0,0,0,0.08),0 2px 4px rgba(0,0,0,0.05);
-  transition:transform 0.25s ease,box-shadow 0.25s ease;
+  justify-content: center; padding: 0;
 }
 .today-star::before,
 .today-calendar::before{
@@ -215,20 +235,8 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
   filter:blur(8px);
   pointer-events:none;
 }
-.today-star:hover,
-.today-calendar:hover{
-  transform:translateY(-3px);
-  box-shadow:0 10px 22px rgba(0,0,0,0.12),0 4px 8px rgba(0,0,0,0.08);
-}
-.today-star:active,
-.today-calendar:active{
-  transform:translateY(0) scale(0.96);
-  box-shadow:0 2px 4px rgba(0,0,0,0.1);
-}
-
 @media (max-width: 768px) {
-  .today-star:hover,
-  .today-calendar:hover {
+  .top-header-btn:hover {
     transform:none;
   }
 }
@@ -856,7 +864,6 @@ body.no-scroll{overflow:hidden;}
   padding:0;
   background:transparent;
   border:none;
-  box-shadow:none;
   border-radius:0;
 
   display:flex;
@@ -880,11 +887,6 @@ body.no-scroll{overflow:hidden;}
 }
 
 @media (hover: hover) and (pointer: fine){
-
-  .btn-attendance,
-  #logoutBtn{
-    position:relative;
-  }
 
   .btn-attendance::after,
   #logoutBtn::after{
@@ -1156,11 +1158,11 @@ body.no-scroll{overflow:hidden;}
       <a href="https://taasiyeda2026.github.io/attendance/"
          target="_blank"
          rel="noopener"
-         class="btn-attendance"
+         class="btn-attendance top-header-btn"
          title="מערכת נוכחות">
         <img src="icon-att.svg" alt="מערכת נוכחות">
       </a>
-      <button id="logoutBtn" title="יציאה">
+      <button id="logoutBtn" class="top-header-btn" title="יציאה">
         <img src="icon-logout.svg" alt="יציאה">
       </button>
     </div>
@@ -1179,8 +1181,8 @@ body.no-scroll{overflow:hidden;}
   </div>
   <div class="nav-arrows">
     <button id="prev" aria-label="הקודם">▶</button>
-    <button id="goToday" class="today-star" title="היום" aria-label="היום"><img src="icon-today.svg" width="58" height="58" alt="" style="display:block"></button>
-    <button id="goCalendar" class="today-calendar" aria-label="חודש" title="חודש"><img src="icon-calendar.svg" width="58" height="58" alt="" style="display:block"></button>
+    <button id="goToday" class="today-star top-header-btn" title="היום" aria-label="היום"><img src="icon-today.svg" width="58" height="58" alt="" style="display:block"></button>
+    <button id="goCalendar" class="today-calendar top-header-btn" aria-label="חודש" title="חודש"><img src="icon-calendar.svg" width="58" height="58" alt="" style="display:block"></button>
     <span id="title"></span>
     <button id="next" aria-label="הבא">◀</button>
   </div>
