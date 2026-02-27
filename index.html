@@ -433,16 +433,16 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
 
 /* ===== END DATES ===== */
 .end-dates-wrapper{max-width:1400px;margin:0 auto;width:100%;padding:0 16px;box-sizing:border-box}
-.end-search-bar{width:min(30%,420px);min-width:260px;margin:0 auto 16px}
+.end-search-bar{width:min(30%,420px);min-width:260px;margin:0 auto 24px}
 .end-search-bar input{width:100%;height:42px;padding:0 14px;border-radius:12px;border:1px solid #d7dbe2;background:#ffffff;box-shadow:0 2px 6px rgba(15,23,42,0.04);transition:0.22s ease;box-sizing:border-box}
 .end-search-bar input:focus{border-color:#b7aee4;box-shadow:0 0 0 3px rgba(183,174,228,0.2);outline:none}
 .end-months-row{display:flex;justify-content:center;width:100%}
-.end-months-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,140px));justify-content:center;gap:8px;margin-bottom:14px;width:fit-content;max-width:100%}
-.month-card{display:block}
+.end-months-grid{display:flex;flex-wrap:wrap;justify-content:center;gap:20px;margin-bottom:14px;width:100%;max-width:100%}
+.month-card{display:block;width:160px;position:relative;text-align:center}
 .end-active-panel{width:100%}
-.month-panel{display:none;grid-column:1 / -1}
+.month-panel{position:absolute;top:100%;left:50%;transform:translateX(-50%);width:320px;max-height:400px;overflow-y:auto;background:#fff;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,0.08);display:none;z-index:10}
 .month-card.open .month-panel{display:block}
-.end-month-card{min-height:48px;width:auto;border:none;border-radius:16px;padding:8px 12px;cursor:pointer;transition:0.22s ease;box-shadow:0 3px 10px rgba(15,23,42,0.05);display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:4px;color:#1f2937}
+.end-month-card{min-height:48px;width:100%;border:none;border-radius:16px;padding:8px 12px;cursor:pointer;transition:0.22s ease;box-shadow:0 3px 10px rgba(15,23,42,0.05);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:#1f2937}
 .end-month-card:hover{transform:translateY(-1px);box-shadow:0 6px 14px rgba(15,23,42,0.08)}
 .end-month-card.active{transform:translateY(-2px);box-shadow:0 8px 16px rgba(15,23,42,0.1);border:1px solid rgba(31,41,55,0.18)}
 .end-month-card.month-0{background:#f9e4ea}
@@ -456,6 +456,7 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
 .end-content-wrapper{width:100%;padding:16px 20px;box-sizing:border-box}
 .end-content-panel{display:none;width:100%;max-width:700px;margin:10px auto 0;background:#ffffff;border:1px solid #e6e8ed;border-radius:16px;box-shadow:0 4px 12px rgba(15,23,42,0.05);padding:6px 0 4px;min-height:auto;transition:0.22s ease;box-sizing:border-box}
 .end-content-panel.open{display:block}
+.month-panel.end-content-panel{top:100%;left:50%;transform:translateX(-50%);width:320px;max-width:320px;max-height:400px;margin:0;overflow-y:auto;background:#fff;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,0.08);position:absolute;z-index:10}
 .end-content-wrapper table{width:100%;max-width:100%;table-layout:fixed}
 .end-content-wrapper table td,
 .end-content-wrapper table th{width:50%}
@@ -840,7 +841,9 @@ body.no-scroll{overflow:hidden;}
   .end-content-wrapper{max-width:100%;}
   .end-search-bar{width:100%;}
   .end-months-row{display:block;}
-  .end-months-grid{width:100%;}
+  .end-months-grid{width:100%;gap:12px;}
+  .month-card{width:100%;max-width:320px;margin:0 auto;}
+  .month-panel{width:min(320px,calc(100vw - 24px));}
 
   .view-month .instructor-cal-cell{background:#fff;min-height:180px;padding:10px;display:flex;flex-direction:column;gap:6px;position:relative;}
   .view-month .instructor-cal-cell:active{transform:scale(0.985);background:#f1f5f9;}
@@ -867,7 +870,11 @@ body.no-scroll{overflow:hidden;}
 }
 
 @media(max-width:480px){
-  .end-months-grid{grid-template-columns:1fr}
+  .end-months-grid{gap:10px}
+}
+
+@media (min-width:1024px){
+  .end-search-bar{width:30%;margin:0 auto 24px auto}
 }
 
 /* ===== VERY SMALL SCREENS (≤400px) ===== */
