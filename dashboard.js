@@ -2265,6 +2265,23 @@ function renderEndDates(){
   });
 
   const monthNames = ['ינואר', 'פברואר', 'מרץ', 'אפריל', 'מאי', 'יוני'];
+  const monthTitleColors = ['#be123c', '#c2410c', '#a16207', '#15803d', '#0f766e', '#6d28d9'];
+  const allEndDateCourses = courses
+    .slice()
+    .sort((a, b) => a.End - b.End)
+    .map((course, index) => {
+      const endDateText = course.End.toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit', year: 'numeric' }).toLowerCase();
+      const meetingDatesText = (course.Dates || [])
+        .filter(d => d instanceof Date && !isNaN(d.getTime()))
+        .map(d => d.toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit', year: 'numeric' }).toLowerCase())
+        .join(' ');
+
+      return {
+        course,
+        index,
+        searchText: `${(monthNames[course.End.getMonth()] || '').toLowerCase()} ${(course.Program || '').toLowerCase()} ${(course.School || '').toLowerCase()} ${(course.Authority || '').toLowerCase()} ${endDateText} ${meetingDatesText}`
+      };
+    });
   let searchTerm = '';
   let isSearching = false;
 
@@ -2354,6 +2371,11 @@ function renderEndDates(){
     }).join('');
   };
 
+  const formatMonth = endDate => {
+    if(!(endDate instanceof Date) || isNaN(endDate.getTime())) return 'ללא חודש';
+    return `${monthNames[endDate.getMonth()] || ''} ${endDate.getFullYear()}`.trim();
+  };
+
   view.innerHTML = `
     <div class="end-dates-wrapper">
       <div class="end-search-bar">
@@ -2364,10 +2386,13 @@ function renderEndDates(){
           <div class="end-months-grid">${buildMonthsDom()}</div>
         </div>
       </div>
+      <div class="end-search-results"></div>
     </div>
   `;
 
   const monthsContainer = document.getElementById('endDatesMonths');
+  const monthsGrid = monthsContainer.querySelector('.end-months-grid');
+  const resultsWrapper = view.querySelector('.end-search-results');
   const searchInput = document.getElementById('endDatesSearch');
 
   const closeAllMonths = () => {
@@ -2382,69 +2407,59 @@ function renderEndDates(){
   };
 
   const applySearch = () => {
-    const monthCards = monthsContainer.querySelectorAll('.month-card');
+    if(!isSearching){
+      monthsGrid.style.display = '';
+      resultsWrapper.innerHTML = '';
+      resultsWrapper.style.display = 'none';
+      closeAllMonths();
+      return;
+    }
 
-    monthCards.forEach(monthCard => {
-      const courseRows = monthCard.querySelectorAll('.course-row');
-      const schoolGroups = monthCard.querySelectorAll('.end-school-group');
-      let monthHasMatch = false;
+    monthsGrid.style.display = 'none';
+    resultsWrapper.style.display = 'flex';
+    resultsWrapper.innerHTML = '';
 
-      courseRows.forEach(course => {
-        const text = (course.dataset.searchText || course.innerText || '').toLowerCase();
+    const filtered = allEndDateCourses
+      .filter(item => item.searchText.includes(searchTerm))
+      .sort((a, b) => a.course.End - b.course.End);
 
-        if(!isSearching){
-          course.style.display = '';
-        } else if(text.includes(searchTerm)){
-          course.style.display = '';
-          monthHasMatch = true;
-        } else {
-          course.style.display = 'none';
-        }
-      });
+    if(!filtered.length){
+      resultsWrapper.innerHTML = '<div class="end-empty-state">לא נמצאו תוצאות לחיפוש</div>';
+      return;
+    }
 
-      schoolGroups.forEach(group => {
-        const visibleCourses = [...group.querySelectorAll('.course-row')].filter(row => row.style.display !== 'none');
-        const row = group.querySelector('.end-school-row');
-        const countEl = group.querySelector('.end-school-count');
-
-        if(countEl){
-          const countValue = isSearching ? visibleCourses.length : group.querySelectorAll('.course-row').length;
-          countEl.textContent = `${countValue} קורסים`;
-        }
-
-        if(!isSearching){
-          group.style.display = '';
-          group.classList.remove('open');
-          row?.classList.remove('open');
-          return;
-        }
-
-        if(visibleCourses.length > 0){
-          group.style.display = '';
-          group.classList.add('open');
-          row?.classList.add('open');
-        } else {
-          group.style.display = 'none';
-          group.classList.remove('open');
-          row?.classList.remove('open');
-        }
-      });
-
-      const monthButton = monthCard.querySelector('.end-month-card');
-      if(!isSearching){
-        monthCard.style.display = '';
-        monthCard.classList.remove('open');
-        monthButton?.classList.remove('active');
-      } else if(monthHasMatch){
-        monthCard.style.display = '';
-        monthCard.classList.add('open');
-        monthButton?.classList.add('active');
-      } else {
-        monthCard.style.display = 'none';
-        monthCard.classList.remove('open');
-        monthButton?.classList.remove('active');
+    const grouped = new Map();
+    filtered.forEach(item => {
+      const monthLabel = formatMonth(item.course.End);
+      if(!grouped.has(monthLabel)){
+        grouped.set(monthLabel, []);
       }
+      grouped.get(monthLabel).push(item);
     });
+
+    grouped.forEach((items, monthLabel) => {
+      const monthIndex = items[0]?.course?.End instanceof Date ? items[0].course.End.getMonth() : -1;
+      const monthTitle = document.createElement('div');
+      monthTitle.className = 'search-month-title';
+      monthTitle.style.color = monthTitleColors[monthIndex] || '#1f2937';
+      monthTitle.innerText = monthLabel;
+      resultsWrapper.appendChild(monthTitle);
+
+      items.forEach(({ course, index }) => {
+        const dateStr = course.End.toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        const row = document.createElement('button');
+        row.type = 'button';
+        row.className = 'search-course-row';
+        row.dataset.courseIndex = `${index}`;
+        row.innerHTML = `
+          <div class="search-course-title" style="color:${getProgramColor(course.Program)}">${escapeHtml(course.Program || '—')}</div>
+          <div class="search-course-meta">${escapeHtml(course.School || '—')} | ${escapeHtml(course.Authority || '—')}</div>
+          <div class="search-course-date ${getEndClass(course.End)}">תאריך סיום: ${dateStr}</div>
+        `;
+        resultsWrapper.appendChild(row);
+      });
+    });
+
   };
 
   const toggleMonth = monthCard => {
@@ -2484,6 +2499,14 @@ function renderEndDates(){
     const willOpen = !schoolGroup.classList.contains('open');
     schoolGroup.classList.toggle('open', willOpen);
     schoolRow.classList.toggle('open', willOpen);
+  });
+
+  resultsWrapper.addEventListener('click', e => {
+    const row = e.target.closest('.search-course-row');
+    if(!row) return;
+    const courseIndex = Number(row.dataset.courseIndex);
+    const selectedCourse = allEndDateCourses[courseIndex]?.course;
+    if(selectedCourse) openEndDateDetail(selectedCourse);
   });
 
   searchInput.addEventListener('input', e => {
