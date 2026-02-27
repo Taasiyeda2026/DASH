@@ -966,6 +966,51 @@ body.no-scroll{overflow:hidden;}
   border-radius: 16px !important;
 }
 
+/* ===== FORCE COMPACT LEVEL 2 – GLOBAL OVERRIDE ===== */
+
+/* Month / Week */
+#view.view-month .grid,
+#view.view-week .grid{
+  grid-template-columns: repeat(7, minmax(140px, 1fr)) !important;
+  gap: 8px !important;
+  padding: 8px !important;
+}
+
+#view.view-month .day-column,
+#view.view-week .day-column{
+  min-height: 140px !important;
+  padding: 8px !important;
+}
+
+#view.view-month .event,
+#view.view-week .event{
+  min-height: 42px !important;
+  padding: 6px 8px !important;
+  margin-bottom: 6px !important;
+}
+
+/* Summary */
+#view .summary-wrapper{
+  gap: 12px !important;
+  padding-bottom: 16px !important;
+}
+
+#view .summary-wrapper .kpi-card{
+  min-height: 92px !important;
+  padding: 10px !important;
+}
+
+/* Instructors */
+#view.view-instructors .instructors-grid{
+  gap: 10px !important;
+  padding: 8px !important;
+}
+
+#view.view-instructors .instructor-card{
+  min-height: 110px !important;
+  padding: 10px !important;
+}
+
 </style>
 </head>
 <body>
