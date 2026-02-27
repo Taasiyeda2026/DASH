@@ -2256,17 +2256,8 @@ function renderEndDates(){
     monthObj.schools.get(schoolKey).courses.push(course);
   });
 
-  const months = [...monthMap.entries()]
-    .sort((a, b) => {
-      const mA = a[1];
-      const mB = b[1];
-      return mA.month - mB.month;
-    })
-    .map(([key, value]) => ({ key, ...value }));
-
   const monthNames = ['ינואר', 'פברואר', 'מרץ', 'אפריל', 'מאי', 'יוני'];
   let openMonthKey = null;
-  let openSchoolKey = null;
 
   const getEndClass = endDate => {
     const daysDiff = Math.ceil((endDate - today) / 86400000);
@@ -2275,36 +2266,19 @@ function renderEndDates(){
     return '';
   };
 
-  const renderMonths = query => {
+  const buildMonthPanelHtml = (monthObj, query) => {
+    if(!monthObj) return '<div class="end-empty-state">אין נתונים לחודש זה</div>';
     const q = (query || '').trim().toLowerCase();
-    const monthCards = monthNames.map((monthName, monthIndex) => {
-      const key = `${monthIndex}`;
-      const monthObj = monthMap.get(key);
-      const coursesCount = monthObj
-        ? [...monthObj.schools.values()].reduce((sum, schoolObj) => sum + schoolObj.courses.length, 0)
-        : 0;
-      const isOpen = openMonthKey === key;
-      return `
-        <button class="end-month-card month-${monthIndex} ${isOpen ? 'active' : ''}" data-month-key="${key}" type="button">
-          <span class="end-month-name">${monthName}</span>
-          <span class="end-month-count">${coursesCount} קורסים</span>
-        </button>
-      `;
-    }).join('');
+    const monthLabel = monthNames[monthObj.month] || '';
+    const monthMatches = !q || monthLabel.toLowerCase().includes(q);
 
-    const activeMonthObj = openMonthKey !== null ? monthMap.get(openMonthKey) : null;
-    let contentHtml = '<div class="end-empty-state">בחרו חודש להצגת נתונים</div>';
-
-    if(activeMonthObj){
-      const monthLabel = monthNames[activeMonthObj.month] || '';
-      const monthMatches = !q || monthLabel.toLowerCase().includes(q);
-      const schoolEntries = [...activeMonthObj.schools.entries()]
-        .sort(([, schoolA], [, schoolB]) => {
-          const minA = schoolA.courses.reduce((min, course) => Math.min(min, course.End.getTime()), Infinity);
-          const minB = schoolB.courses.reduce((min, course) => Math.min(min, course.End.getTime()), Infinity);
-          return minA - minB;
-        })
-        .map(([schoolKey, schoolObj]) => {
+    const schoolEntries = [...monthObj.schools.entries()]
+      .sort(([, schoolA], [, schoolB]) => {
+        const minA = schoolA.courses.reduce((min, course) => Math.min(min, course.End.getTime()), Infinity);
+        const minB = schoolB.courses.reduce((min, course) => Math.min(min, course.End.getTime()), Infinity);
+        return minA - minB;
+      })
+      .map(([schoolKey, schoolObj]) => {
         const schoolText = `${schoolObj.school} | ${schoolObj.authority}`;
         const visibleCourses = schoolObj.courses
           .filter(course => {
@@ -2322,45 +2296,60 @@ function renderEndDates(){
           .sort((a, b) => a.End - b.End);
 
         const courseHtml = visibleCourses.map(course => {
-            const dateStr = course.End.toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit', year: 'numeric' });
-            const meetings = (course.Dates || [])
-              .filter(d => d instanceof Date && !isNaN(d.getTime()))
-              .sort((a, b) => a - b)
-              .map((d, i) => `<div class="end-meeting-item">מפגש ${i + 1}: ${d.toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit', year: 'numeric' })}</div>`)
-              .join('');
-            return `
-              <div class="end-course-item">
-                <div class="end-course-title" style="color:${getProgramColor(course.Program)}">${course.Program || '—'}</div>
-                <div class="end-course-end-date ${getEndClass(course.End)}">תאריך סיום: ${dateStr}</div>
-                <div>${meetings || '<div class="end-meeting-item">אין מפגשים</div>'}</div>
-              </div>
-            `;
-          }).join('');
+          const dateStr = course.End.toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit', year: 'numeric' });
+          const meetings = (course.Dates || [])
+            .filter(d => d instanceof Date && !isNaN(d.getTime()))
+            .sort((a, b) => a - b)
+            .map((d, i) => `<div class="end-meeting-item">מפגש ${i + 1}: ${d.toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit', year: 'numeric' })}</div>`)
+            .join('');
+          return `
+            <div class="end-course-item">
+              <div class="end-course-title" style="color:${getProgramColor(course.Program)}">${course.Program || '—'}</div>
+              <div class="end-course-end-date ${getEndClass(course.End)}">תאריך סיום: ${dateStr}</div>
+              <div>${meetings || '<div class="end-meeting-item">אין מפגשים</div>'}</div>
+            </div>
+          `;
+        }).join('');
 
         if(!courseHtml) return '';
-        const isOpen = openSchoolKey === schoolKey;
         return `
-          <div class="end-school-group">
-            <div class="end-school-row ${isOpen ? 'open' : ''}" data-school-key="${schoolKey}">
+          <div class="end-school-group" data-school-key="${schoolKey}">
+            <div class="end-school-row" data-school-key="${schoolKey}">
               <div class="end-school-meta">
                 <span class="end-school-title">${schoolObj.school} <span class="separator">|</span> ${schoolObj.authority}</span>
               </div>
               <span class="end-school-count">${visibleCourses.length} קורסים</span>
             </div>
-            ${isOpen ? `<div class="end-courses-wrap">${courseHtml}</div>` : ''}
+            <div class="end-courses-wrap">${courseHtml}</div>
           </div>
         `;
-      }).filter(Boolean).join('');
+      })
+      .filter(Boolean)
+      .join('');
 
-      contentHtml = schoolEntries || '<div class="end-empty-state">אין תוצאות לחיפוש בחודש הנבחר</div>';
-    }
+    return schoolEntries || '<div class="end-empty-state">אין תוצאות לחיפוש בחודש הנבחר</div>';
+  };
 
-    const container = document.getElementById('endDatesMonths');
-    const panelClass = `end-content-panel end-content-wrapper ${activeMonthObj ? 'open' : ''}`;
-    container.innerHTML = `
-      <div class="end-months-grid">${monthCards}</div>
-      <div class="${panelClass}">${contentHtml}</div>
-    `;
+  const buildMonthsDom = query => {
+    const q = (query || '').trim().toLowerCase();
+    return monthNames.map((monthName, monthIndex) => {
+      const key = `${monthIndex}`;
+      const monthObj = monthMap.get(key);
+      const coursesCount = monthObj
+        ? [...monthObj.schools.values()].reduce((sum, schoolObj) => sum + schoolObj.courses.length, 0)
+        : 0;
+      const isOpen = openMonthKey === key;
+      const panelHtml = buildMonthPanelHtml(monthObj, q);
+      return `
+        <div class="month-card ${isOpen ? 'open' : ''}" data-month-key="${key}">
+          <button class="end-month-card month-${monthIndex} ${isOpen ? 'active' : ''}" data-month-key="${key}" type="button">
+            <span class="end-month-name">${monthName}</span>
+            <span class="end-month-count">${coursesCount} קורסים</span>
+          </button>
+          <div class="month-panel end-content-panel end-content-wrapper ${isOpen ? 'open' : ''}">${panelHtml}</div>
+        </div>
+      `;
+    }).join('');
   };
 
   view.innerHTML = `
@@ -2372,31 +2361,68 @@ function renderEndDates(){
     </div>
   `;
 
-  renderMonths('');
-
   const monthsContainer = document.getElementById('endDatesMonths');
   const searchInput = document.getElementById('endDatesSearch');
+
+  const renderMonths = query => {
+    monthsContainer.innerHTML = `<div class="end-months-grid">${buildMonthsDom(query)}</div>`;
+  };
+
+  const closeOpenSchools = monthCard => {
+    monthCard.querySelectorAll('.end-school-group.open').forEach(group => {
+      group.classList.remove('open');
+      const schoolRow = group.querySelector('.end-school-row');
+      if(schoolRow) schoolRow.classList.remove('open');
+    });
+  };
+
+  const toggleMonth = monthCard => {
+    const wasOpen = monthCard.classList.contains('open');
+
+    monthsContainer.querySelectorAll('.month-card.open').forEach(card => {
+      card.classList.remove('open');
+      card.querySelector('.end-month-card')?.classList.remove('active');
+      card.querySelector('.month-panel')?.classList.remove('open');
+      closeOpenSchools(card);
+    });
+
+    if(wasOpen){
+      openMonthKey = null;
+      return;
+    }
+
+    monthCard.classList.add('open');
+    monthCard.querySelector('.end-month-card')?.classList.add('active');
+    monthCard.querySelector('.month-panel')?.classList.add('open');
+    openMonthKey = monthCard.dataset.monthKey || null;
+  };
+
+  renderMonths('');
 
   monthsContainer.addEventListener('click', e => {
     const monthCard = e.target.closest('.end-month-card');
     if(monthCard){
-      const monthKey = monthCard.dataset.monthKey;
-      if(openMonthKey === monthKey){
-        openMonthKey = null;
-        openSchoolKey = null;
-      }else{
-        openMonthKey = monthKey;
-        openSchoolKey = null;
-      }
-      renderMonths(searchInput.value);
+      toggleMonth(monthCard.closest('.month-card'));
       return;
     }
 
     const schoolRow = e.target.closest('.end-school-row');
-    if(schoolRow && openMonthKey !== null){
-      const schoolKey = schoolRow.dataset.schoolKey;
-      openSchoolKey = openSchoolKey === schoolKey ? null : schoolKey;
-      renderMonths(searchInput.value);
+    if(schoolRow){
+      const schoolGroup = schoolRow.closest('.end-school-group');
+      if(!schoolGroup) return;
+      const monthRoot = schoolGroup.closest('.month-card');
+      if(!monthRoot || !monthRoot.classList.contains('open')) return;
+
+      monthRoot.querySelectorAll('.end-school-group.open').forEach(group => {
+        if(group !== schoolGroup){
+          group.classList.remove('open');
+          group.querySelector('.end-school-row')?.classList.remove('open');
+        }
+      });
+
+      const willOpen = !schoolGroup.classList.contains('open');
+      schoolGroup.classList.toggle('open', willOpen);
+      schoolRow.classList.toggle('open', willOpen);
     }
   });
 
