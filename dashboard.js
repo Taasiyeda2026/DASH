@@ -2239,6 +2239,7 @@ function renderEndDates(){
         schools: new Map()
       });
     }
+
     const monthObj = monthMap.get(monthKey);
     const schoolName = course.School || '—';
     const authorityName = course.Authority || '—';
@@ -2254,7 +2255,8 @@ function renderEndDates(){
   });
 
   const monthNames = ['ינואר', 'פברואר', 'מרץ', 'אפריל', 'מאי', 'יוני'];
-  let openMonthKey = null;
+  let searchTerm = '';
+  let isSearching = false;
 
   const getEndClass = endDate => {
     const daysDiff = Math.ceil((endDate - today) / 86400000);
@@ -2263,69 +2265,63 @@ function renderEndDates(){
     return '';
   };
 
-  const buildMonthPanelHtml = (monthObj, query) => {
+  const buildMonthPanelHtml = monthObj => {
     if(!monthObj) return '<div class="end-empty-state">אין נתונים לחודש זה</div>';
-    const q = (query || '').trim().toLowerCase();
-    const monthLabel = monthNames[monthObj.month] || '';
-    const monthMatches = !q || monthLabel.toLowerCase().includes(q);
 
-    const schoolEntries = [...monthObj.schools.entries()]
-      .sort(([, schoolA], [, schoolB]) => {
+    const schoolEntries = [...monthObj.schools.values()]
+      .sort((schoolA, schoolB) => {
         const minA = schoolA.courses.reduce((min, course) => Math.min(min, course.End.getTime()), Infinity);
         const minB = schoolB.courses.reduce((min, course) => Math.min(min, course.End.getTime()), Infinity);
         return minA - minB;
       })
-      .map(([, schoolObj], schoolIndex) => {
+      .map((schoolObj, schoolIndex) => {
         const safeSchoolId = `${monthObj.month}-${schoolIndex}`;
-        const schoolText = `${schoolObj.school} | ${schoolObj.authority}`;
+        const schoolText = `${schoolObj.school} ${schoolObj.authority}`.toLowerCase();
+
         const visibleCourses = schoolObj.courses
-          .filter(course => {
-            if(!q || monthMatches) return true;
-            const endDateText = course.End.toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit', year: 'numeric' }).toLowerCase();
+          .slice()
+          .sort((a, b) => a.End - b.End)
+          .map(course => {
+            const dateStr = course.End.toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit', year: 'numeric' });
+            const meetings = (course.Dates || [])
+              .filter(d => d instanceof Date && !isNaN(d.getTime()))
+              .sort((a, b) => a - b)
+              .map((d, i) => `<div class="end-meeting-item">מפגש ${i + 1}: ${d.toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit', year: 'numeric' })}</div>`)
+              .join('');
             const datesText = (course.Dates || [])
               .filter(d => d instanceof Date && !isNaN(d.getTime()))
               .map(d => d.toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit', year: 'numeric' }).toLowerCase())
               .join(' ');
-            return schoolText.toLowerCase().includes(q) ||
-              (course.Program || '').toLowerCase().includes(q) ||
-              endDateText.includes(q) ||
-              datesText.includes(q);
+            const searchText = `${monthNames[monthObj.month] || ''} ${schoolText} ${(course.Program || '').toLowerCase()} ${dateStr.toLowerCase()} ${datesText}`;
+
+            return `
+              <div class="end-course-item course-row" data-search-text="${escapeHtml(searchText)}">
+                <div class="end-course-title" style="color:${getProgramColor(course.Program)}">${course.Program || '—'}</div>
+                <div class="end-course-end-date ${getEndClass(course.End)}">תאריך סיום: ${dateStr}</div>
+                <div>${meetings || '<div class="end-meeting-item">אין מפגשים</div>'}</div>
+              </div>
+            `;
           })
-          .sort((a, b) => a.End - b.End);
+          .join('');
 
-        const courseHtml = visibleCourses.map(course => {
-          const dateStr = course.End.toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit', year: 'numeric' });
-          const meetings = (course.Dates || [])
-            .filter(d => d instanceof Date && !isNaN(d.getTime()))
-            .sort((a, b) => a - b)
-            .map((d, i) => `<div class="end-meeting-item">מפגש ${i + 1}: ${d.toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit', year: 'numeric' })}</div>`)
-            .join('');
-          return `
-            <div class="end-course-item">
-              <div class="end-course-title" style="color:${getProgramColor(course.Program)}">${course.Program || '—'}</div>
-              <div class="end-course-end-date ${getEndClass(course.End)}">תאריך סיום: ${dateStr}</div>
-              <div>${meetings || '<div class="end-meeting-item">אין מפגשים</div>'}</div>
-            </div>
-          `;
-        }).join('');
+        if(!visibleCourses) return '';
 
-        if(!courseHtml) return '';
         return `
           <div class="end-school-group" data-school-key="${safeSchoolId}">
             <div class="end-school-row" data-school-key="${safeSchoolId}">
               <div class="end-school-meta">
                 <span class="end-school-title">${schoolObj.school} <span class="separator">|</span> ${schoolObj.authority}</span>
               </div>
-              <span class="end-school-count">${visibleCourses.length} קורסים</span>
+              <span class="end-school-count">${schoolObj.courses.length} קורסים</span>
             </div>
-            <div class="end-courses-wrap">${courseHtml}</div>
+            <div class="end-courses-wrap">${visibleCourses}</div>
           </div>
         `;
       })
       .filter(Boolean)
       .join('');
 
-    return schoolEntries || '<div class="end-empty-state">אין תוצאות לחיפוש בחודש הנבחר</div>';
+    return schoolEntries || '<div class="end-empty-state">אין נתונים לחודש זה</div>';
   };
 
   const buildMonthsDom = () => {
@@ -2335,24 +2331,17 @@ function renderEndDates(){
       const coursesCount = monthObj
         ? [...monthObj.schools.values()].reduce((sum, schoolObj) => sum + schoolObj.courses.length, 0)
         : 0;
-      const isOpen = openMonthKey === key;
+
       return `
-        <div class="month-card ${isOpen ? 'open' : ''}" data-month-key="${key}">
-          <button class="end-month-card month-${monthIndex} ${isOpen ? 'active' : ''}" data-month-key="${key}" type="button">
+        <div class="month-card" data-month-key="${key}">
+          <button class="end-month-card month-${monthIndex}" data-month-key="${key}" type="button">
             <span class="end-month-name">${monthName}</span>
             <span class="end-month-count">${coursesCount} קורסים</span>
           </button>
+          <div class="month-panel end-content-panel">${buildMonthPanelHtml(monthObj)}</div>
         </div>
       `;
     }).join('');
-  };
-
-  const buildOpenPanelDom = query => {
-    const q = (query || '').trim().toLowerCase();
-    if(openMonthKey === null) return '';
-    const monthObj = monthMap.get(openMonthKey);
-    const panelHtml = buildMonthPanelHtml(monthObj, q);
-    return `<div class="month-panel end-content-panel end-content-wrapper open">${panelHtml}</div>`;
   };
 
   view.innerHTML = `
@@ -2360,62 +2349,143 @@ function renderEndDates(){
       <div class="end-search-bar">
         <input id="endDatesSearch" type="text" placeholder="חיפוש לפי חודש / בית ספר / רשות / קורס / תאריך">
       </div>
-      <div id="endDatesMonths" class="months-container"></div>
+      <div id="endDatesMonths" class="months-container">
+        <div class="end-months-row">
+          <div class="end-months-grid">${buildMonthsDom()}</div>
+        </div>
+      </div>
     </div>
   `;
 
   const monthsContainer = document.getElementById('endDatesMonths');
   const searchInput = document.getElementById('endDatesSearch');
 
-  const renderMonths = query => {
-    monthsContainer.innerHTML = `
-      <div class="end-months-row">
-        <div class="end-months-grid">${buildMonthsDom()}</div>
-      </div>
-      <div class="end-active-panel">${buildOpenPanelDom(query)}</div>
-    `;
+  const closeAllMonths = () => {
+    monthsContainer.querySelectorAll('.month-card').forEach(card => {
+      card.classList.remove('open');
+      card.querySelector('.end-month-card')?.classList.remove('active');
+      card.querySelectorAll('.end-school-group.open').forEach(group => {
+        group.classList.remove('open');
+        group.querySelector('.end-school-row')?.classList.remove('open');
+      });
+    });
   };
 
-  const toggleMonth = monthKey => {
-    openMonthKey = openMonthKey === monthKey ? null : monthKey;
-    renderMonths(searchInput.value);
+  const applySearch = () => {
+    const monthCards = monthsContainer.querySelectorAll('.month-card');
+
+    monthCards.forEach(monthCard => {
+      const courseRows = monthCard.querySelectorAll('.course-row');
+      const schoolGroups = monthCard.querySelectorAll('.end-school-group');
+      let monthHasMatch = false;
+
+      courseRows.forEach(course => {
+        const text = (course.dataset.searchText || course.innerText || '').toLowerCase();
+
+        if(!isSearching){
+          course.style.display = '';
+        } else if(text.includes(searchTerm)){
+          course.style.display = '';
+          monthHasMatch = true;
+        } else {
+          course.style.display = 'none';
+        }
+      });
+
+      schoolGroups.forEach(group => {
+        const visibleCourses = [...group.querySelectorAll('.course-row')].filter(row => row.style.display !== 'none');
+        const row = group.querySelector('.end-school-row');
+        const countEl = group.querySelector('.end-school-count');
+
+        if(countEl){
+          const countValue = isSearching ? visibleCourses.length : group.querySelectorAll('.course-row').length;
+          countEl.textContent = `${countValue} קורסים`;
+        }
+
+        if(!isSearching){
+          group.style.display = '';
+          group.classList.remove('open');
+          row?.classList.remove('open');
+          return;
+        }
+
+        if(visibleCourses.length > 0){
+          group.style.display = '';
+          group.classList.add('open');
+          row?.classList.add('open');
+        } else {
+          group.style.display = 'none';
+          group.classList.remove('open');
+          row?.classList.remove('open');
+        }
+      });
+
+      const monthButton = monthCard.querySelector('.end-month-card');
+      if(!isSearching){
+        monthCard.style.display = '';
+        monthCard.classList.remove('open');
+        monthButton?.classList.remove('active');
+      } else if(monthHasMatch){
+        monthCard.style.display = '';
+        monthCard.classList.add('open');
+        monthButton?.classList.add('active');
+      } else {
+        monthCard.style.display = 'none';
+        monthCard.classList.remove('open');
+        monthButton?.classList.remove('active');
+      }
+    });
   };
 
-  renderMonths('');
+  const toggleMonth = monthCard => {
+    if(!monthCard || isSearching) return;
+
+    const isOpen = monthCard.classList.contains('open');
+    closeAllMonths();
+
+    if(!isOpen){
+      monthCard.classList.add('open');
+      monthCard.querySelector('.end-month-card')?.classList.add('active');
+    }
+  };
 
   monthsContainer.addEventListener('click', e => {
     const monthButton = e.target.closest('.end-month-card');
     if(monthButton){
-      const monthKey = monthButton.dataset.monthKey;
-      if(monthKey === undefined) return;
-      toggleMonth(monthKey);
+      toggleMonth(monthButton.closest('.month-card'));
       return;
     }
 
     const schoolRow = e.target.closest('.end-school-row');
-    if(schoolRow){
-      const schoolGroup = schoolRow.closest('.end-school-group');
-      if(!schoolGroup) return;
-      const panelRoot = schoolGroup.closest('.month-panel');
-      if(!panelRoot || !panelRoot.classList.contains('open')) return;
+    if(!schoolRow || isSearching) return;
 
-      panelRoot.querySelectorAll('.end-school-group.open').forEach(group => {
-        if(group !== schoolGroup){
-          group.classList.remove('open');
-          group.querySelector('.end-school-row')?.classList.remove('open');
-        }
-      });
+    const schoolGroup = schoolRow.closest('.end-school-group');
+    if(!schoolGroup) return;
+    const panelRoot = schoolGroup.closest('.month-panel');
+    if(!panelRoot || !panelRoot.closest('.month-card')?.classList.contains('open')) return;
 
-      const willOpen = !schoolGroup.classList.contains('open');
-      schoolGroup.classList.toggle('open', willOpen);
-      schoolRow.classList.toggle('open', willOpen);
-    }
+    panelRoot.querySelectorAll('.end-school-group.open').forEach(group => {
+      if(group !== schoolGroup){
+        group.classList.remove('open');
+        group.querySelector('.end-school-row')?.classList.remove('open');
+      }
+    });
+
+    const willOpen = !schoolGroup.classList.contains('open');
+    schoolGroup.classList.toggle('open', willOpen);
+    schoolRow.classList.toggle('open', willOpen);
   });
 
-  searchInput.addEventListener('input', () => {
-    renderMonths(searchInput.value);
+  searchInput.addEventListener('input', e => {
+    searchTerm = e.target.value.trim().toLowerCase();
+    isSearching = searchTerm.length > 0;
+    applySearch();
   });
+
+  closeAllMonths();
+  applySearch();
 }
+
 function openEndDateDetail(course){
   const dates = (course.Dates || [])
     .filter(d => d instanceof Date && !isNaN(d.getTime()))
