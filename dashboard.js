@@ -745,8 +745,8 @@ function fitViewToScreen() {
   requestAnimationFrame(() => requestAnimationFrame(() => {
     const viewH = view.clientHeight;
     const contentH = view.scrollHeight;
-    if (contentH <= viewH) return;
-    const z = Math.max(0.70, viewH / contentH);
+    if (!viewH || !contentH) return;
+    const z = Math.max(0.70, Math.min(0.88, viewH / contentH));
     Array.from(view.children).forEach(c => { c.style.zoom = z; });
   }));
 }
