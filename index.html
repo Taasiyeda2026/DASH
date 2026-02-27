@@ -849,6 +849,7 @@ body.no-scroll{overflow:hidden;}
 }
 
 
+/* ===== ZOOM OUT 25% – no bottom gap ===== */
 /* ===== ZOOM OUT 25% – Month / Week / Summary only ===== */
 
 #view.view-month,
@@ -856,7 +857,15 @@ body.no-scroll{overflow:hidden;}
 #view.view-summary{
   transform: scale(0.75);
   transform-origin: top center;
-  will-change: transform;
+  height: calc(100% / 0.75);
+}
+
+/* ===== ZOOM OUT 35% – no bottom gap ===== */
+
+#view.view-instructors{
+  transform: scale(0.65);
+  transform-origin: top center;
+  height: calc(100% / 0.65);
 }
 
 /* ===== ZOOM OUT 35% – Instructors view only ===== */
