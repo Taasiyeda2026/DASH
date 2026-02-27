@@ -2397,9 +2397,22 @@ function renderEndDates(){
   renderMonths('');
 
   monthsContainer.addEventListener('click', e => {
-    const monthCard = e.target.closest('.end-month-card');
-    if(monthCard){
-      toggleMonth(monthCard.closest('.month-card'));
+    const monthButton = e.target.closest('.end-month-card');
+    if(monthButton){
+      console.log('month clicked');
+      const monthCard = monthButton.closest('.month-card');
+      if(!monthCard){
+        console.warn('month-card container not found for clicked month button');
+        return;
+      }
+
+      toggleMonth(monthCard);
+
+      const monthPanel = monthCard.querySelector('.month-panel');
+      console.log('month-card classList:', [...monthCard.classList]);
+      if(monthPanel){
+        console.log('month-panel computed display:', getComputedStyle(monthPanel).display);
+      }
       return;
     }
 
