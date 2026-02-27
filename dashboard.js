@@ -2275,7 +2275,8 @@ function renderEndDates(){
         const minB = schoolB.courses.reduce((min, course) => Math.min(min, course.End.getTime()), Infinity);
         return minA - minB;
       })
-      .map(([schoolKey, schoolObj]) => {
+      .map(([, schoolObj], schoolIndex) => {
+        const safeSchoolId = `${monthObj.month}-${schoolIndex}`;
         const schoolText = `${schoolObj.school} | ${schoolObj.authority}`;
         const visibleCourses = schoolObj.courses
           .filter(course => {
@@ -2310,8 +2311,8 @@ function renderEndDates(){
 
         if(!courseHtml) return '';
         return `
-          <div class="end-school-group" data-school-key="${schoolKey}">
-            <div class="end-school-row" data-school-key="${schoolKey}">
+          <div class="end-school-group" data-school-key="${safeSchoolId}">
+            <div class="end-school-row" data-school-key="${safeSchoolId}">
               <div class="end-school-meta">
                 <span class="end-school-title">${schoolObj.school} <span class="separator">|</span> ${schoolObj.authority}</span>
               </div>
