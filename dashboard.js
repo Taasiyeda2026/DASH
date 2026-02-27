@@ -742,6 +742,7 @@ function fitViewToScreen() {
   const view = document.getElementById('view');
   if (!view) return;
   Array.from(view.children).forEach(c => { c.style.zoom = ''; });
+  if(window.mode === 'enddates') return;
   requestAnimationFrame(() => requestAnimationFrame(() => {
     const viewH = view.clientHeight;
     const contentH = view.scrollHeight;
@@ -2264,7 +2265,7 @@ function renderEndDates(){
     .map(([key, value]) => ({ key, ...value }));
 
   const monthNames = ['ינואר', 'פברואר', 'מרץ', 'אפריל', 'מאי', 'יוני'];
-  let openMonthKey = months[0]?.key || '0';
+  let openMonthKey = null;
   let openSchoolKey = null;
 
   const getEndClass = endDate => {
@@ -2291,8 +2292,8 @@ function renderEndDates(){
       `;
     }).join('');
 
-    const activeMonthObj = monthMap.get(openMonthKey);
-    let contentHtml = '<div class="end-empty-state">אין נתונים לחודש זה</div>';
+    const activeMonthObj = openMonthKey !== null ? monthMap.get(openMonthKey) : null;
+    let contentHtml = '<div class="end-empty-state">בחרו חודש להצגת נתונים</div>';
 
     if(activeMonthObj){
       const monthLabel = monthNames[activeMonthObj.month] || '';
@@ -2355,9 +2356,10 @@ function renderEndDates(){
     }
 
     const container = document.getElementById('endDatesMonths');
+    const panelClass = `end-content-panel end-content-wrapper ${activeMonthObj ? 'is-open' : ''}`;
     container.innerHTML = `
       <div class="end-months-grid">${monthCards}</div>
-      <div class="end-content-panel end-content-wrapper">${contentHtml}</div>
+      <div class="${panelClass}">${contentHtml}</div>
     `;
   };
 
@@ -2379,7 +2381,10 @@ function renderEndDates(){
     const monthCard = e.target.closest('.end-month-card');
     if(monthCard){
       const monthKey = monthCard.dataset.monthKey;
-      if(openMonthKey !== monthKey){
+      if(openMonthKey === monthKey){
+        openMonthKey = null;
+        openSchoolKey = null;
+      }else{
         openMonthKey = monthKey;
         openSchoolKey = null;
       }
@@ -2388,7 +2393,7 @@ function renderEndDates(){
     }
 
     const schoolRow = e.target.closest('.end-school-row');
-    if(schoolRow){
+    if(schoolRow && openMonthKey !== null){
       const schoolKey = schoolRow.dataset.schoolKey;
       openSchoolKey = openSchoolKey === schoolKey ? null : schoolKey;
       renderMonths(searchInput.value);
