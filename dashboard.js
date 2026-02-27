@@ -811,16 +811,6 @@ function renderInstructorGridMonth(){
   const wrap = document.createElement('div');
   wrap.className = 'instructor-cal-wrap';
 
-  // שורת כותרות ימים
-  const headerRow = document.createElement('div');
-  headerRow.className = 'instructor-cal-header-row';
-  ["א'","ב'","ג'","ד'","ה'","ו'","ש'"].forEach(name => {
-    const h = document.createElement('div');
-    h.textContent = name;
-    headerRow.appendChild(h);
-  });
-  wrap.appendChild(headerRow);
-
   const grid = document.createElement('div');
   grid.className = 'instructor-cal-grid';
 
