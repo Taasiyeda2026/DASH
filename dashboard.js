@@ -2359,7 +2359,7 @@ function renderEndDates(){
     const container = document.getElementById('endDatesMonths');
     container.innerHTML = `
       <div class="end-months-grid">${monthCards}</div>
-      <div class="end-content-panel">${contentHtml}</div>
+      <div class="end-content-panel end-content-wrapper">${contentHtml}</div>
     `;
   };
 
