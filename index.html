@@ -860,7 +860,7 @@ body.no-scroll{overflow:hidden;}
 /* ===== SAFE ZOOM 25% – Summary only ===== */
 
 .summary-wrapper{
-  transform: scale(0.75);
+  transform: scale(0.70);
   transform-origin: top center;
 }
 
@@ -874,8 +874,9 @@ body.no-scroll{overflow:hidden;}
 /* Prevent empty scroll area after scale */
 #view.view-month,
 #view.view-week,
-#view.view-instructors{
-  overflow-y: hidden;
+#view.view-instructors,
+.summary-wrapper{
+  overflow-y: auto;
 }
 
 </style>
