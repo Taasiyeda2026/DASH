@@ -32,6 +32,8 @@ html {
   margin: 0;
   padding: 0;
   height: 100vh;
+  height: 100dvh;
+  min-height: -webkit-fill-available;
   width: 100%;
   overflow: hidden;
   overflow-x: hidden;
@@ -42,6 +44,8 @@ body {
   margin: 0;
   padding: 0;
   height: 100vh;
+  height: 100dvh;
+  min-height: -webkit-fill-available;
   width: 100%;
   display: flex;
   flex-direction: column;
@@ -102,7 +106,7 @@ button, input, select { width: auto; }
   padding: 20px 20px 200px 20px;
   overflow-y: auto;
   overflow-x: hidden;
-  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
   flex: 1;
   min-height: 0;
   display: flex;
@@ -805,7 +809,7 @@ body.no-scroll{overflow:hidden;}
 
 /* ===== VERY SMALL SCREENS (≤400px) ===== */
 @media(max-width:400px){
-  #greetingName{display:none !important;}
+  #greetingName{max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px !important;}
   .header-inner{padding:8px 10px !important;gap:6px !important;}
   .kpi-number{font-size:34px;}
   .kpi-title{font-size:12px;}
