@@ -555,22 +555,23 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
 .overlay-close-btn{position:absolute;top:12px;left:14px;background:#f1f5f9;border:none;border-radius:50%;width:32px;height:32px;font-size:20px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#64748b;z-index:2;flex-shrink:0;padding:0;}
 .overlay-close-btn:hover{background:#e2e8f0;}
 
-/* ===== INSTRUCTORS CARDS ===== */
-#view > div[style*="grid-template-columns: repeat(auto-fill,minmax(180px,1fr))"]{
-  grid-template-columns:repeat(auto-fill,minmax(90px,1fr)) !important;
-  gap:8px !important;
+/* ===== INSTRUCTORS VIEW: shrink tiles only (no font changes, no side panel changes) ===== */
+#view.view-instructors{
+  /* לא נוגעים בפונטים כאן */
 }
-#view > div[style*="grid-template-columns: repeat(auto-fill,minmax(180px,1fr))"] > div{
-  min-height:70px !important;padding:8px !important;border-radius:12px !important;
+
+/* הקטנת ה-grid כדי שייכנסו יותר כרטיסים בשורה */
+#view.view-instructors .instructors-grid{
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)) !important;
+  gap: 10px !important;
+  padding: 8px !important;
 }
-#view > div[style*="grid-template-columns: repeat(auto-fill,minmax(180px,1fr))"] > div div:first-child{
-  font-size:9px !important;margin-bottom:4px !important;
-}
-#view > div[style*="grid-template-columns: repeat(auto-fill,minmax(180px,1fr))"] > div div:nth-child(2){
-  font-size:16px !important;
-}
-#view > div[style*="grid-template-columns: repeat(auto-fill,minmax(180px,1fr))"] > div div:nth-child(3){
-  font-size:7px !important;margin-top:3px !important;
+
+/* הקטנת הריבועים עצמם (רק מימדים/ריווחים), בלי font-size */
+#view.view-instructors .instructors-grid > *{
+  min-height: 108px !important;
+  padding: 10px !important;
+  border-radius: 14px !important;
 }
 
 /* ===== SIDE PANEL BACKDROP ===== */
