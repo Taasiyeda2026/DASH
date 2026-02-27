@@ -2376,6 +2376,41 @@ function renderEndDates(){
     return `${monthNames[endDate.getMonth()] || ''} ${endDate.getFullYear()}`.trim();
   };
 
+  const createSearchRow = course => {
+    const row = document.createElement('div');
+    row.className = 'search-row';
+
+    const summary = document.createElement('div');
+    summary.className = 'search-row-summary';
+    summary.innerText = `${course.School || '—'} | ${course.Authority || '—'} | ${course.Program || '—'}`;
+
+    const details = document.createElement('div');
+    details.className = 'search-row-details';
+
+    const endDateText = course.End instanceof Date && !isNaN(course.End.getTime())
+      ? course.End.toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit', year: 'numeric' })
+      : '—';
+
+    const sessions = (course.Dates || [])
+      .filter(d => d instanceof Date && !isNaN(d.getTime()))
+      .sort((a, b) => a - b)
+      .map(d => d.toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit', year: 'numeric' }));
+
+    details.innerHTML = `
+      <div class="search-row-end-date ${getEndClass(course.End)}">תאריך סיום: ${escapeHtml(endDateText)}</div>
+      <div>מפגשים: ${escapeHtml(sessions.length ? sessions.join(', ') : 'אין מפגשים')}</div>
+    `;
+
+    summary.addEventListener('click', () => {
+      row.classList.toggle('open');
+    });
+
+    row.appendChild(summary);
+    row.appendChild(details);
+
+    return row;
+  };
+
   view.innerHTML = `
     <div class="end-dates-wrapper">
       <div class="end-search-bar">
@@ -2445,17 +2480,8 @@ function renderEndDates(){
       monthTitle.innerText = monthLabel;
       resultsWrapper.appendChild(monthTitle);
 
-      items.forEach(({ course, index }) => {
-        const dateStr = course.End.toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit', year: 'numeric' });
-        const row = document.createElement('button');
-        row.type = 'button';
-        row.className = 'search-course-row';
-        row.dataset.courseIndex = `${index}`;
-        row.innerHTML = `
-          <div class="search-course-title" style="color:${getProgramColor(course.Program)}">${escapeHtml(course.Program || '—')}</div>
-          <div class="search-course-meta">${escapeHtml(course.School || '—')} | ${escapeHtml(course.Authority || '—')}</div>
-          <div class="search-course-date ${getEndClass(course.End)}">תאריך סיום: ${dateStr}</div>
-        `;
+      items.forEach(({ course }) => {
+        const row = createSearchRow(course);
         resultsWrapper.appendChild(row);
       });
     });
@@ -2499,14 +2525,6 @@ function renderEndDates(){
     const willOpen = !schoolGroup.classList.contains('open');
     schoolGroup.classList.toggle('open', willOpen);
     schoolRow.classList.toggle('open', willOpen);
-  });
-
-  resultsWrapper.addEventListener('click', e => {
-    const row = e.target.closest('.search-course-row');
-    if(!row) return;
-    const courseIndex = Number(row.dataset.courseIndex);
-    const selectedCourse = allEndDateCourses[courseIndex]?.course;
-    if(selectedCourse) openEndDateDetail(selectedCourse);
   });
 
   searchInput.addEventListener('input', e => {
