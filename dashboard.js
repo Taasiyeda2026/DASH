@@ -834,6 +834,14 @@ function renderInstructorGridMonth(){
   const first = new Date(y,m,1);
   const last  = new Date(y,m+1,0);
 
+  // שורת כותרת ימים
+  ['א׳','ב׳','ג׳','ד׳','ה׳','ו׳','ש׳'].forEach((d, i) => {
+    const h = document.createElement('div');
+    h.className = 'instructor-cal-header-cell' + (i === 6 ? ' ic-shabbat-header' : '');
+    h.textContent = d;
+    grid.appendChild(h);
+  });
+
   // תאים ריקים לפני תחילת החודש
   for(let i = 0; i < first.getDay(); i++){
     const empty = document.createElement('div');
