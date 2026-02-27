@@ -849,31 +849,26 @@ body.no-scroll{overflow:hidden;}
 }
 
 
-/* ===== ZOOM OUT 25% – no bottom gap ===== */
-/* ===== ZOOM OUT 25% – Month / Week / Summary only ===== */
+/* ===== SAFE ZOOM 25% – Month / Week only ===== */
 
-#view.view-month,
-#view.view-week,
-#view.view-summary{
+#view.view-month .grid,
+#view.view-week .grid{
   transform: scale(0.75);
   transform-origin: top center;
-  height: calc(100% / 0.75);
 }
 
-/* ===== ZOOM OUT 35% – no bottom gap ===== */
+/* ===== SAFE ZOOM 25% – Summary only ===== */
 
-#view.view-instructors{
-  transform: scale(0.65);
+.summary-wrapper{
+  transform: scale(0.75);
   transform-origin: top center;
-  height: calc(100% / 0.65);
 }
 
-/* ===== ZOOM OUT 35% – Instructors view only ===== */
+/* ===== SAFE ZOOM 35% – Instructors only ===== */
 
-#view.view-instructors{
+#view.view-instructors .instructors-grid{
   transform: scale(0.65);
   transform-origin: top center;
-  will-change: transform;
 }
 
 </style>
