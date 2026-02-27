@@ -882,6 +882,7 @@ function renderInstructorGridMonth(){
     const cell = document.createElement('div');
     cell.className = 'instructor-cal-cell calendar-day' +
       (isShabbat ? ' ic-shabbat' : '') +
+      (date.getDay() === 5 ? ' ic-friday' : '') +
       (isToday ? ' ic-today is-today' : '') +
       (groups.some(g => g.type !== 'holiday') ? ' ic-has-events' : '');
 
