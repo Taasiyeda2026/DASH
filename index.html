@@ -196,11 +196,27 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
 
 .top-header-btn {
   position: relative;
+  border: none;
+  outline: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   box-shadow:
     0 4px 10px rgba(0,0,0,0.08),
     0 2px 4px rgba(0,0,0,0.05);
   transition: transform 0.2s ease,
               box-shadow 0.2s ease;
+}
+
+.top-header-btn.circle {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+}
+
+.top-header-btn.pill {
+  padding: 10px 18px;
+  border-radius: 14px;
 }
 
 .top-header-btn:hover {
@@ -218,9 +234,9 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
 
 .today-star,
 .today-calendar {
-  width: 58px; height: 58px; background: transparent; cursor: pointer;
-  border: none; border-radius: 50%; display: flex; align-items: center;
-  justify-content: center; padding: 0;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
 }
 .today-star::before,
 .today-calendar::before{
@@ -741,7 +757,7 @@ body.no-scroll{overflow:hidden;}
 
   .controls{flex-direction:column;align-items:stretch;gap:6px;padding:0 10px;}
   .controls select,.controls button{width:100%;height:40px;font-size:14px;}
-  .nav button,.nav select{width:100%;}
+  .nav-modes button,.nav select{width:100%;}
 
   .nav{flex-direction:column !important;gap:8px !important;}
   #btnMonth,#btnWeek{display:none !important;}
@@ -788,8 +804,6 @@ body.no-scroll{overflow:hidden;}
   .header-inner{padding:10px;gap:8px;flex-wrap:wrap;}
   .header-inner > strong{display:none;}
   .app-logo{height:32px;}
-  .today-star{width:58px !important;height:58px !important;min-height:58px !important;}
-  .today-calendar{width:58px !important;height:58px !important;min-height:58px !important;}
   .instructors-count-title{margin-top:12px;font-size:15px;padding:0 12px;}
   .today{scroll-margin-top:170px;}
 
@@ -856,15 +870,14 @@ body.no-scroll{overflow:hidden;}
 
 .btn-attendance,
 #logoutBtn{
-  width:45px;
-  height:45px;
-  min-width:45px;
-  min-height:45px;
+  width:48px;
+  height:48px;
+  min-width:48px;
+  min-height:48px;
 
   padding:0;
   background:transparent;
   border:none;
-  border-radius:0;
 
   display:flex;
   align-items:center;
@@ -875,8 +888,8 @@ body.no-scroll{overflow:hidden;}
 
 .btn-attendance img,
 #logoutBtn img{
-  width:45px;
-  height:45px;
+  width:48px;
+  height:48px;
   display:block;
   transition:transform .15s ease;
 }
@@ -1158,11 +1171,11 @@ body.no-scroll{overflow:hidden;}
       <a href="https://taasiyeda2026.github.io/attendance/"
          target="_blank"
          rel="noopener"
-         class="btn-attendance top-header-btn"
+         class="btn-attendance top-header-btn circle"
          title="מערכת נוכחות">
         <img src="icon-att.svg" alt="מערכת נוכחות">
       </a>
-      <button id="logoutBtn" class="top-header-btn" title="יציאה">
+      <button id="logoutBtn" class="top-header-btn circle" title="יציאה">
         <img src="icon-logout.svg" alt="יציאה">
       </button>
     </div>
@@ -1181,8 +1194,8 @@ body.no-scroll{overflow:hidden;}
   </div>
   <div class="nav-arrows">
     <button id="prev" aria-label="הקודם">▶</button>
-    <button id="goToday" class="today-star top-header-btn" title="היום" aria-label="היום"><img src="icon-today.svg" width="58" height="58" alt="" style="display:block"></button>
-    <button id="goCalendar" class="today-calendar top-header-btn" aria-label="חודש" title="חודש"><img src="icon-calendar.svg" width="58" height="58" alt="" style="display:block"></button>
+    <button id="goToday" class="today-star top-header-btn pill" title="היום" aria-label="היום"><img src="icon-today.svg" width="58" height="58" alt="" style="display:block"></button>
+    <button id="goCalendar" class="today-calendar top-header-btn pill" aria-label="חודש" title="חודש"><img src="icon-calendar.svg" width="58" height="58" alt="" style="display:block"></button>
     <span id="title"></span>
     <button id="next" aria-label="הבא">◀</button>
   </div>
