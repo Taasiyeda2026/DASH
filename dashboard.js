@@ -976,21 +976,18 @@ function renderInstructorGridMonth(){
     ).size;
 
     const personalSummary = document.createElement('div');
-    personalSummary.style.maxWidth = '600px';
-    personalSummary.style.margin = '24px auto';
-    personalSummary.className = 'personal-summary-row'; personalSummary.style.display = 'flex'; personalSummary.style.justifyContent = 'center';
-    personalSummary.style.gap = '10px';
+    personalSummary.className = 'personal-summary-row';
 
     personalSummary.innerHTML = `
-      <div class="kpi-card" style="padding:12px 10px;">
+      <div class="kpi-card">
         <div class="kpi-label summary-label">קורסים פעילים</div>
         <div class="kpi-value summary-number">${activeCourses}</div>
     </div>
-      <div class="kpi-card" style="padding:12px 10px;">
+      <div class="kpi-card">
         <div class="kpi-label summary-label">סדנאות/סיורים</div>
         <div class="kpi-value summary-number">${dailyActivitiesCount}</div>
     </div>
-      <div class="kpi-card" style="padding:12px 10px;">
+      <div class="kpi-card">
         <div class="kpi-label summary-label">ימי פעילות</div>
         <div class="kpi-value summary-number">${distinctDays}</div>
     </div>
@@ -1637,7 +1634,7 @@ function renderSummary(){
   titleEl.textContent = currentMonthStart.toLocaleString('he-IL',{month:'long',year:'numeric'});
 
   const wrap = document.createElement('div');
-  wrap.className = 'summary-wrapper'; wrap.style.maxWidth='1200px';
+  wrap.className = 'summary-wrapper';
   wrap.innerHTML = `
     <div class="kpi-total">
       <div class="kpi-title">סה"כ קורסים פעילים</div>
