@@ -512,7 +512,8 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
 .end-courses-content{display:flex;flex-direction:column;gap:14px}
 .end-courses-month-group{background:#fff;border:1px solid #dbe4ef;border-radius:14px;padding:8px 8px 10px}
 .end-courses-month-title{background:#eef5ff;border:1px solid #d8e4f7;border-radius:10px;padding:6px 10px;margin:2px 0 8px;font-weight:700;color:#334155}
-.end-courses-table-wrap{width:100%;max-width:560px;margin:0 auto;overflow-x:hidden}
+.end-courses-table-wrap{width:100%;max-width:560px;margin:0 auto}
+.table-container{overflow-x:auto;width:100%}
 .end-courses-table{width:100%;border-collapse:collapse;table-layout:fixed}
 .end-courses-table col.col-end-date{width:24%}
 .end-courses-table col.col-school{width:25.33%}
@@ -1491,11 +1492,44 @@ body[data-role="instructor"] #view .view-month .calendar-event{
   .end-courses-table td:nth-child(2){display:none}
 }
 
-@media(max-width:520px){
-  .end-courses-table th,.end-courses-table td{white-space:normal}
-  .end-courses-table col.col-end-date{width:26%}
-  .end-courses-table col.col-authority{width:37%}
-  .end-courses-table col.col-course{width:37%}
+@media screen and (max-width:600px){
+  .end-courses-table{table-layout:auto}
+  .end-courses-table thead{
+    position:absolute;
+    width:1px;
+    height:1px;
+    overflow:hidden;
+    clip:rect(0,0,0,0);
+    white-space:nowrap;
+  }
+  .end-courses-table col{width:100% !important}
+  .end-courses-table tr{
+    display:block;
+    border-bottom:3px solid #ddd;
+    margin-bottom:1em;
+  }
+  .end-courses-table td{
+    display:block;
+    text-align:right;
+    border-bottom:1px solid #ddd;
+    padding:0.5em;
+    white-space:normal;
+    writing-mode:horizontal-tb;
+    transform:none;
+  }
+  .end-courses-table td.col-end-date{ text-align:right; }
+  .end-courses-table td::before{
+    content:attr(data-label);
+    float:left;
+    font-weight:700;
+    text-transform:uppercase;
+    writing-mode:horizontal-tb;
+    transform:none;
+    white-space:normal;
+  }
+  .end-courses-table td:last-child{border-bottom:none}
+  .end-courses-table td.col-school{display:none}
+  .end-courses-empty{display:block;text-align:center}
 }
 </style>
 </head>

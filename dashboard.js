@@ -2271,7 +2271,7 @@ function renderEndDates(){
     groupedByMonth.get(key).courses.push(course);
   });
 
-  const monthSections = [...groupedByMonth.values()].map(group => {
+  const monthSections = [...groupedByMonth.values()].map((group, groupIndex) => {
     const rows = group.courses
       .slice()
       .sort((a, b) => a.End - b.End)
@@ -2280,19 +2280,21 @@ function renderEndDates(){
         const courseIndex = courses.indexOf(course);
         return `
           <tr class="end-courses-row" data-course-index="${courseIndex}">
-            <td class="col-end-date">${escapeHtml(endDateText)}</td>
-            <td class="col-school">${escapeHtml(course.School || '—')}</td>
-            <td class="col-authority">${escapeHtml(course.Authority || '—')}</td>
-            <td class="col-course">${escapeHtml(course.Program || '—')}</td>
+            <td class="col-end-date" data-label="תאריך סיום">${escapeHtml(endDateText)}</td>
+            <td class="col-school" data-label="בית ספר">${escapeHtml(course.School || '—')}</td>
+            <td class="col-authority" data-label="רשות">${escapeHtml(course.Authority || '—')}</td>
+            <td class="col-course" data-label="קורס">${escapeHtml(course.Program || '—')}</td>
           </tr>
         `;
       })
       .join('');
 
+    const monthTitleId = `endCoursesMonthTitle-${groupIndex}`;
+
     return `
       <section class="end-courses-month-group">
-        <div class="end-courses-month-title">${escapeHtml(group.monthLabel)}</div>
-        <div class="end-courses-table-wrap">
+        <div id="${monthTitleId}" class="end-courses-month-title">${escapeHtml(group.monthLabel)}</div>
+        <div class="end-courses-table-wrap table-container" role="region" aria-labelledby="${monthTitleId}" tabindex="0">
           <table class="end-courses-table">
             <colgroup>
               <col class="col-end-date">
@@ -2309,7 +2311,7 @@ function renderEndDates(){
               </tr>
             </thead>
             <tbody>
-              ${rows || '<tr><td colspan="4" class="end-courses-empty">אין קורסים לחודש זה</td></tr>'}
+              ${rows || '<tr><td colspan="4" class="end-courses-empty" data-label="מצב">אין קורסים לחודש זה</td></tr>'}
             </tbody>
           </table>
         </div>
