@@ -2323,9 +2323,15 @@ function renderEndDates(){
   if(searchInput){
     searchInput.addEventListener('input', () => {
       const query = searchInput.value.trim().toLowerCase();
-      view.querySelectorAll('.end-courses-table tbody tr.end-courses-row').forEach(row => {
-        const rowText = row.innerText.toLowerCase();
-        row.style.display = !query || rowText.includes(query) ? '' : 'none';
+      view.querySelectorAll('.end-courses-month-group').forEach(monthGroup => {
+        let hasVisibleRows = false;
+        monthGroup.querySelectorAll('.end-courses-table tbody tr.end-courses-row').forEach(row => {
+          const rowText = row.innerText.toLowerCase();
+          const isVisible = !query || rowText.includes(query);
+          row.style.display = isVisible ? '' : 'none';
+          if(isVisible) hasVisibleRows = true;
+        });
+        monthGroup.style.display = hasVisibleRows ? '' : 'none';
       });
     });
   }
