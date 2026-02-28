@@ -891,6 +891,8 @@ function renderInstructorGridMonth(){
   });
     const groups = Object.values(groupsMap)
       .sort((a,b) => (a.time||'').localeCompare(b.time||''));
+    const activityGroups = groups.filter(g => g.type !== 'holiday');
+    const hasActivity = activityGroups.length > 0;
 
     const isShabbat = date.getDay() === 6;
     const cell = document.createElement('div');
@@ -898,7 +900,7 @@ function renderInstructorGridMonth(){
       (isShabbat ? ' ic-shabbat' : '') +
       (date.getDay() === 5 ? ' ic-friday' : '') +
       (isToday ? ' ic-today is-today' : '') +
-      (groups.some(g => g.type !== 'holiday') ? ' ic-has-events' : '');
+      (hasActivity ? ' ic-has-events has-activity' : '');
 
     // תצוגת יום: יום בשבוע מקוצר + יום/חודש
     const numWrap = document.createElement('div');
@@ -908,6 +910,20 @@ function renderInstructorGridMonth(){
     const weekdays = ['א׳','ב׳','ג׳','ד׳','ה׳','ו׳','ש׳'];
     const weekday = weekdays[date.getDay()];
     numWrap.textContent = `${weekday} ${day}/${month}`;
+
+    if(hasActivity){
+      const firstActivity = activityGroups[0]?.items?.[0] || null;
+      const instructorName = firstActivity?.Employee || firstActivity?.Instructor || firstActivity?.EmployeeName || '';
+      const mappedEmployeeColor = getEmployeeColor(instructorName);
+      const activityColor = (instructorName && mappedEmployeeColor !== '#f1f5f9' && mappedEmployeeColor !== '#ffffff')
+        ? mappedEmployeeColor
+        : getProgramColor(firstActivity?.Program || '');
+
+      numWrap.classList.add('has-activity');
+      numWrap.style.setProperty('--activity-color', activityColor);
+      numWrap.style.setProperty('--activity-color-rgb', toRgbTuple(activityColor));
+    }
+
     cell.appendChild(numWrap);
 
     // פילים של אירועים (מקסימום 3) – לא בשבת
