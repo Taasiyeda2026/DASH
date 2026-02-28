@@ -2303,11 +2303,32 @@ function renderEndDates(){
   view.innerHTML = `
     <div class="end-courses-page">
       <h2 class="end-courses-page-title">תאריכי סיום קורסים</h2>
+      <div class="end-courses-search-wrap">
+        <input
+          id="endCoursesSearch"
+          class="end-courses-search-input"
+          type="search"
+          dir="rtl"
+          placeholder="חיפוש בטבלה..."
+          aria-label="חיפוש בטבלת תאריכי סיום"
+        />
+      </div>
       <div class="end-courses-content">
         ${monthSections || '<div class="end-courses-empty">אין קורסים עם תאריך סיום</div>'}
       </div>
     </div>
   `;
+
+  const searchInput = view.querySelector('#endCoursesSearch');
+  if(searchInput){
+    searchInput.addEventListener('input', () => {
+      const query = searchInput.value.trim().toLowerCase();
+      view.querySelectorAll('.end-courses-table tbody tr.end-courses-row').forEach(row => {
+        const rowText = row.innerText.toLowerCase();
+        row.style.display = !query || rowText.includes(query) ? '' : 'none';
+      });
+    });
+  }
 
   view.querySelectorAll('.end-courses-row').forEach(row => {
     row.addEventListener('click', () => {
