@@ -893,6 +893,19 @@ body.no-scroll{overflow:hidden;}
   .view-month .day-column.today{box-shadow:0 0 0 2px #bae6fd;}
 }
 
+@media (min-width:1024px){
+  .month-panel{
+    max-width:520px;
+    margin:12px auto 0;
+  }
+
+  .month-panel .course-row,
+  .month-panel div{
+    text-align:right;
+    direction:rtl;
+  }
+}
+
 /* ===== MOBILE (max-width:600px) ===== */
 @media(max-width:600px){
   .instructors-grid{grid-template-columns:repeat(3,minmax(0,1fr)) !important;gap:4px !important;}
