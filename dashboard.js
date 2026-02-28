@@ -922,7 +922,10 @@ function renderInstructorGridMonth(){
       if(g.type === 'holiday') pill.classList.add('holiday');
       if(g.type === 'holiday') pill.addEventListener('click', e => e.stopPropagation());
       const txt = firstItem.Program || '';
-      pill.textContent = txt.length > 10 ? txt.slice(0,9)+'…' : txt;
+      const text = document.createElement('span');
+      text.className = 'instructor-cal-pill-text';
+      text.textContent = txt.length > 13 ? txt.slice(0,12)+'…' : txt;
+      pill.appendChild(text);
       cell.appendChild(pill);
   });
 
