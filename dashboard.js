@@ -247,9 +247,28 @@ function hashStringToHue(str) {
   return h % 360;
 }
 
+function ensureColorContrast(colorValue) {
+  const tuple = toRgbTuple(colorValue).split(',').map(v => Number(v.trim()));
+  if (tuple.length !== 3 || tuple.some(v => Number.isNaN(v))) return colorValue;
+
+  let [r, g, b] = tuple;
+  const luminance = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
+  if (luminance <= 0.82) return colorValue;
+
+  const darkenFactor = luminance > 0.9 ? 0.72 : 0.84;
+  r = Math.max(0, Math.round(r * darkenFactor));
+  g = Math.max(0, Math.round(g * darkenFactor));
+  b = Math.max(0, Math.round(b * darkenFactor));
+  return `rgb(${r}, ${g}, ${b})`;
+}
+
 function instructorColor(name) {
+  const mappedColor = getEmployeeColor(name);
+  if (mappedColor !== '#f1f5f9' && mappedColor !== '#ffffff') {
+    return ensureColorContrast(mappedColor);
+  }
   const hue = hashStringToHue(String(name || ''));
-  return `hsl(${hue} 70% 52%)`;
+  return ensureColorContrast(`hsl(${hue} 70% 52%)`);
 }
 
 function toRgbTuple(colorValue) {
@@ -915,7 +934,7 @@ function renderInstructorGridMonth(){
       const instructorName = firstActivity?.Employee || firstActivity?.Instructor || firstActivity?.EmployeeName || '';
       const mappedEmployeeColor = getEmployeeColor(instructorName);
       const activityColor = (instructorName && mappedEmployeeColor !== '#f1f5f9' && mappedEmployeeColor !== '#ffffff')
-        ? mappedEmployeeColor
+        ? instructorColor(instructorName)
         : getProgramColor(firstActivity?.Program || '');
 
       numWrap.classList.add('has-day-activity');
