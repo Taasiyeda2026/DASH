@@ -493,6 +493,34 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
 .search-row-details{display:none;margin-top:12px;font-size:14px;color:#475569;padding-top:10px;border-top:1px solid #f1f5f9}
 .search-row-course-title{font-size:18px;font-weight:800;line-height:1.35;margin-bottom:8px;overflow-wrap:anywhere;word-break:break-word}
 .search-row-end-date{font-size:15px;font-weight:700;margin-bottom:12px;line-height:1.45;overflow-wrap:anywhere;word-break:break-word}
+
+
+/* ===== END DATES TABLE (NEW) ===== */
+.end-courses-page{max-width:1120px;margin:0 auto;padding:0 12px 24px;box-sizing:border-box}
+.end-courses-page-title{margin:0 0 14px;font-size:28px;font-weight:800;color:#0f172a;text-align:right}
+.end-courses-content{display:flex;flex-direction:column;gap:14px}
+.end-courses-month-group{background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:10px 10px 12px}
+.end-courses-month-title{background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:7px 10px;margin:4px 0 10px;font-weight:700;color:#334155}
+.end-courses-table-wrap{width:100%}
+.end-courses-table{width:100%;border-collapse:collapse;table-layout:fixed}
+.end-courses-table th,.end-courses-table td{padding:8px 6px;border-bottom:1px solid #eef2f7;text-align:right;vertical-align:top;line-height:1.35;font-size:13px;overflow-wrap:anywhere;word-break:break-word}
+.end-courses-table th{font-size:12px;color:#64748b;font-weight:700}
+.end-courses-table tbody tr:last-child td{border-bottom:none}
+.end-courses-row{cursor:pointer;transition:background .2s ease}
+.end-courses-row:hover{background:#f8fafc}
+.end-courses-empty{text-align:center;padding:18px;color:#94a3b8 !important}
+.end-detail-panel{padding:14px 2px 12px}
+.end-detail-title{font-size:20px;font-weight:800;color:#0f172a;margin-bottom:12px}
+.end-detail-meta-grid{display:grid;grid-template-columns:1fr;gap:8px;margin-bottom:14px}
+.end-detail-meta-item{background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:8px 10px;display:flex;justify-content:space-between;gap:10px}
+.end-detail-meta-item span{font-size:12px;color:#64748b}
+.end-detail-meta-item strong{font-size:13px;color:#0f172a;text-align:left}
+.end-detail-section-title{font-size:14px;font-weight:700;color:#334155;margin-bottom:8px}
+.end-detail-meetings-list{list-style:none;margin:0;padding:0;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden}
+.end-detail-meeting-item{display:flex;justify-content:space-between;gap:8px;padding:8px 10px;border-bottom:1px solid #f1f5f9;font-size:13px;color:#334155}
+.end-detail-meeting-item:last-child{border-bottom:none}
+.end-detail-meeting-item span:last-child{color:#94a3b8;font-size:12px}
+.end-detail-empty{list-style:none;padding:14px;text-align:center;color:#94a3b8;font-size:13px}
 .search-row-meetings-title{font-size:13px;font-weight:700;color:#334155;margin-bottom:6px}
 .search-row-meetings-list{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px}
 .search-row-meeting-item{font-size:14px;line-height:1.5;color:#334155;overflow-wrap:anywhere;word-break:break-word}
@@ -1422,6 +1450,18 @@ body[data-role="instructor"] #view .view-month .calendar-event{
   }
 }
 
+
+@media(max-width:768px){
+  .end-courses-page{padding:0 8px 18px}
+  .end-courses-page-title{font-size:23px;margin-bottom:10px}
+  .end-courses-month-group{padding:8px}
+  .end-courses-month-title{margin-bottom:8px}
+  .end-courses-table th,.end-courses-table td{font-size:12px;padding:7px 4px}
+}
+
+@media(max-width:520px){
+  .end-courses-table th,.end-courses-table td{white-space:normal}
+}
 </style>
 </head>
 <body>
