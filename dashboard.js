@@ -1154,7 +1154,6 @@ function renderMobileMonthAccordion(data){
   const first = new Date(y,m,1);
   const last  = new Date(y,m+1,0);
   const start = new Date(first);
-  start.setDate(first.getDate() - first.getDay());
   start.setHours(0,0,0,0);
 
   const today = new Date(); today.setHours(0,0,0,0);
@@ -1176,11 +1175,15 @@ function renderMobileMonthAccordion(data){
 
   let todayWeekEl = null;
   let cursor = new Date(start);
+  let weekNumber = 1;
 
   while(cursor <= last){
     const weekStart = new Date(cursor);
     const weekEnd   = new Date(cursor);
     weekEnd.setDate(weekStart.getDate() + 6);
+    if(weekEnd > last){
+      weekEnd.setTime(last.getTime());
+    }
 
     const containsToday = today >= weekStart && today <= weekEnd;
 
@@ -1211,6 +1214,7 @@ function renderMobileMonthAccordion(data){
           for(let i = 0; i < 7; i++){
             const date = new Date(weekStart);
             date.setDate(weekStart.getDate() + i);
+            if(date > weekEnd) break;
             content.appendChild(buildDay(date, data));
           }
           content.dataset.loaded = 'true';
@@ -1231,7 +1235,7 @@ function renderMobileMonthAccordion(data){
     const navBtn = document.createElement('button');
     navBtn.type = 'button';
     navBtn.dataset.weekKey = weekKey;
-    navBtn.textContent = String(Math.floor((cursor - start) / (7 * 24 * 60 * 60 * 1000)) + 1);
+    navBtn.textContent = String(weekNumber);
     navBtn.addEventListener('click', (event) => {
       event.stopPropagation();
       openWeek();
@@ -1243,11 +1247,12 @@ function renderMobileMonthAccordion(data){
 
     container.appendChild(weekEl);
     cursor.setDate(cursor.getDate() + 7);
+    weekNumber += 1;
   }
 
+  wrapper.appendChild(sideNav);
   wrapper.appendChild(container);
   view.appendChild(wrapper);
-  view.appendChild(sideNav);
 }
 
 function renderMobileMonth(){
