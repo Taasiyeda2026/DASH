@@ -825,6 +825,48 @@ body.no-scroll{overflow:hidden;}
 
 /* ===== MOBILE (max-width:800px) ===== */
 @media(max-width:800px){
+  /* ===== MOBILE – Narrow Main Calendar Wrapper ===== */
+  .mobile-narrow-wrap{
+    width:calc(100% - 36px);
+    margin:0 auto;
+  }
+
+  /* ===== MOBILE – Week Side Navigator ===== */
+  .week-side-nav{
+    position:fixed;
+    top:120px;
+    right:4px;
+    width:30px;
+    height:65vh;
+    overflow-y:auto;
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    z-index:50;
+    touch-action:pan-y;
+  }
+
+  .week-side-nav button{
+    width:100%;
+    height:22px;
+    border-radius:6px;
+    border:none;
+    background:#e2e8f0;
+    font-size:10px;
+    padding:0;
+    cursor:pointer;
+    transition:0.2s;
+    min-height:22px;
+  }
+
+  .week-side-nav button.active{
+    background:#3b82f6;
+  }
+
+  .week-side-nav button:hover{
+    opacity:0.8;
+  }
+
   button{min-height:44px;}
   select{min-height:44px;}
   .side .close,.side-close{width:44px !important;height:44px !important;font-size:22px !important;}
