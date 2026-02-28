@@ -284,6 +284,12 @@ function toRgbTuple(colorValue) {
     return `${r}, ${g}, ${b}`;
   }
 
+  const rgbMatch = normalized.match(/^rgba?\(\s*(\d+(?:\.\d+)?)\s*,\s*(\d+(?:\.\d+)?)\s*,\s*(\d+(?:\.\d+)?)(?:\s*,\s*(\d*\.?\d+))?\s*\)$/i);
+  if (rgbMatch) {
+    const clamp = (v) => Math.max(0, Math.min(255, Math.round(Number(v))));
+    return `${clamp(rgbMatch[1])}, ${clamp(rgbMatch[2])}, ${clamp(rgbMatch[3])}`;
+  }
+
   const hslMatch = normalized.match(/^hsl\((\d+)\s+(\d+)%\s+(\d+)%\)$/i);
   if (hslMatch) {
     const h = Number(hslMatch[1]) / 360;
