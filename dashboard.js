@@ -899,19 +899,18 @@ function renderInstructorGridMonth(){
     cell.className = 'instructor-cal-cell calendar-day' +
       (isShabbat ? ' ic-shabbat' : '') +
       (date.getDay() === 5 ? ' ic-friday' : '') +
-      (isToday ? ' ic-today is-today' : '') +
-      (hasActivity ? ' ic-has-events has-activity' : '');
+      (isToday ? ' ic-today is-today' : '');
 
     // תצוגת יום: יום בשבוע מקוצר + יום/חודש
     const numWrap = document.createElement('div');
-    numWrap.className = 'instructor-cal-day-num date-number' + (isToday ? ' ic-today-num' : '');
+    numWrap.className = 'instructor-cal-day-num day-number date-number' + (isToday ? ' ic-today-num' : '');
     const day = date.getDate();
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const weekdays = ['א׳','ב׳','ג׳','ד׳','ה׳','ו׳','ש׳'];
     const weekday = weekdays[date.getDay()];
     numWrap.textContent = `${weekday} ${day}/${month}`;
 
-    if(hasActivity){
+    if(hasActivity && !isToday && !isShabbat){
       const firstActivity = activityGroups[0]?.items?.[0] || null;
       const instructorName = firstActivity?.Employee || firstActivity?.Instructor || firstActivity?.EmployeeName || '';
       const mappedEmployeeColor = getEmployeeColor(instructorName);
@@ -919,9 +918,8 @@ function renderInstructorGridMonth(){
         ? mappedEmployeeColor
         : getProgramColor(firstActivity?.Program || '');
 
-      numWrap.classList.add('has-activity');
+      numWrap.classList.add('has-day-activity');
       numWrap.style.setProperty('--activity-color', activityColor);
-      numWrap.style.setProperty('--activity-color-rgb', toRgbTuple(activityColor));
     }
 
     cell.appendChild(numWrap);

@@ -747,30 +747,14 @@ body.no-scroll{overflow:hidden;}
 .view-month .instructor-cal-cell.ic-empty{background:transparent;border-color:transparent;}
 .view-month .instructor-cal-cell.ic-today,
 .view-month .calendar-day.is-today{background:#ecfeff;border:2px solid #22d3ee;box-shadow:0 0 0 3px rgba(34,211,238,0.15);}
-.view-month .instructor-cal-cell.ic-has-events{cursor:pointer;background:#fafbff;}
 .view-month .instructor-cal-cell.ic-friday{background:#fffef0;}
 .view-month .instructor-cal-cell:hover{background:#f1f5f9;box-shadow:0 4px 14px rgba(0,0,0,0.09);transform:translateY(-1px);}
-.view-month .instructor-cal-cell.ic-has-events:active{opacity:0.7;transform:scale(0.95);transition:transform 0.1s,opacity 0.1s;}
 .view-month .instructor-cal-day-num{font-size:13px;font-weight:600;color:#334155;direction:rtl;text-align:center;line-height:1;padding:1px 0;}
-.view-month .instructor-cal-day-num.has-activity{
-  color:color-mix(in srgb, var(--activity-color, #0f172a) 78%, #0f172a 22%);
-  border:1px solid rgba(var(--activity-color-rgb, 15, 23, 42), 0.28);
-  background:rgba(var(--activity-color-rgb, 15, 23, 42), 0.12);
-  border-radius:999px;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  padding:4px 8px;
-  width:fit-content;
-  margin:0 auto;
+.view-month .instructor-cal-day-num.has-day-activity{
+  color:var(--activity-color, #0f172a);
+  font-weight:700;
 }
 .view-month .instructor-cal-day-num.ic-today-num{background:transparent;color:#0ea5e9;border-radius:0;padding:1px 0;font-weight:800;}
-.view-month .instructor-cal-day-num.ic-today-num.has-activity{
-  color:var(--activity-color, #0369a1);
-  border-color:rgba(var(--activity-color-rgb, 3, 105, 161), 0.36);
-  background:rgba(var(--activity-color-rgb, 3, 105, 161), 0.18);
-  border-radius:999px;
-}
 .view-month .instructor-cal-pill,
 .view-month .calendar-event{position:relative;background:rgba(var(--instructor-color-rgb, 148, 163, 184), 0.20);border-radius:14px;border:1px solid rgba(15,23,42,0.06);border-right:5px solid var(--instructor-color, #94a3b8);box-shadow:0 1px 2px rgba(0,0,0,0.05);overflow:hidden;padding:10px 10px;margin-bottom:10px;font-size:13px;font-weight:600;color:#1e293b;white-space:nowrap;text-overflow:ellipsis;line-height:1;transition:all 0.15s ease;width:100%;box-sizing:border-box;min-width:0;}
 .view-month .instructor-cal-pill-text{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-inline:1px;}
