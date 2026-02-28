@@ -330,7 +330,15 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
 
 #view.view-summary,
 #view.view-managers,
-#view.view-enddates{background-color:#fafcff;}
+#view.view-enddates{background-color:#fcfdff;}
+
+/* Keep white cards visually separated from the near-white wrapper background */
+#view.view-summary .kpi-small,
+#view.view-enddates .end-content-panel,
+#view.view-enddates .search-row,
+#view.view-enddates .end-courses-month-group{
+  box-shadow:0 6px 16px rgba(15,23,42,0.07);
+}
 
 #view.week-mode,
 #view.view-month{padding-top:30px;}
