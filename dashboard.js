@@ -262,11 +262,25 @@ function ensureColorContrast(colorValue) {
   return `rgb(${r}, ${g}, ${b})`;
 }
 
+function hasStrongSaturation(colorValue) {
+  const tuple = toRgbTuple(colorValue).split(',').map(v => Number(v.trim()));
+  if (tuple.length !== 3 || tuple.some(v => Number.isNaN(v))) return false;
+  const [r, g, b] = tuple;
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  if (max === 0) return false;
+  const saturation = (max - min) / max;
+  return saturation >= 0.2;
+}
+
 function instructorColor(name) {
   const mappedColor = getEmployeeColor(name);
-  if (mappedColor !== '#f1f5f9' && mappedColor !== '#ffffff') {
+  const hasMappedColor = mappedColor !== '#f1f5f9' && mappedColor !== '#ffffff';
+
+  if (hasMappedColor && hasStrongSaturation(mappedColor)) {
     return ensureColorContrast(mappedColor);
   }
+
   const hue = hashStringToHue(String(name || ''));
   return ensureColorContrast(`hsl(${hue} 70% 52%)`);
 }
