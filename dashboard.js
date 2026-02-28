@@ -2263,10 +2263,10 @@ function renderEndDates(){
         const courseIndex = courses.indexOf(course);
         return `
           <tr class="end-courses-row" data-course-index="${courseIndex}">
-            <td>${escapeHtml(course.School || '—')}</td>
-            <td>${escapeHtml(course.Authority || '—')}</td>
-            <td>${escapeHtml(endDateText)}</td>
-            <td>${escapeHtml(course.Program || '—')}</td>
+            <td class="col-course">${escapeHtml(course.Program || '—')}</td>
+            <td class="col-authority">${escapeHtml(course.Authority || '—')}</td>
+            <td class="col-end-date">${escapeHtml(endDateText)}</td>
+            <td class="col-school">${escapeHtml(course.School || '—')}</td>
           </tr>
         `;
       })
@@ -2277,12 +2277,18 @@ function renderEndDates(){
         <div class="end-courses-month-title">${escapeHtml(group.monthLabel)}</div>
         <div class="end-courses-table-wrap">
           <table class="end-courses-table">
+            <colgroup>
+              <col class="col-course">
+              <col class="col-authority">
+              <col class="col-end-date">
+              <col class="col-school">
+            </colgroup>
             <thead>
               <tr>
-                <th>שם בית ספר</th>
+                <th>קורס</th>
                 <th>רשות</th>
                 <th>תאריך סיום</th>
-                <th>קורס</th>
+                <th>בית ספר</th>
               </tr>
             </thead>
             <tbody>
@@ -2333,7 +2339,6 @@ function openEndDateDetail(course){
         <div class="end-detail-meta-item"><span>בית ספר</span><strong>${escapeHtml(course.School || '—')}</strong></div>
         <div class="end-detail-meta-item"><span>רשות</span><strong>${escapeHtml(course.Authority || '—')}</strong></div>
         <div class="end-detail-meta-item"><span>תאריך סיום</span><strong>${escapeHtml(endDateText)}</strong></div>
-        <div class="end-detail-meta-item"><span>מדריך</span><strong>${escapeHtml(course.Instructor || '—')}</strong></div>
       </div>
       <div class="end-detail-section-title">מפגשים (${dates.length})</div>
       <ul class="end-detail-meetings-list">${dateItems || '<li class="end-detail-empty">אין תאריכים</li>'}</ul>
