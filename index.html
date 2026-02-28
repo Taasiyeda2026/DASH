@@ -488,10 +488,14 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
 .end-warning{color:#b45309;font-weight:500}
 .end-search-results{max-width:800px;margin:20px auto;display:none;flex-direction:column;gap:12px;width:100%}
 .search-month-title{font-weight:700;font-size:18px;margin-top:20px}
-.search-row{background:#fff;border-radius:12px;padding:12px 16px;box-shadow:0 4px 12px rgba(0,0,0,0.06)}
-.search-row-summary{cursor:pointer;font-weight:600}
-.search-row-details{display:none;margin-top:8px;font-size:14px;color:#555}
-.search-row-end-date{margin-bottom:4px}
+.search-row{background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:14px 18px;box-shadow:0 4px 12px rgba(0,0,0,0.06);overflow:hidden}
+.search-row-summary{cursor:pointer;font-weight:600;line-height:1.5;overflow-wrap:anywhere;word-break:break-word}
+.search-row-details{display:none;margin-top:12px;font-size:14px;color:#475569;padding-top:10px;border-top:1px solid #f1f5f9}
+.search-row-course-title{font-size:18px;font-weight:800;line-height:1.35;margin-bottom:8px;overflow-wrap:anywhere;word-break:break-word}
+.search-row-end-date{font-size:15px;font-weight:700;margin-bottom:12px;line-height:1.45;overflow-wrap:anywhere;word-break:break-word}
+.search-row-meetings-title{font-size:13px;font-weight:700;color:#334155;margin-bottom:6px}
+.search-row-meetings-list{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px}
+.search-row-meeting-item{font-size:14px;line-height:1.5;color:#334155;overflow-wrap:anywhere;word-break:break-word}
 .search-row.open .search-row-details{display:block}
 
 @media (min-width:1024px){
@@ -883,6 +887,14 @@ body.no-scroll{overflow:hidden;}
     width:100%;
     max-width:100%;
   }
+
+  .end-search-results{max-width:100%;margin:16px auto;gap:14px}
+  .search-row{width:100%;max-width:100%;margin:0;padding:16px 14px;border-radius:12px;box-sizing:border-box}
+  .search-row-summary{font-size:14px}
+  .search-row-details{margin-top:14px;padding-top:12px}
+  .search-row-course-title{font-size:20px;margin-bottom:10px}
+  .search-row-end-date{font-size:16px;margin-bottom:14px}
+  .search-row-meetings-list{gap:8px}
 
   .view-month .instructor-cal-cell{background:#fff;min-height:180px;padding:10px;display:flex;flex-direction:column;gap:6px;position:relative;}
   .view-month .instructor-cal-cell:active{transform:scale(0.985);background:#f1f5f9;}

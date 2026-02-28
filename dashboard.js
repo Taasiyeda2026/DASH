@@ -2399,9 +2399,16 @@ function renderEndDates(){
       .sort((a, b) => a - b)
       .map(d => d.toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit', year: 'numeric' }));
 
+    const safeProgram = escapeHtml(course.Program || '—');
+    const safeSessions = sessions.length
+      ? sessions.map(date => `<li class="search-row-meeting-item">${escapeHtml(date)}</li>`).join('')
+      : '<li class="search-row-meeting-item">אין מפגשים</li>';
+
     details.innerHTML = `
+      <div class="search-row-course-title" style="color:${getProgramColor(course.Program)}">${safeProgram}</div>
       <div class="search-row-end-date ${getEndClass(course.End)}">תאריך סיום: ${escapeHtml(endDateText)}</div>
-      <div>מפגשים: ${escapeHtml(sessions.length ? sessions.join(', ') : 'אין מפגשים')}</div>
+      <div class="search-row-meetings-title">מפגשים</div>
+      <ul class="search-row-meetings-list">${safeSessions}</ul>
     `;
 
     summary.addEventListener('click', () => {
