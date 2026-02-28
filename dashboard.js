@@ -1070,6 +1070,9 @@ function renderMobileWeekView(){
   titleEl.textContent = `${weekStart.toLocaleDateString('he-IL')} – ${weekEnd.toLocaleDateString('he-IL')}`;
 
   const data = applyFilters();
+  const wrapper = document.createElement('div');
+  wrapper.className = 'mobile-narrow-wrap';
+
   const container = document.createElement('div');
   container.style.cssText = 'display:flex;flex-direction:column;gap:12px;padding:10px 10px 200px;';
 
@@ -1079,7 +1082,8 @@ function renderMobileWeekView(){
     container.appendChild(buildDay(date, data));
   }
 
-  view.appendChild(container);
+  wrapper.appendChild(container);
+  view.appendChild(wrapper);
 
   requestAnimationFrame(() => {
     const todayEl = container.querySelector('.today');
@@ -1136,8 +1140,20 @@ function renderMobileMonthAccordion(data){
 
   const today = new Date(); today.setHours(0,0,0,0);
 
+  const wrapper = document.createElement('div');
+  wrapper.className = 'mobile-narrow-wrap';
+
   const container = document.createElement('div');
   container.className = 'mobile-accordion';
+
+  const sideNav = document.createElement('div');
+  sideNav.className = 'week-side-nav';
+
+  const setActiveWeek = (weekKey) => {
+    sideNav.querySelectorAll('button').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.weekKey === weekKey);
+    });
+  };
 
   let todayWeekEl = null;
   let cursor = new Date(start);
@@ -1164,11 +1180,14 @@ function renderMobileMonthAccordion(data){
     const content = document.createElement('div');
     content.className = 'accordion-content';
 
-    header.addEventListener('click', () => {
+    const weekKey = weekStart.toISOString();
+
+    const openWeek = () => {
       const isOpen = weekEl.classList.contains('open');
       container.querySelectorAll('.accordion-week.open').forEach(w => w.classList.remove('open'));
       if(!isOpen){
         weekEl.classList.add('open');
+        setActiveWeek(weekKey);
         if(!content.dataset.loaded){
           for(let i = 0; i < 7; i++){
             const date = new Date(weekStart);
@@ -1183,8 +1202,22 @@ function renderMobileMonthAccordion(data){
           const viewRect = viewEl.getBoundingClientRect();
           viewEl.scrollTo({ top: viewEl.scrollTop + rect.top - viewRect.top - 10, behavior: 'smooth' });
         }, 50);
+      } else {
+        setActiveWeek('');
       }
+    };
+
+    header.addEventListener('click', openWeek);
+
+    const navBtn = document.createElement('button');
+    navBtn.type = 'button';
+    navBtn.dataset.weekKey = weekKey;
+    navBtn.textContent = String(Math.floor((cursor - start) / (7 * 24 * 60 * 60 * 1000)) + 1);
+    navBtn.addEventListener('click', (event) => {
+      event.stopPropagation();
+      openWeek();
     });
+    sideNav.appendChild(navBtn);
 
     weekEl.appendChild(header);
     weekEl.appendChild(content);
@@ -1193,7 +1226,9 @@ function renderMobileMonthAccordion(data){
     cursor.setDate(cursor.getDate() + 7);
   }
 
-  view.appendChild(container);
+  wrapper.appendChild(container);
+  view.appendChild(wrapper);
+  view.appendChild(sideNav);
 }
 
 function renderMobileMonth(){
