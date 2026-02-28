@@ -2263,10 +2263,10 @@ function renderEndDates(){
         const courseIndex = courses.indexOf(course);
         return `
           <tr class="end-courses-row" data-course-index="${courseIndex}">
-            <td class="col-course">${escapeHtml(course.Program || '—')}</td>
-            <td class="col-authority">${escapeHtml(course.Authority || '—')}</td>
             <td class="col-end-date">${escapeHtml(endDateText)}</td>
             <td class="col-school">${escapeHtml(course.School || '—')}</td>
+            <td class="col-authority">${escapeHtml(course.Authority || '—')}</td>
+            <td class="col-course">${escapeHtml(course.Program || '—')}</td>
           </tr>
         `;
       })
@@ -2278,17 +2278,17 @@ function renderEndDates(){
         <div class="end-courses-table-wrap">
           <table class="end-courses-table">
             <colgroup>
-              <col class="col-course">
-              <col class="col-authority">
               <col class="col-end-date">
               <col class="col-school">
+              <col class="col-authority">
+              <col class="col-course">
             </colgroup>
             <thead>
               <tr>
-                <th>קורס</th>
-                <th>רשות</th>
                 <th>תאריך סיום</th>
                 <th>בית ספר</th>
+                <th>רשות</th>
+                <th>קורס</th>
               </tr>
             </thead>
             <tbody>
