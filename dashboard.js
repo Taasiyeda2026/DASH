@@ -770,6 +770,9 @@ function render(){
   view.classList.toggle('view-week', window.mode === 'week');
   view.classList.toggle('view-month', window.mode === 'month');
   view.classList.toggle('view-instructors', window.mode === 'instructors');
+  view.classList.toggle('view-summary', window.mode === 'summary');
+  view.classList.toggle('view-managers', window.mode === 'instructors');
+  view.classList.toggle('view-enddates', window.mode === 'enddates');
   closeSidePanel();
 
   if(userRole === 'instructor' || window.mode === 'summary' || window.mode === 'instructors' || window.mode === 'enddates' || isMobile()){
