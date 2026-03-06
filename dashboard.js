@@ -2753,13 +2753,15 @@ async function persistZoomAssignment(dayNum, course){
 
   const courseKey = zoomCourseKey(dayNum, course);
   const assignment = window.zoomAssignments?.[courseKey] || {};
+  const startTime = assignment.startTime || course.StartTime || '';
+  const endTime = assignment.endTime || course.EndTime || '';
   await saveZoomAssignment({
     courseKey: courseKey,
     date: zoomDateString(dayNum),
     program: course.Program || '',
     employee: course.Employee || '',
-    startTime: course.StartTime || '',
-    endTime: course.EndTime || '',
+    startTime,
+    endTime,
     zoom: assignment.account || '',
     notes: assignment.notes || '',
     assignedBy: String(window.EmployeeID || '').trim()
@@ -2805,7 +2807,13 @@ async function autoAssignZoomDay(dayNum, dayCourses) {
   const toAssign = dayCourses
     .filter(c => window.zoomAssignments[zoomCourseKey(dayNum, c)] && window.zoomAssignments[zoomCourseKey(dayNum, c)].checked)
     .slice()
-    .sort((a, b) => (a.StartTime || '').localeCompare(b.StartTime || ''));
+    .sort((a, b) => {
+      const aKey = zoomCourseKey(dayNum, a);
+      const bKey = zoomCourseKey(dayNum, b);
+      const aStart = window.zoomAssignments[aKey]?.startTime || a.StartTime || '';
+      const bStart = window.zoomAssignments[bKey]?.startTime || b.StartTime || '';
+      return aStart.localeCompare(bStart);
+    });
 
   dayCourses.forEach(c => {
     const k = zoomCourseKey(dayNum, c);
@@ -2818,8 +2826,9 @@ async function autoAssignZoomDay(dayNum, dayCourses) {
   const schedule = { Z1: [], Z2: [], Z3: [] };
   toAssign.forEach(course => {
     const key = zoomCourseKey(dayNum, course);
-    const s = zoomTimeToMinutes(course.StartTime);
-    const e = zoomTimeToMinutes(course.EndTime);
+    const assignment = window.zoomAssignments[key] || {};
+    const s = zoomTimeToMinutes(assignment.startTime || course.StartTime);
+    const e = zoomTimeToMinutes(assignment.endTime || course.EndTime);
     const emp = course.Employee || '';
 
     let preferred = null;
@@ -3169,6 +3178,8 @@ function renderZoomPrep(container, courses, days, hdays) {
         window.zoomAssignments[key] = { checked: false, account: null, notes: '', conflict: false };
       }
       const asgn = window.zoomAssignments[key];
+      asgn.startTime = asgn.startTime || course.StartTime || '';
+      asgn.endTime = asgn.endTime || course.EndTime || '';
 
       const tr = document.createElement('tr');
       if (asgn.account)   tr.classList.add('zoom-assigned-row');
@@ -3204,14 +3215,62 @@ function renderZoomPrep(container, courses, days, hdays) {
         ['בית ספר', course.School],
         ['קורס',    course.Program],
         ['מדריך',   course.Employee],
-        ['התחלה',   course.StartTime],
-        ['סיום',    course.EndTime],
       ].forEach(([label, val]) => {
         const td = document.createElement('td');
         td.setAttribute('data-label', label);
         td.textContent = val || '—';
         tr.appendChild(td);
       });
+
+      const tdStart = document.createElement('td');
+      tdStart.setAttribute('data-label', 'התחלה');
+      const startInput = document.createElement('input');
+      startInput.type = 'time';
+      startInput.step = 3600;
+      startInput.className = 'zoom-time-input';
+      startInput.value = asgn.startTime || '';
+      if (!startInput.value) {
+        startInput.value = '08:00';
+      }
+
+      const tdEnd = document.createElement('td');
+      tdEnd.setAttribute('data-label', 'סיום');
+      const endInput = document.createElement('input');
+      endInput.type = 'time';
+      endInput.step = 3600;
+      endInput.className = 'zoom-time-input';
+      endInput.value = asgn.endTime || '';
+      if (!endInput.value && startInput.value) {
+        const [h] = startInput.value.split(':');
+        const endHour = (parseInt(h, 10) + 1) % 24;
+        endInput.value = String(endHour).padStart(2, '0') + ':00';
+      }
+      asgn.startTime = startInput.value;
+      asgn.endTime = endInput.value;
+
+      startInput.addEventListener('change', async () => {
+        const [h] = (startInput.value || '').split(':');
+        const startHour = parseInt(h, 10);
+        if (!Number.isNaN(startHour)) {
+          const endHour = (startHour + 1) % 24;
+          endInput.value = String(endHour).padStart(2, '0') + ':00';
+        }
+        asgn.startTime = startInput.value;
+        asgn.endTime = endInput.value;
+        startInput.blur();
+        await persistZoomAssignment(dayNum, course);
+      });
+
+      endInput.addEventListener('change', async () => {
+        asgn.endTime = endInput.value;
+        endInput.blur();
+        await persistZoomAssignment(dayNum, course);
+      });
+
+      tdStart.appendChild(startInput);
+      tdEnd.appendChild(endInput);
+      tr.appendChild(tdStart);
+      tr.appendChild(tdEnd);
 
       // Notes
       const tdNotes = document.createElement('td');
