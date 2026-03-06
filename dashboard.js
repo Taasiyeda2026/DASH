@@ -3309,6 +3309,7 @@ function renderZoomPrep(container, courses, days, hdays) {
 
       // Notes
       const tdNotes = document.createElement('td');
+      tdNotes.className = 'zoom-col-notes';
       tdNotes.setAttribute('data-label', 'הערות');
       const inp = document.createElement('input');
       inp.type = 'text'; inp.className = 'zoom-notes-input'; inp.dir = 'rtl';
