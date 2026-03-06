@@ -266,7 +266,7 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
 /* ═══════════════ ZOOM PAGE ═══════════════ */
 .zoom-page{max-width:1120px;margin:0 auto;padding:0 12px 40px;box-sizing:border-box;}
 .zoom-links-bar{display:flex;gap:10px;justify-content:center;margin-bottom:6px;flex-wrap:wrap;}
-.zoom-link-btn{border:none;border-radius:12px;padding:12px 34px;font-size:16px;font-weight:800;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.10);transition:filter .15s,transform .1s;}
+.zoom-link-btn{border:none;border-radius:12px;padding:12px 34px;font-size:16px;font-weight:800;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.10);transition:filter .15s,transform .1s;display:inline-flex;align-items:center;justify-content:center;text-align:center;}
 .zoom-link-btn:hover{filter:brightness(.91);transform:translateY(-1px);}
 .zoom-btn-1{background:#bfdbfe;color:#1e3a8a;}
 .zoom-btn-2{background:#bbf7d0;color:#14532d;}
@@ -654,7 +654,10 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
 }
 
 .instructor-hours-button{
-  display:block;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
   align-self:center;
   margin:25px auto;
   padding:18px 36px;
