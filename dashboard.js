@@ -2916,7 +2916,9 @@ function renderZoom() {
   prevBtn.disabled = window.zoomWeekPage === 0;
   prevBtn.addEventListener('click', () => { window.zoomWeekPage--; renderZoom(); });
   const weekLabel = document.createElement('span');
-  weekLabel.className = 'zoom-week-label'; weekLabel.textContent = weekRangeLabel;
+  weekLabel.className = 'zoom-week-label';
+  weekLabel.setAttribute('dir', 'ltr');
+  weekLabel.textContent = weekRangeLabel;
   const nextBtn = document.createElement('button');
   nextBtn.type = 'button'; nextBtn.className = 'zoom-week-arrow'; nextBtn.textContent = '◀';
   nextBtn.disabled = window.zoomWeekPage === WEEK_PAGES.length - 1;
@@ -2949,7 +2951,7 @@ function formatZoomWeekRange(days) {
     const yy = String(dateObj.getFullYear()).slice(-2);
     return `${dd}.${mm}.${yy}`;
   };
-  return `${format(start)} - ${format(end)}`;
+  return `\u200E${format(start)} - ${format(end)}\u200E`;
 }
 
 function zoomPastelColor(instructorName) {
