@@ -3007,10 +3007,11 @@ function renderZoomCalendar(container, courses, days, hdays) {
   const DAY_START  = 8 * 60;
   const DAY_END    = 16 * 60;
   const TOTAL_MINS = DAY_END - DAY_START;
+  const displayDays = days.slice().reverse(); // ראשון מופיע בצד ימין
 
   // Gather assigned items for this week
   const assignedItems = [];
-  days.forEach(dayNum => {
+  displayDays.forEach(dayNum => {
     const dayCourses = courses.filter(c =>
       (c.Dates || []).some(d =>
         d instanceof Date && d.getFullYear() === 2026 && d.getMonth() === 2 && d.getDate() === dayNum
@@ -3037,7 +3038,7 @@ function renderZoomCalendar(container, courses, days, hdays) {
   const timeHdr = document.createElement('div');
   timeHdr.className = 'zoom-cal-timecol-header';
   header.appendChild(timeHdr);
-  days.forEach(dayNum => {
+  displayDays.forEach(dayNum => {
     const date = new Date(2026, 2, dayNum);
     const cell = document.createElement('div');
     cell.className = 'zoom-cal-day-header';
@@ -3064,7 +3065,7 @@ function renderZoomCalendar(container, courses, days, hdays) {
   body.appendChild(timeCol);
 
   // Day columns
-  days.forEach(dayNum => {
+  displayDays.forEach(dayNum => {
     const col = document.createElement('div');
     col.className = 'zoom-cal-daycol';
     for (let h = 8; h < 16; h++) {
