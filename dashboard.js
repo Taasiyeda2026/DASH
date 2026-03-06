@@ -2633,9 +2633,9 @@ function renderZoom(){
 
   const TARGET_DAYS = [8, 9, 10, 11, 12, 13, 15, 16, 17, 18, 19, 22, 23];
   const ZOOM_LINKS = [
-    { label: 'Z1', url: 'https://zoom.us/j/6023602336?omn=96962875568' },
-    { label: 'Z2', url: 'https://zoom.us/j/7601360450?omn=98989531483' },
-    { label: 'Z3', url: 'https://zoom.us/j/97448258082' }
+    { label: 'Zoom1', cls: 'zoom-btn-1', url: 'https://zoom.us/j/6023602336?omn=96962875568' },
+    { label: 'Zoom2', cls: 'zoom-btn-2', url: 'https://zoom.us/j/7601360450?omn=98989531483' },
+    { label: 'Zoom3', cls: 'zoom-btn-3', url: 'https://zoom.us/j/97448258082' }
   ];
   const HEBREW_DAYS = ['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];
 
@@ -2658,8 +2658,8 @@ function renderZoom(){
     return { date, dayNum, items: dayItems };
   });
 
-  const zoomButtonsHtml = ZOOM_LINKS.map(({label, url}) =>
-    `<button class="zoom-link-btn" data-url="${escapeHtml(url)}" type="button">${escapeHtml(label)}</button>`
+  const zoomButtonsHtml = ZOOM_LINKS.map(({label, cls, url}) =>
+    `<button class="zoom-link-btn ${escapeHtml(cls)}" data-url="${escapeHtml(url)}" type="button">${escapeHtml(label)}</button>`
   ).join('');
 
   const dayCardsHtml = dayGroups.map(({ date, dayNum, items }) => {
@@ -2704,6 +2704,7 @@ function renderZoom(){
       <h2 class="zoom-page-title">\u05e0\u05d9\u05d4\u05d5\u05dc \u05de\u05e4\u05d2\u05e9\u05d9 ZOOM \u2013 \u05e7\u05d5\u05e8\u05e1\u05d9\u05dd</h2>
       <p class="zoom-page-subtitle">\u05de\u05de\u05e9\u05e7 \u05dc\u05d4\u05db\u05e0\u05ea \u05e9\u05d9\u05d1\u05d5\u05e5 \u05de\u05e4\u05d2\u05e9\u05d9 \u05d6\u05d5\u05dd \u05dc\u05e7\u05d5\u05e8\u05e1\u05d9\u05dd \u05d1\u05d7\u05d5\u05d3\u05e9 \u05de\u05e8\u05e5</p>
       <div class="zoom-links-bar">${zoomButtonsHtml}</div>
+      <p class="zoom-links-caption">קישורי הזום להעברה למדריכים ולתלמידים – לפי חשבון הזום</p>
       <div class="zoom-days-area">${dayCardsHtml || '<div class="zoom-empty">\u05d0\u05d9\u05df \u05e7\u05d5\u05e8\u05e1\u05d9\u05dd \u05dc\u05d4\u05e6\u05d2\u05d4</div>'}</div>
     </div>
   `;
