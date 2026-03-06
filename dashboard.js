@@ -1880,7 +1880,7 @@ function renderSummary(){
   instructorHoursButton.setAttribute('aria-expanded', 'false');
 
   const instructorHoursPanel = document.createElement('section');
-  instructorHoursPanel.className = 'summary-instructor-hours-panel';
+  instructorHoursPanel.className = 'summary-instructor-hours-panel instructor-hours-panel';
   instructorHoursPanel.hidden = true;
 
   const selectedMonth = new Date(currentYear, currentMonth, 1);
@@ -1974,7 +1974,7 @@ function renderSummary(){
     tableWrap.className = 'table-container';
 
     const table = document.createElement('table');
-    table.className = 'summary-instructor-hours-table';
+    table.className = 'summary-instructor-hours-table instructor-hours-table';
     table.innerHTML = `
       <thead>
         <tr>
