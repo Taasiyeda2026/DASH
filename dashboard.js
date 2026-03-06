@@ -2851,6 +2851,9 @@ function renderZoom() {
   const wrap = document.createElement('div');
   wrap.className = 'zoom-page';
 
+  const header = document.createElement('div');
+  header.className = 'zoom-header';
+
   // ── Z1 / Z2 / Z3 copy buttons ──
   const linksBar = document.createElement('div');
   linksBar.className = 'zoom-links-bar';
@@ -2862,11 +2865,11 @@ function renderZoom() {
     btn.addEventListener('click', () => copyZoomLink(ZOOM_LINKS_MAP[key], btn));
     linksBar.appendChild(btn);
   });
-  wrap.appendChild(linksBar);
+  header.appendChild(linksBar);
   const caption = document.createElement('p');
   caption.className = 'zoom-links-caption';
   caption.textContent = 'לחיצה מעתיקה את קישור הפגישה';
-  wrap.appendChild(caption);
+  header.appendChild(caption);
 
   // ── Sub-nav: יומן שבועי / הכנת שיבוץ ──
   const subNav = document.createElement('div');
@@ -2879,7 +2882,7 @@ function renderZoom() {
     btn.addEventListener('click', () => { window.zoomSubView = sv; renderZoom(); });
     subNav.appendChild(btn);
   });
-  wrap.appendChild(subNav);
+  header.appendChild(subNav);
 
   // ── Week navigation ──
   const weekNav = document.createElement('div');
@@ -2895,10 +2898,12 @@ function renderZoom() {
   nextBtn.disabled = window.zoomWeekPage === WEEK_PAGES.length - 1;
   nextBtn.addEventListener('click', () => { window.zoomWeekPage++; renderZoom(); });
   weekNav.append(prevBtn, weekLabel, nextBtn);
-  wrap.appendChild(weekNav);
+  header.appendChild(weekNav);
+  wrap.appendChild(header);
 
   // ── Main content ──
   const content = document.createElement('div');
+  content.className = 'zoom-content';
   if (window.zoomSubView === 'calendar') {
     renderZoomCalendar(content, courses, currentPage.days, HDAYS);
   } else {
@@ -3204,7 +3209,7 @@ function renderZoomPrep(container, courses, days, hdays) {
     const assignBtn = document.createElement('button');
     assignBtn.type = 'button';
     assignBtn.className = 'zoom-assign-btn';
-    assignBtn.textContent = '⚡ הפעל שיבוץ ZOOM ליום זה';
+    assignBtn.textContent = 'שיבוץ';
     assignBtn.addEventListener('click', async () => {
       await autoAssignZoomDay(dayNum, dayCourses);
       const rows = Array.from(tbody.querySelectorAll('tr'));
