@@ -2833,9 +2833,9 @@ function renderZoom() {
   if (!window.zoomSubView) window.zoomSubView = 'calendar';
 
   const WEEK_PAGES = [
-    { days: [8, 9, 10, 11, 12, 13], label: 'שבוע א׳ – 08–13.03' },
-    { days: [15, 16, 17, 18, 19],   label: 'שבוע ב׳ – 15–19.03' },
-    { days: [22, 23],               label: 'שבוע ג׳ – 22–23.03' },
+    { days: [8, 9, 10, 11, 12, 13] },
+    { days: [15, 16, 17, 18, 19] },
+    { days: [22, 23] },
   ];
   const ZOOM_LINKS_MAP = {
     Z1: 'https://zoom.us/j/6023602336?omn=96962875568',
@@ -2846,6 +2846,7 @@ function renderZoom() {
 
   const courses = rawData.filter(isCourse);
   const currentPage = WEEK_PAGES[window.zoomWeekPage];
+  const weekRangeLabel = formatZoomWeekRange(currentPage.days);
 
   const wrap = document.createElement('div');
   wrap.className = 'zoom-page';
@@ -2859,7 +2860,7 @@ function renderZoom() {
   [['Z1', 'zoom-btn-1'], ['Z2', 'zoom-btn-2'], ['Z3', 'zoom-btn-3']].forEach(([key, cls]) => {
     const btn = document.createElement('button');
     btn.type = 'button';
-    btn.className = 'zoom-link-btn ' + cls;
+    btn.className = 'zoom-link-btn zoom-btn ' + cls;
     btn.textContent = key;
     btn.addEventListener('click', () => copyZoomLink(ZOOM_LINKS_MAP[key], btn));
     linksBar.appendChild(btn);
@@ -2876,7 +2877,7 @@ function renderZoom() {
   [['calendar', 'יומן שבועי'], ['prep', 'הכנת שיבוץ']].forEach(([sv, label]) => {
     const btn = document.createElement('button');
     btn.type = 'button';
-    btn.className = 'zoom-sub-btn' + (window.zoomSubView === sv ? ' active' : '');
+    btn.className = 'zoom-sub-btn zoom-tab' + (window.zoomSubView === sv ? ' active' : '');
     btn.textContent = label;
     btn.addEventListener('click', () => { window.zoomSubView = sv; renderZoom(); });
     subNav.appendChild(btn);
@@ -2891,7 +2892,7 @@ function renderZoom() {
   prevBtn.disabled = window.zoomWeekPage === 0;
   prevBtn.addEventListener('click', () => { window.zoomWeekPage--; renderZoom(); });
   const weekLabel = document.createElement('span');
-  weekLabel.className = 'zoom-week-label'; weekLabel.textContent = currentPage.label;
+  weekLabel.className = 'zoom-week-label'; weekLabel.textContent = weekRangeLabel;
   const nextBtn = document.createElement('button');
   nextBtn.type = 'button'; nextBtn.className = 'zoom-week-arrow'; nextBtn.textContent = '◀';
   nextBtn.disabled = window.zoomWeekPage === WEEK_PAGES.length - 1;
@@ -2911,6 +2912,69 @@ function renderZoom() {
   wrap.appendChild(content);
   view.innerHTML = '';
   view.appendChild(wrap);
+}
+
+function formatZoomWeekRange(days) {
+  if (!Array.isArray(days) || days.length === 0) return '';
+  const sortedDays = days.slice().sort((a, b) => a - b);
+  const start = new Date(2026, 2, sortedDays[0]);
+  const end = new Date(2026, 2, sortedDays[sortedDays.length - 1]);
+  const format = (dateObj) => {
+    const dd = String(dateObj.getDate()).padStart(2, '0');
+    const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
+    const yy = String(dateObj.getFullYear()).slice(-2);
+    return `${dd}.${mm}.${yy}`;
+  };
+  return `${format(start)} - ${format(end)}`;
+}
+
+function zoomPastelColor(instructorName) {
+  const [r, g, b] = toRgbTuple(instructorColor(instructorName || ''))
+    .split(',')
+    .map(v => Number(v.trim()));
+  const blend = (value) => Math.round((value * 0.35) + (255 * 0.65));
+  return `rgb(${blend(r)}, ${blend(g)}, ${blend(b)})`;
+}
+
+function computeZoomOverlapLayout(items) {
+  const sorted = items.slice().sort((a, b) => (a.startMin - b.startMin) || (a.endMin - b.endMin));
+  const groups = [];
+  let currentGroup = null;
+
+  sorted.forEach(item => {
+    if (!currentGroup || item.startMin >= currentGroup.endMax) {
+      currentGroup = { endMax: item.endMin, items: [item] };
+      groups.push(currentGroup);
+      return;
+    }
+    currentGroup.items.push(item);
+    currentGroup.endMax = Math.max(currentGroup.endMax, item.endMin);
+  });
+
+  groups.forEach(group => {
+    const active = [];
+    let colCount = 0;
+    const groupItems = group.items.sort((a, b) => (a.startMin - b.startMin) || (a.endMin - b.endMin));
+    groupItems.forEach(item => {
+      for (let i = active.length - 1; i >= 0; i--) {
+        if (active[i].endMin <= item.startMin) active.splice(i, 1);
+      }
+
+      const usedCols = new Set(active.map(ev => ev._overlapIndex));
+      let colIndex = 0;
+      while (usedCols.has(colIndex)) colIndex++;
+
+      item._overlapIndex = colIndex;
+      active.push(item);
+      colCount = Math.max(colCount, active.length);
+    });
+
+    groupItems.forEach(item => {
+      item._overlapCount = colCount || 1;
+    });
+  });
+
+  return sorted;
 }
 
 function renderZoomCalendar(container, courses, days, hdays) {
@@ -2982,18 +3046,23 @@ function renderZoomCalendar(container, courses, days, hdays) {
       slot.className = 'zoom-cal-slot';
       col.appendChild(slot);
     }
-    assignedItems
-      .filter(item => item.dayNum === dayNum)
-      .forEach(({ course, account, startMin, endMin }) => {
+    computeZoomOverlapLayout(assignedItems.filter(item => item.dayNum === dayNum))
+      .forEach(({ course, account, startMin, endMin, _overlapCount, _overlapIndex }) => {
         const s = Math.max(startMin != null ? startMin : DAY_START, DAY_START);
         const e = Math.min(endMin   != null ? endMin   : s + 120,   DAY_END);
         const topPct    = ((s - DAY_START) / TOTAL_MINS) * 100;
         const heightPct = ((e - s)         / TOTAL_MINS) * 100;
+        const overlapCount = _overlapCount || 1;
+        const overlapIndex = _overlapIndex || 0;
+        const widthPct = 100 / overlapCount;
+        const leftPct = widthPct * overlapIndex;
         const block = document.createElement('div');
         block.className = 'zoom-cal-block';
         block.style.top    = topPct    + '%';
         block.style.height = heightPct + '%';
-        const color = instructorColor(course.Employee || '');
+        block.style.width = `calc(${widthPct}% - 6px)`;
+        block.style.left = `${leftPct}%`;
+        const color = zoomPastelColor(course.Employee || '');
         block.style.setProperty('--ic-bg',     color);
         block.style.setProperty('--ic-border', color);
         const accLow = account.toLowerCase();
