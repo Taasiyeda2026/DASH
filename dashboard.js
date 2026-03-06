@@ -195,18 +195,39 @@ if(userRole === 'instructor'){
 
 // Dual role: manager + instructor — only for employee 1500
 window._dualViewMode = 'admin'; // 'admin' | 'instructor'
-if(userRole === 'both'){
+const isDualRoleEmployee1500 = userRole === 'both' && String(window.EmployeeID || '').trim() === '1500';
+function getDualRoleToggleLabel(){
+  return window._dualViewMode === 'admin' ? 'תצוגת מדריך' : 'תצוגת מנהל';
+}
+
+function syncDualRoleToggleButtons(){
+  const label = getDualRoleToggleLabel();
+  document.querySelectorAll('.dual-role-toggle-btn').forEach((btn)=>{
+    btn.textContent = label;
+  });
+}
+
+function createDualRoleToggle(targetEl, extraClass=''){
+  if(!targetEl) return;
+
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = `dual-role-toggle-btn ${extraClass}`.trim();
+  btn.onclick = switchDualRoleView;
+  targetEl.appendChild(btn);
+}
+
+if(isDualRoleEmployee1500){
   // Start in admin view — all buttons visible by default
-  // Add toggle button
+  // Add toggle button for desktop and mobile
   (function addDualRoleToggle(){
     const navModes = document.querySelector('.nav-modes');
-    if(!navModes) return;
-    const btn = document.createElement('button');
-    btn.id = 'btnDualRoleToggle';
-    btn.style.cssText = 'background:#7c3aed;color:#fff;border:none;padding:6px 14px;border-radius:8px;cursor:pointer;font-weight:700;font-size:13px;';
-    btn.textContent = 'תצוגת מדריך';
-    btn.onclick = switchDualRoleView;
-    navModes.appendChild(btn);
+    createDualRoleToggle(navModes, 'desktop-only');
+
+    const navContainer = document.querySelector('.nav.week-header');
+    createDualRoleToggle(navContainer, 'mobile-only');
+
+    syncDualRoleToggleButtons();
   })();
 }
 
@@ -222,8 +243,6 @@ function switchDualRoleView(){
     btnWeek.style.display = 'none';
     if(filtersEl) filtersEl.style.display = 'none';
     window.mode = 'month';
-    const toggleBtn = document.getElementById('btnDualRoleToggle');
-    if(toggleBtn) toggleBtn.textContent = 'תצוגת מנהל';
   } else {
     // Switch to admin view
     window._dualViewMode = 'admin';
@@ -235,9 +254,8 @@ function switchDualRoleView(){
     btnWeek.style.display = '';
     if(filtersEl) filtersEl.style.display = '';
     window.mode = 'summary';
-    const toggleBtn = document.getElementById('btnDualRoleToggle');
-    if(toggleBtn) toggleBtn.textContent = 'תצוגת מדריך';
   }
+  syncDualRoleToggleButtons();
   render();
 }
 
