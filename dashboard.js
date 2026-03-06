@@ -3041,6 +3041,9 @@ function renderZoomCalendar(container, courses, days, hdays) {
   const grid = document.createElement('div');
   grid.className = 'zoom-cal-grid';
 
+  const calendarContainer = document.createElement('div');
+  calendarContainer.className = 'zoom-calendar-container';
+
   // Header
   const header = document.createElement('div');
   header.className = 'zoom-cal-header';
@@ -3117,7 +3120,8 @@ function renderZoomCalendar(container, courses, days, hdays) {
     body.appendChild(col);
   });
   grid.appendChild(body);
-  container.appendChild(grid);
+  calendarContainer.appendChild(grid);
+  container.appendChild(calendarContainer);
 
   if (assignedItems.length === 0) {
     const empty = document.createElement('p');
