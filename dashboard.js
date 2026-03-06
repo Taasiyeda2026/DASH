@@ -361,16 +361,37 @@ function hasStrongSaturation(colorValue) {
   return saturation >= 0.2;
 }
 
-function instructorColor(name) {
-  const mappedColor = getEmployeeColor(name);
-  const hasMappedColor = mappedColor !== '#f1f5f9' && mappedColor !== '#ffffff';
+const instructorColors = [
+  '#b2ebf2',
+  '#f8bbd0',
+  '#fff9c4',
+  '#ffe0b2',
+  '#c8e6c9',
+  '#bbdefb',
+  '#e0f7fa',
+  '#fce4ec',
+  '#fff3e0',
+  '#f3e5f5',
+  '#e3f2fd',
+  '#ffebee'
+];
 
-  if (hasMappedColor && hasStrongSaturation(mappedColor)) {
-    return ensureColorContrast(mappedColor);
+const instructorColorMap = {};
+
+function getInstructorPaletteColor(name) {
+  const instructor = String(name || '').trim();
+  if (!instructor) return instructorColors[0];
+
+  if (!instructorColorMap[instructor]) {
+    const index = Object.keys(instructorColorMap).length % instructorColors.length;
+    instructorColorMap[instructor] = instructorColors[index];
   }
 
-  const hue = hashStringToHue(String(name || ''));
-  return ensureColorContrast(`hsl(${hue} 70% 52%)`);
+  return instructorColorMap[instructor];
+}
+
+function instructorColor(name) {
+  return getInstructorPaletteColor(name);
 }
 
 function toRgbTuple(colorValue) {
@@ -1070,6 +1091,7 @@ function renderInstructorGridMonth(){
       const instructorName = firstItem.Employee || firstItem.Instructor || firstItem.EmployeeName || '';
       const eventColor = g.type === 'holiday' ? '#cbd5e1' : instructorColor(instructorName);
       applyInstructorColorVars(pill, eventColor);
+      pill.style.backgroundColor = eventColor;
       if(g.type === 'holiday') pill.classList.add('holiday');
       if(g.type === 'holiday') pill.addEventListener('click', e => e.stopPropagation());
       const txt = firstItem.Program || '';
@@ -1447,7 +1469,9 @@ function buildDay(date,data){
     const evDiv = document.createElement('div');
     const first = g.items[0];
     const instructorName = first.Employee || first.Instructor || first.EmployeeName || '';
-    applyInstructorColorVars(evDiv, instructorColor(instructorName));
+    const eventColor = g.type === 'holiday' ? '#cbd5e1' : instructorColor(instructorName);
+    applyInstructorColorVars(evDiv, eventColor);
+    evDiv.style.backgroundColor = eventColor;
 
     if(g.type === 'holiday') {
       evDiv.className = 'event schedule-card holiday';
