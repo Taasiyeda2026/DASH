@@ -195,7 +195,6 @@ if(userRole === 'instructor'){
 
 // Dual role: manager + instructor — only for employee 1500
 window._dualViewMode = 'admin'; // 'admin' | 'instructor'
-const isDualRoleEmployee1500 = userRole === 'both' && String(window.EmployeeID || '').trim() === '1500';
 function getDualRoleToggleLabel(){
   return window._dualViewMode === 'admin' ? 'תצוגת מדריך' : 'תצוגת מנהל';
 }
@@ -217,7 +216,7 @@ function createDualRoleToggle(targetEl, extraClass=''){
   targetEl.appendChild(btn);
 }
 
-if(isDualRoleEmployee1500){
+if(userRole === 'both'){
   // Start in admin view — all buttons visible by default
   // Add toggle button for desktop and mobile
   (function addDualRoleToggle(){
