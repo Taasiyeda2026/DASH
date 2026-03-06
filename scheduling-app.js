@@ -72,7 +72,7 @@ function renderCoursesTable(rows){
   });
 }
 
-export function renderCoursesTableFromLast(){
+function renderCoursesTableFromLast(){
   renderCoursesTable(lastCourseRows);
 }
 window.renderCoursesTableFromLast = renderCoursesTableFromLast;
@@ -96,7 +96,7 @@ async function boot(){
   }
 }
 
-export async function runSuggestions(){
+async function runSuggestions(){
   const targetAuthority = document.getElementById('authoritySelect').value;
   if (!targetAuthority) return;
 
@@ -124,7 +124,7 @@ window.runSuggestions = runSuggestions;
 document.getElementById("runButton")
   .addEventListener("click", runSuggestions);
 
-export function goBackToDashboard(){
+function goBackToDashboard(){
   location.href = 'index.html';
 }
 window.goBackToDashboard = goBackToDashboard;
