@@ -3055,8 +3055,8 @@ function computeZoomOverlapLayout(items) {
 function renderZoomCalendar(container, courses, days, hdays) {
   const DAY_START  = 8 * 60;
   const DAY_END    = 16 * 60;
-  const TOTAL_MINS = DAY_END - DAY_START;
   const displayDays = days.slice().reverse(); // ראשון מופיע בצד ימין
+  const ZOOM_ACCOUNT_ORDER = { Z1: 1, Z2: 2, Z3: 3 };
 
   // Gather assigned items for this week
   const assignedItems = [];
@@ -3118,45 +3118,49 @@ function renderZoomCalendar(container, courses, days, hdays) {
 
   // Day columns
   displayDays.forEach(dayNum => {
+    const dayItems = assignedItems.filter(item => item.dayNum === dayNum);
     const col = document.createElement('div');
     col.className = 'zoom-cal-daycol';
     for (let h = 8; h < 16; h++) {
       const slot = document.createElement('div');
       slot.className = 'zoom-cal-slot';
+
+      const slotStart = h * 60;
+      const slotEnd = slotStart + 60;
+      const slotItems = dayItems
+        .filter(({ startMin, endMin }) => {
+          const s = Math.max(startMin != null ? startMin : DAY_START, DAY_START);
+          const e = Math.min(endMin != null ? endMin : s + 120, DAY_END);
+          return s < slotEnd && e > slotStart;
+        })
+        .sort((a, b) => {
+          const accCmp = (ZOOM_ACCOUNT_ORDER[a.account] || 99) - (ZOOM_ACCOUNT_ORDER[b.account] || 99);
+          if (accCmp !== 0) return accCmp;
+          return (a.course.Employee || '').localeCompare(b.course.Employee || '', 'he');
+        });
+
+      if (slotItems.length) {
+        const slotList = document.createElement('div');
+        slotList.className = 'zoom-slot';
+        slotItems.forEach(({ account, course }) => {
+          const line = document.createElement('div');
+          const accountKey = String(account || '').toLowerCase();
+          line.className = `zoom-line zoom-${accountKey}`;
+          line.title = [
+            account,
+            course.Employee || '',
+            course.Program || '',
+            course.School || '',
+            (course.StartTime || '') + (course.EndTime ? '–' + course.EndTime : ''),
+          ].filter(Boolean).join(' | ');
+          line.innerHTML = `<strong>${escapeHtml(account || '')}</strong><span>${escapeHtml(course.Employee || '')}</span>`;
+          slotList.appendChild(line);
+        });
+        slot.appendChild(slotList);
+      }
+
       col.appendChild(slot);
     }
-    computeZoomOverlapLayout(assignedItems.filter(item => item.dayNum === dayNum))
-      .forEach(({ course, account, startMin, endMin, _overlapCount, _overlapIndex }) => {
-        const s = Math.max(startMin != null ? startMin : DAY_START, DAY_START);
-        const e = Math.min(endMin   != null ? endMin   : s + 120,   DAY_END);
-        const topPct    = ((s - DAY_START) / TOTAL_MINS) * 100;
-        const heightPct = ((e - s)         / TOTAL_MINS) * 100;
-        const overlapCount = _overlapCount || 1;
-        const overlapIndex = _overlapIndex || 0;
-        const widthPct = 100 / overlapCount;
-        const leftPct = widthPct * overlapIndex;
-        const block = document.createElement('div');
-        block.className = 'zoom-cal-block';
-        block.style.top    = topPct    + '%';
-        block.style.height = heightPct + '%';
-        block.style.width = `calc(${widthPct}% - 6px)`;
-        block.style.left = `${leftPct}%`;
-        const color = zoomPastelColor(course.Employee || '');
-        block.style.setProperty('--ic-bg',     color);
-        block.style.setProperty('--ic-border', color);
-        const accLow = account.toLowerCase();
-        block.title = [
-          account,
-          course.Employee || '',
-          course.Program || '',
-          course.School || '',
-          (course.StartTime || '') + (course.EndTime ? '–' + course.EndTime : ''),
-        ].filter(Boolean).join(' | ');
-        block.innerHTML =
-          `<span class="zoom-account-badge zoom-account-badge-${accLow}">${account}</span>` +
-          `<span class="zoom-cal-block-employee">${escapeHtml(course.Employee || '')}</span>`;
-        col.appendChild(block);
-      });
     body.appendChild(col);
   });
   grid.appendChild(body);
