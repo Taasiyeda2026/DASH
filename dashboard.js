@@ -1875,7 +1875,7 @@ function renderSummary(){
 
   const instructorHoursButton = document.createElement('button');
   instructorHoursButton.type = 'button';
-  instructorHoursButton.className = 'summary-action-btn';
+  instructorHoursButton.className = 'summary-action-btn instructor-hours-button';
   instructorHoursButton.textContent = '📊 שעות מדריכים החודש';
   instructorHoursButton.setAttribute('aria-expanded', 'false');
 
@@ -1883,6 +1883,7 @@ function renderSummary(){
   instructorHoursPanel.className = 'summary-instructor-hours-panel';
   instructorHoursPanel.hidden = true;
 
+  const selectedMonth = new Date(currentYear, currentMonth, 1);
   const monthSessions = [];
 
   rawData.forEach(record => {
@@ -1897,19 +1898,26 @@ function renderSummary(){
 
     (record.Dates || []).forEach(date => {
       if(!date) return;
-      if(date.getFullYear() !== currentYear || date.getMonth() !== currentMonth) return;
-
       monthSessions.push({
         employee: instructorName,
+        date,
         startTime: startText,
         endTime: endText
       });
     });
   });
 
+  const filteredSessions = monthSessions.filter(session => {
+    const sessionDate = new Date(session.date);
+    return (
+      sessionDate.getMonth() === selectedMonth.getMonth() &&
+      sessionDate.getFullYear() === selectedMonth.getFullYear()
+    );
+  });
+
   const instructorHoursMap = {};
 
-  monthSessions.forEach(session => {
+  filteredSessions.forEach(session => {
     const [startHours, startMinutes] = session.startTime.split(':').map(Number);
     const [endHours, endMinutes] = session.endTime.split(':').map(Number);
 
@@ -2031,8 +2039,6 @@ function renderSummary(){
     ` : ''}
   `;
 
-  wrap.insertAdjacentElement('afterbegin', instructorHoursPanel);
-  wrap.insertAdjacentElement('afterbegin', instructorHoursButton);
   const managers = [...new Set(rawData.filter(isCourse).map(r=>getCourseManager(r)).filter(Boolean))]
     .sort((a,b)=>a.localeCompare(b,'he'));
   
@@ -2075,6 +2081,8 @@ function renderSummary(){
     split.appendChild(col);
   });
   wrap.appendChild(split);
+  wrap.appendChild(instructorHoursButton);
+  wrap.appendChild(instructorHoursPanel);
   view.appendChild(wrap);
 
   wrap.addEventListener('click', function(e){
