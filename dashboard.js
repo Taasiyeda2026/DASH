@@ -3353,16 +3353,17 @@ function renderZoomPrep(container, courses, days, hdays) {
         }
 
         if(a.account){
-          saveZoomScheduling({
-            date: zoomDateString(dayNum),
-            authority: course.Authority || '',
-            school: course.School || '',
-            program: course.Program || '',
-            employee: course.Employee || '',
-            startTime: a.startTime || course.StartTime || '',
-            endTime: a.endTime || course.EndTime || '',
-            zoom: a.account
-          });
+saveZoomScheduling({
+  courseKey: courseKey,
+  date: zoomDateString(dayNum),
+  authority: course.Authority || '',
+  school: course.School || '',
+  program: course.Program || '',
+  employee: course.Employee || '',
+  startTime: a.startTime || course.StartTime || '',
+  endTime: a.endTime || course.EndTime || '',
+  zoom: a.account
+})
         }
       });
     });
