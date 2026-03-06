@@ -2881,13 +2881,13 @@ function renderZoom() {
   // ── Z1 / Z2 / Z3 copy buttons ──
   const linksBar = document.createElement('div');
   linksBar.className = 'zoom-links-bar';
-  [['Z1', 'zoom-btn-1'], ['Z2', 'zoom-btn-2'], ['Z3', 'zoom-btn-3']].forEach(([key, cls]) => {
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'zoom-link-btn zoom-btn ' + cls;
-    btn.textContent = key;
-    btn.addEventListener('click', () => copyZoomLink(ZOOM_LINKS_MAP[key], btn));
-    linksBar.appendChild(btn);
+[['Z1', 'Zoom1', 'zoom-btn-1'], ['Z2', 'Zoom2', 'zoom-btn-2'], ['Z3', 'Zoom3', 'zoom-btn-3']].forEach(([key, label, cls]) => {
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'zoom-link-btn zoom-btn ' + cls;
+  btn.textContent = label;
+  btn.addEventListener('click', () => copyZoomLink(ZOOM_LINKS_MAP[key], btn));
+  linksBar.appendChild(btn);
   });
   header.appendChild(linksBar);
   const caption = document.createElement('p');
