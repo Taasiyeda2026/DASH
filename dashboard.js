@@ -744,7 +744,7 @@ async function initFromRawData(){
   updateSchedulingButtonVisibility();
   updateEndDatesButtonVisibility();
 
-  window.mode = (userRole === 'both') ? 'summary' : 'month';
+  window.mode = (userRole === 'instructor') ? 'month' : 'summary';
 
   if(userRole === 'instructor'){
     await loadSchedulingJson();
