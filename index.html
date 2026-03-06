@@ -623,6 +623,11 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
   direction:rtl;
 }
 
+.summary-instructor-hours-panel .table-container{
+  width:50%;
+  margin:0 auto;
+}
+
 .summary-instructor-hours-table th,
 .summary-instructor-hours-table td{
   width:33.333%;
@@ -1623,6 +1628,10 @@ body[data-role="instructor"] #view .view-month .calendar-event{
 }
 
 @media (max-width:768px){
+  .summary-instructor-hours-panel .table-container{
+    width:100%;
+  }
+
   body[data-role="instructor"] #view .summary-wrapper .kpi-row,
   body[data-role="instructor"] #view .personal-summary-row{
     grid-template-columns:1fr;
