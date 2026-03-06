@@ -1937,6 +1937,17 @@ function renderSummary(){
     instructorHoursMap[session.employee].hours += hours;
   });
 
+  const formatHours = decimalHours => {
+    const h = Math.floor(decimalHours);
+    const m = Math.round((decimalHours - h) * 60);
+
+    if(m === 60){
+      return `${h + 1}:00`;
+    }
+
+    return `${h}:${String(m).padStart(2,'0')}`;
+  };
+
   const instructorRows = Object.entries(instructorHoursMap)
     .map(([name, totals]) => ({
       name,
@@ -1964,7 +1975,7 @@ function renderSummary(){
           <tr>
             <td>${escapeHtml(row.name)}</td>
             <td>${row.sessions}</td>
-            <td>${row.hours.toFixed(1)}</td>
+            <td>${formatHours(row.hours)}</td>
           </tr>
         `).join('')}
       </tbody>

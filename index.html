@@ -591,23 +591,45 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
 }
 
 .summary-instructor-hours-table{
-  width:100%;
+  width:auto;
+  max-width:100%;
+  table-layout:fixed;
   border-collapse:collapse;
   direction:rtl;
-  text-align:right;
 }
 
 .summary-instructor-hours-table th,
 .summary-instructor-hours-table td{
+  width:33.333%;
   padding:10px 12px;
-  border-bottom:1px solid #e2e8f0;
+  border-bottom:1px solid #e5e7eb;
   color:#1e293b;
   font-size:14px;
 }
 
 .summary-instructor-hours-table th{
+  background:#eef3ff;
+  font-weight:600;
+}
+
+.summary-instructor-hours-table th:nth-child(1),
+.summary-instructor-hours-table td:nth-child(1){
+  text-align:right;
+}
+
+.summary-instructor-hours-table th:nth-child(2),
+.summary-instructor-hours-table th:nth-child(3),
+.summary-instructor-hours-table td:nth-child(2),
+.summary-instructor-hours-table td:nth-child(3){
+  text-align:center;
+}
+
+.summary-instructor-hours-table tbody tr:nth-child(even){
   background:#f8fafc;
-  font-weight:700;
+}
+
+.summary-instructor-hours-table tbody tr:hover{
+  background:#eaf2ff;
 }
 
 .summary-instructor-hours-table tbody tr:last-child td{
