@@ -2636,116 +2636,415 @@ if(btnZoom){
   };
 }
 
-function renderZoom(){
-  titleEl.textContent = 'ניהול מפגשי ZOOM';
+// ─── ZOOM management helpers ──────────────────────────────────────────────────
+function zoomCourseKey(dayNum, course) {
+  return `${dayNum}|${course.Employee||''}|${course.Program||''}|${course.StartTime||''}`;
+}
+function loadZoomAssignments() {
+  try { return JSON.parse(localStorage.getItem('dashZoomAssignments') || '{}'); }
+  catch(e) { return {}; }
+}
+function saveZoomAssignments(data) {
+  localStorage.setItem('dashZoomAssignments', JSON.stringify(data));
+}
+function zoomTimeToMinutes(t) {
+  if (!t) return null;
+  const parts = String(t).split(':');
+  return parseInt(parts[0], 10) * 60 + parseInt(parts[1] || '0', 10);
+}
+function zoomTimesOverlap(s1, e1, s2, e2) {
+  if (s1 == null || e1 == null || s2 == null || e2 == null) return false;
+  return s1 < e2 && s2 < e1;
+}
+function copyZoomLink(url, btn) {
+  const orig = btn.textContent;
+  const done = () => { btn.textContent = orig + ' ✓'; setTimeout(() => { btn.textContent = orig; }, 1600); };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(url).then(done).catch(() => { zoomFallbackCopy(url); done(); });
+  } else { zoomFallbackCopy(url); done(); }
+}
+function zoomFallbackCopy(text) {
+  const ta = Object.assign(document.createElement('textarea'), { value: text });
+  document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove();
+}
+function autoAssignZoomDay(dayNum, dayCourses) {
+  const ACCOUNTS = ['Z1', 'Z2', 'Z3'];
+  const toAssign = dayCourses
+    .filter(c => window.zoomAssignments[zoomCourseKey(dayNum, c)] && window.zoomAssignments[zoomCourseKey(dayNum, c)].checked)
+    .slice()
+    .sort((a, b) => (a.StartTime || '').localeCompare(b.StartTime || ''));
 
-  const TARGET_DAYS = [8, 9, 10, 11, 12, 13, 15, 16, 17, 18, 19, 22, 23];
-  const ZOOM_LINKS = [
-    { label: 'Zoom1', cls: 'zoom-btn-1', url: 'https://zoom.us/j/6023602336?omn=96962875568' },
-    { label: 'Zoom2', cls: 'zoom-btn-2', url: 'https://zoom.us/j/7601360450?omn=98989531483' },
-    { label: 'Zoom3', cls: 'zoom-btn-3', url: 'https://zoom.us/j/97448258082' }
-  ];
-  const HEBREW_DAYS = ['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];
-
-  const rawCourses = schedulingJson && Array.isArray(schedulingJson.courses)
-    ? schedulingJson.courses
-    : [];
-  const courses = normalizeData(rawCourses).filter(isCourse);
-
-  const dayGroups = TARGET_DAYS.map(dayNum => {
-    const date = new Date(2026, 2, dayNum);
-    const dayItems = courses.filter(course =>
-      (course.Dates || []).some(d =>
-        d instanceof Date &&
-        d.getFullYear() === 2026 &&
-        d.getMonth() === 2 &&
-        d.getDate() === dayNum
-      )
-    );
-    dayItems.sort((a, b) => (a.StartTime || '').localeCompare(b.StartTime || ''));
-    return { date, dayNum, items: dayItems };
+  dayCourses.forEach(c => {
+    const k = zoomCourseKey(dayNum, c);
+    if (window.zoomAssignments[k]) {
+      window.zoomAssignments[k].account = null;
+      window.zoomAssignments[k].conflict = false;
+    }
   });
 
-  const zoomButtonsHtml = ZOOM_LINKS.map(({label, cls, url}) =>
-    `<button class="zoom-link-btn ${escapeHtml(cls)}" data-url="${escapeHtml(url)}" type="button">${escapeHtml(label)}</button>`
-  ).join('');
+  const schedule = { Z1: [], Z2: [], Z3: [] };
+  toAssign.forEach(course => {
+    const key = zoomCourseKey(dayNum, course);
+    const s = zoomTimeToMinutes(course.StartTime);
+    const e = zoomTimeToMinutes(course.EndTime);
+    const emp = course.Employee || '';
 
-  const dayCardsHtml = dayGroups.map(({ date, dayNum, items }) => {
-    if(items.length === 0) return '';
-    const hebrewDay = HEBREW_DAYS[date.getDay()];
-    const dateStr = String(dayNum).padStart(2,'0') + '.03.26';
-    const dayTitle = 'יום ' + hebrewDay + ' \u2013 ' + dateStr;
-    const rows = items.map(course => `
-      <tr>
-        <td data-label="רשות">${escapeHtml(course.Authority || '\u2014')}</td>
-        <td data-label="בית ספר">${escapeHtml(course.School || '\u2014')}</td>
-        <td data-label="קורס">${escapeHtml(course.Program || '\u2014')}</td>
-        <td data-label="מדריך">${escapeHtml(course.Employee || '\u2014')}</td>
-        <td data-label="שעת התחלה">${escapeHtml(course.StartTime || '\u2014')}</td>
-        <td data-label="שעת סיום">${escapeHtml(course.EndTime || '\u2014')}</td>
-        <td data-label="הערות"><input class="zoom-notes-input" type="text" placeholder="\u05d4\u05e2\u05e8\u05d4..." dir="rtl" aria-label="\u05d4\u05e2\u05e8\u05d5\u05ea"></td>
-      </tr>
-    `).join('');
-    return `
-      <div class="zoom-day-card">
-        <div class="zoom-day-title">${escapeHtml(dayTitle)}</div>
-        <div class="zoom-table-wrap">
-          <table class="zoom-table">
-            <thead><tr>
-              <th>\u05e8\u05e9\u05d5\u05ea</th>
-              <th>\u05d1\u05d9\u05ea \u05e1\u05e4\u05e8</th>
-              <th>\u05e7\u05d5\u05e8\u05e1</th>
-              <th>\u05de\u05d3\u05e8\u05d9\u05da</th>
-              <th>\u05e9\u05e2\u05ea \u05d4\u05ea\u05d7\u05dc\u05d4</th>
-              <th>\u05e9\u05e2\u05ea \u05e1\u05d9\u05d5\u05dd</th>
-              <th>\u05d4\u05e2\u05e8\u05d5\u05ea</th>
-            </tr></thead>
-            <tbody>${rows}</tbody>
-          </table>
-        </div>
-      </div>
-    `;
-  }).join('');
+    let preferred = null;
+    ACCOUNTS.forEach(acc => {
+      schedule[acc].forEach(slot => {
+        if (slot.employee === emp && slot.endMin === s) preferred = acc;
+      });
+    });
 
-  view.innerHTML = `
-    <div class="zoom-page">
-      <h2 class="zoom-page-title">\u05e0\u05d9\u05d4\u05d5\u05dc \u05de\u05e4\u05d2\u05e9\u05d9 ZOOM \u2013 \u05e7\u05d5\u05e8\u05e1\u05d9\u05dd</h2>
-      <p class="zoom-page-subtitle">\u05de\u05de\u05e9\u05e7 \u05dc\u05d4\u05db\u05e0\u05ea \u05e9\u05d9\u05d1\u05d5\u05e5 \u05de\u05e4\u05d2\u05e9\u05d9 \u05d6\u05d5\u05dd \u05dc\u05e7\u05d5\u05e8\u05e1\u05d9\u05dd \u05d1\u05d7\u05d5\u05d3\u05e9 \u05de\u05e8\u05e5</p>
-      <div class="zoom-links-bar">${zoomButtonsHtml}</div>
-      <p class="zoom-links-caption">קישורי הזום להעברה למדריכים ולתלמידים – לפי חשבון הזום</p>
-      <div class="zoom-days-area">${dayCardsHtml || '<div class="zoom-empty">\u05d0\u05d9\u05df \u05e7\u05d5\u05e8\u05e1\u05d9\u05dd \u05dc\u05d4\u05e6\u05d2\u05d4</div>'}</div>
-    </div>
-  `;
+    const ordered = preferred ? [preferred, ...ACCOUNTS.filter(a => a !== preferred)] : ACCOUNTS;
+    let assigned = null;
+    for (const acc of ordered) {
+      const accBusy  = schedule[acc].some(sl => zoomTimesOverlap(s, e, sl.startMin, sl.endMin));
+      const instrBusy = ACCOUNTS.some(a =>
+        schedule[a].some(sl => sl.employee === emp && zoomTimesOverlap(s, e, sl.startMin, sl.endMin))
+      );
+      if (!accBusy && !instrBusy) { assigned = acc; break; }
+    }
 
-  view.querySelectorAll('.zoom-link-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const url = btn.dataset.url;
-      const origText = btn.textContent;
-      const showCopied = () => {
-        btn.textContent = '\u05d4\u05e7\u05d9\u05e9\u05d5\u05e8 \u05d4\u05d5\u05e2\u05ea\u05e7 \u2713';
-        setTimeout(() => { btn.textContent = origText; }, 1500);
-      };
-      if(navigator.clipboard && navigator.clipboard.writeText){
-        navigator.clipboard.writeText(url).then(showCopied).catch(() => {
-          const ta = document.createElement('textarea');
-          ta.value = url;
-          document.body.appendChild(ta);
-          ta.select();
-          document.execCommand('copy');
-          document.body.removeChild(ta);
-          showCopied();
+    if (assigned) {
+      schedule[assigned].push({ startMin: s, endMin: e, employee: emp });
+      window.zoomAssignments[key].account = assigned;
+    } else {
+      window.zoomAssignments[key].conflict = true;
+    }
+  });
+  saveZoomAssignments(window.zoomAssignments);
+}
+// ─── End ZOOM helpers ─────────────────────────────────────────────────────────
+
+function renderZoom() {
+  titleEl.textContent = 'ניהול מפגשי ZOOM';
+  if (!window.zoomAssignments) window.zoomAssignments = loadZoomAssignments();
+  if (window.zoomWeekPage === undefined) window.zoomWeekPage = 0;
+  if (!window.zoomSubView) window.zoomSubView = 'calendar';
+
+  const WEEK_PAGES = [
+    { days: [8, 9, 10, 11, 12, 13], label: 'שבוע א׳ – 08–13.03' },
+    { days: [15, 16, 17, 18, 19],   label: 'שבוע ב׳ – 15–19.03' },
+    { days: [22, 23],               label: 'שבוע ג׳ – 22–23.03' },
+  ];
+  const ZOOM_LINKS_MAP = {
+    Z1: 'https://zoom.us/j/6023602336?omn=96962875568',
+    Z2: 'https://zoom.us/j/7601360450?omn=98989531483',
+    Z3: 'https://zoom.us/j/97448258082',
+  };
+  const HDAYS = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
+
+  const courses = rawData.filter(isCourse);
+  const currentPage = WEEK_PAGES[window.zoomWeekPage];
+
+  const wrap = document.createElement('div');
+  wrap.className = 'zoom-page';
+
+  // ── Z1 / Z2 / Z3 copy buttons ──
+  const linksBar = document.createElement('div');
+  linksBar.className = 'zoom-links-bar';
+  [['Z1', 'zoom-btn-1'], ['Z2', 'zoom-btn-2'], ['Z3', 'zoom-btn-3']].forEach(([key, cls]) => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'zoom-link-btn ' + cls;
+    btn.textContent = key;
+    btn.addEventListener('click', () => copyZoomLink(ZOOM_LINKS_MAP[key], btn));
+    linksBar.appendChild(btn);
+  });
+  wrap.appendChild(linksBar);
+  const caption = document.createElement('p');
+  caption.className = 'zoom-links-caption';
+  caption.textContent = 'לחיצה מעתיקה את קישור הפגישה';
+  wrap.appendChild(caption);
+
+  // ── Sub-nav: יומן שבועי / הכנת שיבוץ ──
+  const subNav = document.createElement('div');
+  subNav.className = 'zoom-sub-nav';
+  [['calendar', 'יומן שבועי'], ['prep', 'הכנת שיבוץ']].forEach(([sv, label]) => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'zoom-sub-btn' + (window.zoomSubView === sv ? ' active' : '');
+    btn.textContent = label;
+    btn.addEventListener('click', () => { window.zoomSubView = sv; renderZoom(); });
+    subNav.appendChild(btn);
+  });
+  wrap.appendChild(subNav);
+
+  // ── Week navigation ──
+  const weekNav = document.createElement('div');
+  weekNav.className = 'zoom-week-nav';
+  const prevBtn = document.createElement('button');
+  prevBtn.type = 'button'; prevBtn.className = 'zoom-week-arrow'; prevBtn.textContent = '▶';
+  prevBtn.disabled = window.zoomWeekPage === 0;
+  prevBtn.addEventListener('click', () => { window.zoomWeekPage--; renderZoom(); });
+  const weekLabel = document.createElement('span');
+  weekLabel.className = 'zoom-week-label'; weekLabel.textContent = currentPage.label;
+  const nextBtn = document.createElement('button');
+  nextBtn.type = 'button'; nextBtn.className = 'zoom-week-arrow'; nextBtn.textContent = '◀';
+  nextBtn.disabled = window.zoomWeekPage === WEEK_PAGES.length - 1;
+  nextBtn.addEventListener('click', () => { window.zoomWeekPage++; renderZoom(); });
+  weekNav.append(prevBtn, weekLabel, nextBtn);
+  wrap.appendChild(weekNav);
+
+  // ── Main content ──
+  const content = document.createElement('div');
+  if (window.zoomSubView === 'calendar') {
+    renderZoomCalendar(content, courses, currentPage.days, HDAYS);
+  } else {
+    renderZoomPrep(content, courses, currentPage.days, HDAYS);
+  }
+  wrap.appendChild(content);
+  view.innerHTML = '';
+  view.appendChild(wrap);
+}
+
+function renderZoomCalendar(container, courses, days, hdays) {
+  const DAY_START  = 8 * 60;
+  const DAY_END    = 18 * 60;
+  const TOTAL_MINS = DAY_END - DAY_START;
+
+  // Gather assigned items for this week
+  const assignedItems = [];
+  days.forEach(dayNum => {
+    const dayCourses = courses.filter(c =>
+      (c.Dates || []).some(d =>
+        d instanceof Date && d.getFullYear() === 2026 && d.getMonth() === 2 && d.getDate() === dayNum
+      )
+    );
+    dayCourses.forEach(course => {
+      const asgn = window.zoomAssignments[zoomCourseKey(dayNum, course)];
+      if (asgn && asgn.account) {
+        assignedItems.push({
+          dayNum, course, account: asgn.account,
+          startMin: zoomTimeToMinutes(course.StartTime),
+          endMin:   zoomTimeToMinutes(course.EndTime),
         });
-      } else {
-        const ta = document.createElement('textarea');
-        ta.value = url;
-        document.body.appendChild(ta);
-        ta.select();
-        document.execCommand('copy');
-        document.body.removeChild(ta);
-        showCopied();
       }
     });
   });
+
+  const grid = document.createElement('div');
+  grid.className = 'zoom-cal-grid';
+
+  // Header
+  const header = document.createElement('div');
+  header.className = 'zoom-cal-header';
+  const timeHdr = document.createElement('div');
+  timeHdr.className = 'zoom-cal-timecol-header';
+  header.appendChild(timeHdr);
+  days.forEach(dayNum => {
+    const date = new Date(2026, 2, dayNum);
+    const cell = document.createElement('div');
+    cell.className = 'zoom-cal-day-header';
+    cell.innerHTML =
+      `<strong>יום ${hdays[date.getDay()]}</strong>` +
+      `<span>${String(dayNum).padStart(2, '0')}.03</span>`;
+    header.appendChild(cell);
+  });
+  grid.appendChild(header);
+
+  // Body
+  const body = document.createElement('div');
+  body.className = 'zoom-cal-body';
+
+  // Time column
+  const timeCol = document.createElement('div');
+  timeCol.className = 'zoom-cal-timecol';
+  for (let h = 8; h <= 18; h++) {
+    const lbl = document.createElement('div');
+    lbl.className = 'zoom-cal-timeslot-label';
+    lbl.textContent = String(h).padStart(2, '0') + ':00';
+    timeCol.appendChild(lbl);
+  }
+  body.appendChild(timeCol);
+
+  // Day columns
+  days.forEach(dayNum => {
+    const col = document.createElement('div');
+    col.className = 'zoom-cal-daycol';
+    for (let h = 8; h < 18; h++) {
+      const slot = document.createElement('div');
+      slot.className = 'zoom-cal-slot';
+      col.appendChild(slot);
+    }
+    assignedItems
+      .filter(item => item.dayNum === dayNum)
+      .forEach(({ course, account, startMin, endMin }) => {
+        const s = Math.max(startMin != null ? startMin : DAY_START, DAY_START);
+        const e = Math.min(endMin   != null ? endMin   : s + 120,   DAY_END);
+        const topPct    = ((s - DAY_START) / TOTAL_MINS) * 100;
+        const heightPct = ((e - s)         / TOTAL_MINS) * 100;
+        const block = document.createElement('div');
+        block.className = 'zoom-cal-block';
+        block.style.top    = topPct    + '%';
+        block.style.height = heightPct + '%';
+        const color = instructorColor(course.Employee || '');
+        block.style.setProperty('--ic-bg',     color);
+        block.style.setProperty('--ic-border', color);
+        const accLow = account.toLowerCase();
+        block.innerHTML =
+          `<span class="zoom-account-badge zoom-account-badge-${accLow}">${account}</span>` +
+          `<strong class="zoom-cal-block-program">${escapeHtml(course.Program || '')}</strong>` +
+          `<span class="zoom-cal-block-employee">${escapeHtml(course.Employee || '')}</span>` +
+          `<span class="zoom-cal-block-school">${escapeHtml(course.School || '')}</span>`;
+        col.appendChild(block);
+      });
+    body.appendChild(col);
+  });
+  grid.appendChild(body);
+  container.appendChild(grid);
+
+  if (assignedItems.length === 0) {
+    const empty = document.createElement('p');
+    empty.className = 'zoom-empty';
+    empty.textContent = 'אין שיבוצי ZOOM לשבוע זה. עברו למסך הכנת שיבוץ כדי לסמן קורסים.';
+    container.appendChild(empty);
+  }
+}
+
+function renderZoomPrep(container, courses, days, hdays) {
+  const area = document.createElement('div');
+  area.className = 'zoom-days-area';
+
+  days.forEach(dayNum => {
+    const date = new Date(2026, 2, dayNum);
+    const dateStr = String(dayNum).padStart(2, '0') + '.03.26';
+    const dayCourses = courses
+      .filter(c =>
+        (c.Dates || []).some(d =>
+          d instanceof Date && d.getFullYear() === 2026 && d.getMonth() === 2 && d.getDate() === dayNum
+        )
+      )
+      .slice()
+      .sort((a, b) => (a.StartTime || '').localeCompare(b.StartTime || ''));
+
+    if (!dayCourses.length) return;
+
+    const card = document.createElement('div');
+    card.className = 'zoom-day-card';
+
+    const titleDiv = document.createElement('div');
+    titleDiv.className = 'zoom-day-title';
+    titleDiv.textContent = 'יום ' + hdays[date.getDay()] + ' – ' + dateStr;
+    card.appendChild(titleDiv);
+
+    const tableWrap = document.createElement('div');
+    tableWrap.className = 'zoom-table-wrap';
+    const table = document.createElement('table');
+    table.className = 'zoom-table';
+    const thead = document.createElement('thead');
+    thead.innerHTML =
+      '<tr>' +
+      '<th>ZOOM</th>' +
+      '<th>רשות</th>' +
+      '<th>בית ספר</th>' +
+      '<th>קורס</th>' +
+      '<th>מדריך</th>' +
+      '<th>התחלה</th>' +
+      '<th>סיום</th>' +
+      '<th>הערות</th>' +
+      '</tr>';
+    table.appendChild(thead);
+
+    const tbody = document.createElement('tbody');
+    dayCourses.forEach(course => {
+      const key = zoomCourseKey(dayNum, course);
+      if (!window.zoomAssignments[key]) {
+        window.zoomAssignments[key] = { checked: false, account: null, notes: '', conflict: false };
+      }
+      const asgn = window.zoomAssignments[key];
+
+      const tr = document.createElement('tr');
+      if (asgn.account)   tr.classList.add('zoom-assigned-row');
+      if (asgn.conflict)  tr.classList.add('zoom-conflict-row');
+
+      // ZOOM cell: checkbox + account badge
+      const tdZoom = document.createElement('td');
+      tdZoom.style.textAlign = 'center';
+      tdZoom.style.whiteSpace = 'nowrap';
+      const cb = document.createElement('input');
+      cb.type = 'checkbox'; cb.className = 'zoom-check'; cb.checked = !!asgn.checked;
+      const badge = document.createElement('span');
+      badge.style.marginRight = '5px';
+      badge.className = 'zoom-account-badge' + (asgn.account ? ' zoom-account-badge-' + asgn.account.toLowerCase() : '');
+      badge.textContent = asgn.account || '';
+      cb.addEventListener('change', () => {
+        window.zoomAssignments[key].checked = cb.checked;
+        if (!cb.checked) {
+          window.zoomAssignments[key].account = null;
+          window.zoomAssignments[key].conflict = false;
+          tr.classList.remove('zoom-assigned-row', 'zoom-conflict-row');
+          badge.textContent = '';
+          badge.className = 'zoom-account-badge';
+        }
+        saveZoomAssignments(window.zoomAssignments);
+      });
+      tdZoom.append(cb, badge);
+      tr.appendChild(tdZoom);
+
+      // Data cells
+      [
+        ['רשות',    course.Authority],
+        ['בית ספר', course.School],
+        ['קורס',    course.Program],
+        ['מדריך',   course.Employee],
+        ['התחלה',   course.StartTime],
+        ['סיום',    course.EndTime],
+      ].forEach(([label, val]) => {
+        const td = document.createElement('td');
+        td.setAttribute('data-label', label);
+        td.textContent = val || '—';
+        tr.appendChild(td);
+      });
+
+      // Notes
+      const tdNotes = document.createElement('td');
+      tdNotes.setAttribute('data-label', 'הערות');
+      const inp = document.createElement('input');
+      inp.type = 'text'; inp.className = 'zoom-notes-input'; inp.dir = 'rtl';
+      inp.placeholder = 'הערה...'; inp.value = asgn.notes || '';
+      inp.addEventListener('input', () => {
+        window.zoomAssignments[key].notes = inp.value;
+        saveZoomAssignments(window.zoomAssignments);
+      });
+      tdNotes.appendChild(inp);
+      tr.appendChild(tdNotes);
+      tbody.appendChild(tr);
+    });
+
+    table.appendChild(tbody);
+    tableWrap.appendChild(table);
+    card.appendChild(tableWrap);
+
+    // Assign button
+    const assignBtn = document.createElement('button');
+    assignBtn.type = 'button';
+    assignBtn.className = 'zoom-assign-btn';
+    assignBtn.textContent = '⚡ הפעל שיבוץ ZOOM ליום זה';
+    assignBtn.addEventListener('click', () => {
+      autoAssignZoomDay(dayNum, dayCourses);
+      const rows = Array.from(tbody.querySelectorAll('tr'));
+      dayCourses.forEach((course, i) => {
+        const k = zoomCourseKey(dayNum, course);
+        const a = window.zoomAssignments[k] || {};
+        const tr = rows[i];
+        if (!tr) return;
+        tr.classList.toggle('zoom-assigned-row', !!a.account);
+        tr.classList.toggle('zoom-conflict-row',  !!a.conflict);
+        const badgeEl = tr.querySelector('.zoom-account-badge');
+        if (badgeEl) {
+          badgeEl.textContent = a.account || '';
+          badgeEl.className = 'zoom-account-badge' +
+            (a.account ? ' zoom-account-badge-' + a.account.toLowerCase() : '');
+        }
+      });
+    });
+    card.appendChild(assignBtn);
+    area.appendChild(card);
+  });
+
+  container.appendChild(area);
 }
 
 function renderEndDates(){
