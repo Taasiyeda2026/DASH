@@ -2844,6 +2844,7 @@ function zoomFallbackCopy(text) {
 }
 async function autoAssignZoomDay(dayNum, dayCourses) {
   const ACCOUNTS = ['Z1', 'Z2', 'Z3'];
+  const assignedSlots = [];
   const toAssign = dayCourses
     .filter(c => window.zoomAssignments[zoomCourseKey(dayNum, c)] && window.zoomAssignments[zoomCourseKey(dayNum, c)].checked)
     .slice()
@@ -2863,7 +2864,28 @@ async function autoAssignZoomDay(dayNum, dayCourses) {
     }
   });
 
-  const schedule = { Z1: [], Z2: [], Z3: [] };
+  function isZoomBusy(startMin, endMin, account) {
+    return assignedSlots.some(slot =>
+      slot.zoom === account && zoomTimesOverlap(startMin, endMin, slot.startMin, slot.endMin)
+    );
+  }
+
+  function isInstructorBusy(startMin, endMin, employee) {
+    return assignedSlots.some(slot =>
+      slot.employee === employee && zoomTimesOverlap(startMin, endMin, slot.startMin, slot.endMin)
+    );
+  }
+
+  function pickZoomForSlot(startMin, endMin, preferred, employee) {
+    const ordered = preferred ? [preferred, ...ACCOUNTS.filter(a => a !== preferred)] : ACCOUNTS;
+    for (const acc of ordered) {
+      if (!isZoomBusy(startMin, endMin, acc) && !isInstructorBusy(startMin, endMin, employee)) {
+        return acc;
+      }
+    }
+    return null;
+  }
+
   toAssign.forEach(course => {
     const key = zoomCourseKey(dayNum, course);
     const assignment = window.zoomAssignments[key] || {};
@@ -2872,24 +2894,14 @@ async function autoAssignZoomDay(dayNum, dayCourses) {
     const emp = course.Employee || '';
 
     let preferred = null;
-    ACCOUNTS.forEach(acc => {
-      schedule[acc].forEach(slot => {
-        if (slot.employee === emp && slot.endMin === s) preferred = acc;
-      });
+    assignedSlots.forEach(slot => {
+      if (slot.employee === emp && slot.endMin === s) preferred = slot.zoom;
     });
 
-    const ordered = preferred ? [preferred, ...ACCOUNTS.filter(a => a !== preferred)] : ACCOUNTS;
-    let assigned = null;
-    for (const acc of ordered) {
-      const accBusy  = schedule[acc].some(sl => zoomTimesOverlap(s, e, sl.startMin, sl.endMin));
-      const instrBusy = ACCOUNTS.some(a =>
-        schedule[a].some(sl => sl.employee === emp && zoomTimesOverlap(s, e, sl.startMin, sl.endMin))
-      );
-      if (!accBusy && !instrBusy) { assigned = acc; break; }
-    }
+    const assigned = pickZoomForSlot(s, e, preferred, emp);
 
     if (assigned) {
-      schedule[assigned].push({ startMin: s, endMin: e, employee: emp });
+      assignedSlots.push({ startMin: s, endMin: e, employee: emp, zoom: assigned });
       window.zoomAssignments[key].account = assigned;
     } else {
       window.zoomAssignments[key].conflict = true;
