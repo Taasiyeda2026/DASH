@@ -29,6 +29,23 @@ function escapeHtml(str){
 
 const API_URL = "https://script.google.com/macros/s/AKfycbyQvyebcNULd7A0vAnRBlKLccJvRxsacZY3wlUcoSC-H2jzv5E11KUieCuwAHbWBNX0dw/exec";
 
+async function saveZoomScheduling(data){
+  try{
+    const res = await fetch(API_URL, {
+      method: "POST",
+      headers:{
+        "Content-Type":"application/json"
+      },
+      body: JSON.stringify(data)
+    });
+
+    const result = await res.json();
+    console.log("Saved to Google Sheet", result);
+  }catch(err){
+    console.error("Save error", err);
+  }
+}
+
 function normalizeData(data){
   return data.map(r=>({
     ...r,
@@ -3327,6 +3344,19 @@ function renderZoomPrep(container, courses, days, hdays) {
           badgeEl.textContent = a.account || '';
           badgeEl.className = 'zoom-account-badge' +
             (a.account ? ' zoom-account-badge-' + a.account.toLowerCase() : '');
+        }
+
+        if(a.account){
+          saveZoomScheduling({
+            date: zoomDateString(dayNum),
+            authority: course.Authority || '',
+            school: course.School || '',
+            program: course.Program || '',
+            employee: course.Employee || '',
+            startTime: a.startTime || course.StartTime || '',
+            endTime: a.endTime || course.EndTime || '',
+            zoom: a.account
+          });
         }
       });
     });
