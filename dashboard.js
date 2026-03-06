@@ -71,6 +71,30 @@ function toDateAndTimeSortable(item, date, start) {
   };
 }
 
+function createHourSelect(value){
+  const select = document.createElement('select');
+  select.className = 'zoom-time-select';
+
+  for(let h = 8; h <= 18; h++){
+    const hour = String(h).padStart(2, '0') + ':00';
+    const opt = document.createElement('option');
+    opt.value = hour;
+    opt.textContent = hour;
+
+    if(hour === value){
+      opt.selected = true;
+    }
+
+    select.appendChild(opt);
+  }
+
+  if(!select.value){
+    select.value = '08:00';
+  }
+
+  return select;
+}
+
 rawData = normalizeData(rawData);
 
 let schedulingJson = null;
@@ -3224,46 +3248,34 @@ function renderZoomPrep(container, courses, days, hdays) {
 
       const tdStart = document.createElement('td');
       tdStart.setAttribute('data-label', 'התחלה');
-      const startInput = document.createElement('input');
-      startInput.type = 'time';
-      startInput.step = 3600;
-      startInput.className = 'zoom-time-input';
-      startInput.value = asgn.startTime || '';
-      if (!startInput.value) {
-        startInput.value = '08:00';
-      }
+      const startInput = createHourSelect(asgn.startTime || course.StartTime);
 
       const tdEnd = document.createElement('td');
       tdEnd.setAttribute('data-label', 'סיום');
-      const endInput = document.createElement('input');
-      endInput.type = 'time';
-      endInput.step = 3600;
-      endInput.className = 'zoom-time-input';
-      endInput.value = asgn.endTime || '';
-      if (!endInput.value && startInput.value) {
-        const [h] = startInput.value.split(':');
-        const endHour = (parseInt(h, 10) + 1) % 24;
+      const endInput = createHourSelect(asgn.endTime || course.EndTime);
+
+      if (!asgn.endTime) {
+        const startHour = parseInt(startInput.value.split(':')[0], 10);
+        const endHour = Math.min(startHour + 1, 18);
         endInput.value = String(endHour).padStart(2, '0') + ':00';
       }
+
       asgn.startTime = startInput.value;
       asgn.endTime = endInput.value;
 
       startInput.addEventListener('change', async () => {
-        const [h] = (startInput.value || '').split(':');
-        const startHour = parseInt(h, 10);
+        const startHour = parseInt(startInput.value.split(':')[0], 10);
         if (!Number.isNaN(startHour)) {
-          const endHour = (startHour + 1) % 24;
+          const endHour = Math.min(startHour + 1, 18);
           endInput.value = String(endHour).padStart(2, '0') + ':00';
         }
         asgn.startTime = startInput.value;
         asgn.endTime = endInput.value;
-        startInput.blur();
         await persistZoomAssignment(dayNum, course);
       });
 
       endInput.addEventListener('change', async () => {
         asgn.endTime = endInput.value;
-        endInput.blur();
         await persistZoomAssignment(dayNum, course);
       });
 
