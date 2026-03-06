@@ -1922,12 +1922,11 @@ function renderSummary(){
   const instructorHoursButton = document.createElement('button');
   instructorHoursButton.type = 'button';
   instructorHoursButton.className = 'summary-action-btn instructor-hours-button';
-  instructorHoursButton.textContent = 'סה"כ שעות';
+  instructorHoursButton.innerHTML = 'סה"כ שעות <span class="ihb-arrow" aria-hidden="true">▼</span>';
   instructorHoursButton.setAttribute('aria-expanded', 'false');
 
   const instructorHoursPanel = document.createElement('section');
   instructorHoursPanel.className = 'summary-instructor-hours-panel instructor-hours-panel';
-  instructorHoursPanel.hidden = true;
 
   const selectedMonth = currentMonth;
   const selectedYear = currentYear;
@@ -2003,9 +2002,18 @@ function renderSummary(){
   }
 
   instructorHoursButton.onclick = () => {
-    const willOpen = instructorHoursPanel.hidden;
-    instructorHoursPanel.hidden = !willOpen;
+    const willOpen = !instructorHoursPanel.classList.contains('is-open');
+    instructorHoursPanel.classList.toggle('is-open', willOpen);
     instructorHoursButton.setAttribute('aria-expanded', String(willOpen));
+    if (willOpen) {
+      const arrow = instructorHoursButton.querySelector('.ihb-arrow');
+      if (arrow) {
+        arrow.classList.remove('ihb-bounce');
+        void arrow.offsetWidth;
+        arrow.classList.add('ihb-bounce');
+        setTimeout(() => arrow.classList.remove('ihb-bounce'), 900);
+      }
+    }
   };
 
   wrap.innerHTML = `

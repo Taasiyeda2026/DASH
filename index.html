@@ -652,14 +652,45 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
   width:fit-content;
   min-width:260px;
   max-width:420px;
-  margin:16px auto;
+  margin:0 auto;
   background:rgba(255,255,255,.85);
   backdrop-filter:blur(6px);
   border:1px solid var(--border);
   border-radius:12px;
-  padding:14px 18px;
+  padding:0 18px;
   box-sizing:border-box;
   box-shadow:0 6px 20px rgba(0,0,0,.08);
+  overflow:hidden;
+  max-height:0;
+  opacity:0;
+  transition:max-height 0.45s cubic-bezier(0.4,0,0.2,1),opacity 0.3s ease,padding 0.35s ease,margin 0.35s ease;
+}
+.summary-instructor-hours-panel.is-open,
+.instructor-hours-panel.is-open{
+  max-height:600px;
+  opacity:1;
+  padding:14px 18px;
+  margin:16px auto;
+}
+.ihb-arrow{
+  display:inline-block;
+  margin-right:6px;
+  font-size:13px;
+  transition:transform 0.35s cubic-bezier(0.4,0,0.2,1);
+}
+.instructor-hours-button[aria-expanded="true"] .ihb-arrow{
+  transform:rotate(180deg);
+}
+@keyframes ihb-bounce-down{
+  0%   {transform:translateY(0);}
+  25%  {transform:translateY(5px);}
+  50%  {transform:translateY(0);}
+  70%  {transform:translateY(3px);}
+  85%  {transform:translateY(0);}
+  100% {transform:translateY(0);}
+}
+.ihb-arrow.ihb-bounce{
+  animation:ihb-bounce-down 0.7s ease forwards;
 }
 
 .summary-instructor-hours-table,
