@@ -27,6 +27,8 @@ function escapeHtml(str){
     .replace(/'/g,"&#039;");
 }
 
+const API_URL = "https://script.google.com/macros/s/AKfycbyQvyebcNULd7A0vAnRBlKLccJvRxsacZY3wlUcoSC-H2jzv5E11KUieCuwAHbWBNX0dw/exec";
+
 function normalizeData(data){
   return data.map(r=>({
     ...r,
@@ -891,7 +893,7 @@ function fitViewToScreen() {
 }
 window.addEventListener('resize', fitViewToScreen);
 
-function render(){
+async function render(){
 
   logViewRuntimeState('render');
 
@@ -925,6 +927,7 @@ function render(){
     renderEndDates();
   }
   else if(window.mode==='zoom'){
+    await ensureZoomAssignmentsLoaded();
     renderZoom();
   }
   else{
@@ -2640,12 +2643,118 @@ if(btnZoom){
 function zoomCourseKey(dayNum, course) {
   return `${dayNum}|${course.Employee||''}|${course.Program||''}|${course.StartTime||''}`;
 }
-function loadZoomAssignments() {
-  try { return JSON.parse(localStorage.getItem('dashZoomAssignments') || '{}'); }
-  catch(e) { return {}; }
+async function loadZoomAssignments(){
+  try {
+    const res = await fetch(API_URL, { cache:"no-store" });
+    const data = await res.json();
+    window.zoomReadOnlyMode = false;
+    return data;
+  } catch(err){
+    console.error("Failed loading zoom assignments", err);
+    console.error('Zoom API connection failed');
+    window.zoomReadOnlyMode = true;
+    return [];
+  }
 }
-function saveZoomAssignments(data) {
-  localStorage.setItem('dashZoomAssignments', JSON.stringify(data));
+async function saveZoomAssignment(data){
+  try {
+    await fetch(API_URL, {
+      method:"POST",
+      body: JSON.stringify(data)
+    });
+  } catch(err){
+    console.error("Failed saving zoom assignment", err);
+  }
+}
+
+function canAssignZoom(){
+  const employeeId = String(window.EmployeeID || '').trim();
+  return employeeId === '8000' || employeeId === '6000';
+}
+
+function notifyZoomNoPermission(){
+  const message = 'אין הרשאה לבצע שיבוץ';
+  console.warn(message);
+  alert(message);
+}
+
+function mapZoomAssignmentsByCourseKey(rows){
+  const mapped = {};
+  if(Array.isArray(rows)){
+    rows.forEach((row)=>{
+      const courseKey = String(row?.courseKey || row?.CourseKey || '').trim();
+      if(!courseKey) return;
+      const account = row?.zoom || row?.Zoom || row?.account || null;
+      const notes = row?.notes || row?.Notes || '';
+      mapped[courseKey] = {
+        checked: !!account,
+        account,
+        notes,
+        conflict: false
+      };
+    });
+    return mapped;
+  }
+
+  if(rows && typeof rows === 'object'){
+    Object.entries(rows).forEach(([courseKey, value])=>{
+      const account = value?.zoom || value?.Zoom || value?.account || null;
+      const notes = value?.notes || value?.Notes || '';
+      mapped[String(courseKey)] = {
+        checked: !!account,
+        account,
+        notes,
+        conflict: !!value?.conflict
+      };
+    });
+  }
+
+  return mapped;
+}
+
+function zoomDateString(dayNum){
+  const d = new Date(2026, 2, dayNum);
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+async function persistZoomAssignment(dayNum, course){
+  if(window.zoomReadOnlyMode) return;
+  if(!canAssignZoom()){
+    notifyZoomNoPermission();
+    return;
+  }
+
+  const courseKey = zoomCourseKey(dayNum, course);
+  const assignment = window.zoomAssignments?.[courseKey] || {};
+  await saveZoomAssignment({
+    courseKey: courseKey,
+    date: zoomDateString(dayNum),
+    program: course.Program || '',
+    employee: course.Employee || '',
+    startTime: course.StartTime || '',
+    endTime: course.EndTime || '',
+    zoom: assignment.account || '',
+    notes: assignment.notes || '',
+    assignedBy: String(window.EmployeeID || '').trim()
+  });
+}
+
+async function persistZoomAssignmentsForDay(dayNum, dayCourses){
+  for (const course of dayCourses) {
+    const key = zoomCourseKey(dayNum, course);
+    if (!window.zoomAssignments?.[key]?.checked) continue;
+    await persistZoomAssignment(dayNum, course);
+  }
+}
+
+async function ensureZoomAssignmentsLoaded(){
+  if(window.zoomAssignmentsLoaded) return;
+  const zoomAssignments = await loadZoomAssignments();
+  window.zoomAssignments = mapZoomAssignmentsByCourseKey(zoomAssignments);
+  window.zoomAssignmentsLoaded = true;
 }
 function zoomTimeToMinutes(t) {
   if (!t) return null;
@@ -2667,7 +2776,7 @@ function zoomFallbackCopy(text) {
   const ta = Object.assign(document.createElement('textarea'), { value: text });
   document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove();
 }
-function autoAssignZoomDay(dayNum, dayCourses) {
+async function autoAssignZoomDay(dayNum, dayCourses) {
   const ACCOUNTS = ['Z1', 'Z2', 'Z3'];
   const toAssign = dayCourses
     .filter(c => window.zoomAssignments[zoomCourseKey(dayNum, c)] && window.zoomAssignments[zoomCourseKey(dayNum, c)].checked)
@@ -2713,13 +2822,13 @@ function autoAssignZoomDay(dayNum, dayCourses) {
       window.zoomAssignments[key].conflict = true;
     }
   });
-  saveZoomAssignments(window.zoomAssignments);
+  await persistZoomAssignmentsForDay(dayNum, dayCourses);
 }
 // ─── End ZOOM helpers ─────────────────────────────────────────────────────────
 
 function renderZoom() {
   titleEl.textContent = 'ניהול מפגשי ZOOM';
-  if (!window.zoomAssignments) window.zoomAssignments = loadZoomAssignments();
+  if (!window.zoomAssignments) window.zoomAssignments = {};
   if (window.zoomWeekPage === undefined) window.zoomWeekPage = 0;
   if (!window.zoomSubView) window.zoomSubView = 'calendar';
 
@@ -2974,7 +3083,7 @@ function renderZoomPrep(container, courses, days, hdays) {
       badge.style.marginRight = '5px';
       badge.className = 'zoom-account-badge' + (asgn.account ? ' zoom-account-badge-' + asgn.account.toLowerCase() : '');
       badge.textContent = asgn.account || '';
-      cb.addEventListener('change', () => {
+      cb.addEventListener('change', async () => {
         window.zoomAssignments[key].checked = cb.checked;
         if (!cb.checked) {
           window.zoomAssignments[key].account = null;
@@ -2983,7 +3092,7 @@ function renderZoomPrep(container, courses, days, hdays) {
           badge.textContent = '';
           badge.className = 'zoom-account-badge';
         }
-        saveZoomAssignments(window.zoomAssignments);
+        await persistZoomAssignment(dayNum, course);
       });
       tdZoom.append(cb, badge);
       tr.appendChild(tdZoom);
@@ -3009,9 +3118,9 @@ function renderZoomPrep(container, courses, days, hdays) {
       const inp = document.createElement('input');
       inp.type = 'text'; inp.className = 'zoom-notes-input'; inp.dir = 'rtl';
       inp.placeholder = 'הערה...'; inp.value = asgn.notes || '';
-      inp.addEventListener('input', () => {
+      inp.addEventListener('input', async () => {
         window.zoomAssignments[key].notes = inp.value;
-        saveZoomAssignments(window.zoomAssignments);
+        await persistZoomAssignment(dayNum, course);
       });
       tdNotes.appendChild(inp);
       tr.appendChild(tdNotes);
@@ -3027,8 +3136,8 @@ function renderZoomPrep(container, courses, days, hdays) {
     assignBtn.type = 'button';
     assignBtn.className = 'zoom-assign-btn';
     assignBtn.textContent = '⚡ הפעל שיבוץ ZOOM ליום זה';
-    assignBtn.addEventListener('click', () => {
-      autoAssignZoomDay(dayNum, dayCourses);
+    assignBtn.addEventListener('click', async () => {
+      await autoAssignZoomDay(dayNum, dayCourses);
       const rows = Array.from(tbody.querySelectorAll('tr'));
       dayCourses.forEach((course, i) => {
         const k = zoomCourseKey(dayNum, course);
