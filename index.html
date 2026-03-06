@@ -269,6 +269,17 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
 .nav-modes{display:flex;gap:8px;align-items:center}
 .nav-arrows{display:flex;gap:8px;align-items:center}
 .nav-arrows #title{width:100%;max-width:240px;text-align:center;font-weight:700;font-size:15px;white-space:nowrap;}
+.dual-role-toggle-btn{
+  background:#7c3aed;
+  color:#fff;
+  border:none;
+  padding:6px 14px;
+  border-radius:8px;
+  cursor:pointer;
+  font-weight:700;
+  font-size:13px;
+}
+.mobile-only{display:none !important;}
 
 /* ===== GRID & DAY CARDS ===== */
 .event strong, .calendar-event strong, .schedule-item strong, .schedule-card strong { font-size: 0.82em; }
@@ -1002,6 +1013,9 @@ body.no-scroll{overflow:hidden;}
 
   .nav{flex-direction:column !important;gap:8px !important;}
   #btnMonth,#btnWeek{display:none !important;}
+  .desktop-only{display:none !important;}
+  .mobile-only{display:block !important; width:100%;}
+  .mobile-only.dual-role-toggle-btn{height:32px !important;font-size:12px !important;}
 
   .nav-modes{width:100%;display:flex !important;justify-content:center !important;align-items:center !important;gap:10px !important;margin-bottom:8px !important;}
   .nav-modes button{flex:1 1 0;font-size:11px;height:28px !important;padding:0 4px;white-space:nowrap;box-shadow:0 2px 0 #94a3b8,0 3px 6px rgba(0,0,0,0.07) !important;}
