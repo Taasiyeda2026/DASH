@@ -1974,7 +1974,7 @@ function renderSummary(){
     tableWrap.className = 'table-container';
 
     const table = document.createElement('table');
-    table.className = 'summary-instructor-hours-table';
+    table.className = 'summary-instructor-hours-table instructor-hours-table';
     table.innerHTML = `
       <thead>
         <tr>
