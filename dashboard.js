@@ -1689,6 +1689,38 @@ function openFutureOpenings(year, month){
   activeSidePanelType = 'future-openings';
 }
 
+function openJuneWarningCourses(juneWarningCourses){
+  const sortedJuneWarningCourses = sortByDateAndTime(
+    juneWarningCourses.map(r => toDateAndTimeSortable(r, getCourseStartDate(r), r.StartTime))
+  );
+
+  sideContent.innerHTML = `
+    <h2>⚠ חודש יוני</h2>
+    <div class="subtitle">${sortedJuneWarningCourses.length} קורסים</div>
+    <div style="border-top:1px solid var(--border); margin:10px 0;"></div>
+  `;
+
+  sortedJuneWarningCourses.forEach(r => {
+    const startDate = getCourseStartDate(r);
+    const courseEndDate = getCourseEndDate(r);
+    const instructor = (r.Employee && r.Employee.trim()) ? r.Employee : '—';
+
+    sideContent.innerHTML += `
+      <div class="course-card">
+        <div>🌍 רשות: ${r.Authority || '—'}</div>
+        <div>🏫 בית ספר: ${r.School || '—'}</div>
+        <div>📘 תוכנית: ${r.Program || '—'}</div>
+        <div>👤 מדריך: ${instructor}</div>
+        <div>📅 תאריך התחלה: ${startDate ? startDate.toLocaleDateString('he-IL') : '—'}</div>
+        <div>🏁 תאריך סיום: ${courseEndDate ? courseEndDate.toLocaleDateString('he-IL') : '—'}</div>
+      </div>
+    `;
+  });
+
+  openSidePanel();
+  activeSidePanelType = 'june-warning';
+}
+
 function openManagerOverlay(mgr, year, month){
   const courses = rawData.filter(isCourse);
   const mgrCourses = courses.filter(r=>getCourseManager(r) === mgr);
@@ -1762,6 +1794,11 @@ function renderSummary(){
   }
 
   const courses = rawData.filter(isCourse);
+  const juneWarningCutoff = new Date('2026-06-18');
+  const juneWarningCourses = courses.filter(c => {
+    const courseEndDate = getCourseEndDate(c);
+    return courseEndDate && courseEndDate > juneWarningCutoff;
+  });
 
   const activeThisMonth = rawData.filter(r => {
     if(String(r.EventType || '').trim().toUpperCase() !== 'COURSE')
@@ -1856,6 +1893,11 @@ function renderSummary(){
         <div class="kpi-title">סדנאות וסיורים</div>
         <div class="kpi-number">${dailyCount}</div>
     </div>
+
+      <div class="kpi-small" data-action="june-warning" role="button" aria-label="חודש יוני" style="cursor:pointer;background:#fee2e2;border:1px solid #ef4444;color:#7f1d1d;">
+        <div class="kpi-title">⚠ חודש יוני</div>
+        <div class="kpi-number" style="color:#7f1d1d;font-weight:900;">${juneWarningCourses.length}</div>
+    </div>
     </div>
 
     ${missingInstructorCount > 0 ? `
@@ -1924,6 +1966,16 @@ function renderSummary(){
         return;
       }
       openFutureOpenings(currentYear, currentMonth);
+      return;
+    }
+
+    if(e.target.closest('[data-action="june-warning"]')){
+      e.stopPropagation();
+      if(side.classList.contains('open') && activeSidePanelType === 'june-warning'){
+        closeSidePanel();
+        return;
+      }
+      openJuneWarningCourses(juneWarningCourses);
       return;
     }
 
