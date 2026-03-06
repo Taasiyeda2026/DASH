@@ -1883,107 +1883,42 @@ function renderSummary(){
   instructorHoursPanel.className = 'summary-instructor-hours-panel instructor-hours-panel';
   instructorHoursPanel.hidden = true;
 
-  const selectedMonth = new Date(currentYear, currentMonth, 1);
-  const monthSessions = [];
+  const selectedMonth = currentMonth;
+  const selectedYear = currentYear;
+
+  const instructorHoursMap = {};
+  let totalHoursAll = 0;
 
   rawData.forEach(record => {
-    if(!isCourse(record)) return;
+    if(String(record.EventType || '').trim().toUpperCase() !== 'COURSE') return;
 
     const instructorName = String(record.Employee || '').trim();
     if(!instructorName) return;
+    if(!Array.isArray(record.Dates)) return;
 
-    const startText = String(record.StartTime || '').trim();
-    const endText = String(record.EndTime || '').trim();
-    if(!startText || !endText) return;
+    record.Dates.forEach(date => {
+      const sessionDate = new Date(date);
+      if(Number.isNaN(sessionDate.getTime())) return;
+      if(sessionDate.getMonth() !== selectedMonth) return;
+      if(sessionDate.getFullYear() !== selectedYear) return;
 
-    (record.Dates || []).forEach(date => {
-      if(!date) return;
-      monthSessions.push({
-        employee: instructorName,
-        date,
-        startTime: startText,
-        endTime: endText
-      });
+      if(!instructorHoursMap[instructorName]){
+        instructorHoursMap[instructorName] = { sessions: 0, totalHours: 0 };
+      }
+
+      instructorHoursMap[instructorName].sessions += 1;
+      instructorHoursMap[instructorName].totalHours += 2;
+      totalHoursAll += 2;
     });
   });
-
-  const filteredSessions = monthSessions.filter(session => {
-    const sessionDate = new Date(session.date);
-    return (
-      sessionDate.getMonth() === selectedMonth.getMonth() &&
-      sessionDate.getFullYear() === selectedMonth.getFullYear()
-    );
-  });
-
-  const instructorHoursMap = {};
-  let totalSessionsAll = 0;
-  let totalMinutesAll = 0;
-
-  const toSessionDateTime = (dateText, timeText) => {
-    if(!dateText || !timeText) return null;
-
-    try {
-      const baseDate = new Date(dateText);
-      const parts = String(timeText).split(':');
-      const h = Number(parts[0]);
-      const m = Number(parts[1]);
-
-      if(!Number.isNaN(baseDate.getTime()) && Number.isFinite(h) && Number.isFinite(m)){
-        baseDate.setHours(h, m, 0, 0);
-        return baseDate;
-      }
-    } catch(err){
-      console.warn('toSessionDateTime explicit parsing failed:', err);
-    }
-
-    const isoDate = String(dateText || '').slice(0, 10);
-    const candidate = new Date(`${isoDate}T${timeText}`);
-    return Number.isNaN(candidate.getTime()) ? null : candidate;
-  };
-
-  filteredSessions.forEach(session => {
-    const startDate = toSessionDateTime(session.date, session.startTime);
-    const endDate = toSessionDateTime(session.date, session.endTime);
-    if(!startDate || !endDate) return;
-
-    let adjustedEndDate = endDate;
-    if(adjustedEndDate < startDate){
-      adjustedEndDate = new Date(adjustedEndDate.getTime() + (24 * 60 * 60 * 1000));
-    }
-
-    const minutes = (adjustedEndDate - startDate) / 60000;
-    if(!Number.isFinite(minutes) || minutes < 0) return;
-
-    if(!instructorHoursMap[session.employee]){
-      instructorHoursMap[session.employee] = { sessions: 0, totalMinutes: 0 };
-    }
-
-    instructorHoursMap[session.employee].sessions += 1;
-    instructorHoursMap[session.employee].totalMinutes += minutes;
-
-    totalSessionsAll += 1;
-    totalMinutesAll += minutes;
-  });
-
-  const formatMinutesAsHours = totalMinutes => {
-    const safeMinutes = Math.max(0, Number(totalMinutes) || 0);
-    const h = Math.floor(safeMinutes / 60);
-    const m = Math.round(safeMinutes % 60);
-
-    if(m === 60){
-      return `${h + 1}:00`;
-    }
-
-    return `${h}:${String(m).padStart(2,'0')}`;
-  };
 
   const instructorRows = Object.entries(instructorHoursMap)
     .map(([name, totals]) => ({
       name,
       sessions: totals.sessions,
-      totalMinutes: totals.totalMinutes
+      totalHours: totals.totalHours
     }))
-    .sort((a,b) => b.totalMinutes - a.totalMinutes || b.sessions - a.sessions || a.name.localeCompare(b.name, 'he'));
+    .sort((a,b) => b.totalHours - a.totalHours || b.sessions - a.sessions || a.name.localeCompare(b.name, 'he'));
 
   if(instructorRows.length){
     const tableWrap = document.createElement('div');
@@ -1995,22 +1930,19 @@ function renderSummary(){
       <thead>
         <tr>
           <th>מדריך</th>
-          <th>מספר מפגשים</th>
-          <th>סה״כ שעות</th>
+          <th>שעות</th>
         </tr>
       </thead>
       <tbody>
         ${instructorRows.map(row => `
           <tr>
             <td>${escapeHtml(row.name)}</td>
-            <td>${row.sessions}</td>
-            <td>${formatMinutesAsHours(row.totalMinutes)}</td>
+            <td>${row.totalHours}</td>
           </tr>
         `).join('')}
         <tr>
           <td><strong>סה״כ</strong></td>
-          <td><strong>${totalSessionsAll} מפגשים</strong></td>
-          <td><strong>${formatMinutesAsHours(totalMinutesAll)}</strong></td>
+          <td><strong>${totalHoursAll}</strong></td>
         </tr>
       </tbody>
     `;
@@ -2020,7 +1952,7 @@ function renderSummary(){
   } else {
     const emptyState = document.createElement('div');
     emptyState.className = 'summary-instructor-hours-empty';
-    emptyState.textContent = 'אין מפגשים עם שעות מוגדרות בחודש הנבחר.';
+    emptyState.textContent = 'אין מפגשי קורס בחודש הנבחר.';
     instructorHoursPanel.appendChild(emptyState);
   }
 
