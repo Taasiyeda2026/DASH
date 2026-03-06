@@ -27,7 +27,7 @@ function escapeHtml(str){
     .replace(/'/g,"&#039;");
 }
 
-const API_URL = "https://script.google.com/macros/s/AKfycbx_Jpds0SikroyJNPJHeVWaLCS_kv9j50GM11-2V6i1TXsTADkeATC8SiluOJjeNt00Nw/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbyfoPSYe1DY8j9jOOMvDwx7VZWc2J7JlguwEqVvecBWVgsoQqjQwzW4VgFpxdCOXJUdNQ/exec";
 async function saveZoomScheduling(data){
   try{
     const res = await fetch(API_URL, {
