@@ -3210,8 +3210,8 @@ function renderZoomPrep(container, courses, days, hdays) {
       '<th>בית ספר</th>' +
       '<th>קורס</th>' +
       '<th>מדריך</th>' +
-      '<th>התחלה</th>' +
-      '<th>סיום</th>' +
+      '<th class="zoom-col-start">התחלה</th>' +
+      '<th class="zoom-col-end">סיום</th>' +
       '<th>הערות</th>' +
       '</tr>';
     table.appendChild(thead);
@@ -3268,10 +3268,12 @@ function renderZoomPrep(container, courses, days, hdays) {
       });
 
       const tdStart = document.createElement('td');
+      tdStart.className = 'zoom-col-start';
       tdStart.setAttribute('data-label', 'התחלה');
       const startInput = createHourSelect(asgn.startTime || course.StartTime);
 
       const tdEnd = document.createElement('td');
+      tdEnd.className = 'zoom-col-end';
       tdEnd.setAttribute('data-label', 'סיום');
       const endInput = createHourSelect(asgn.endTime || course.EndTime);
 
