@@ -255,6 +255,14 @@ Object.defineProperty(window, 'mode', {
   configurable: false
 });
 const isMobile = () => window.innerWidth < 800;
+
+function logViewRuntimeState(context = 'render'){
+  const currentViewMode = window._dualViewMode || userRole;
+  console.log(`[${context}] viewMode:`, currentViewMode);
+  console.log(`[${context}] screenWidth:`, window.innerWidth);
+  console.log(`[${context}] isMobile:`, isMobile());
+}
+
 let openWeekId = null;
 let currentDate=new Date(); currentDate.setHours(0,0,0,0);
 const dayNames=['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];
@@ -852,6 +860,8 @@ function fitViewToScreen() {
 window.addEventListener('resize', fitViewToScreen);
 
 function render(){
+
+  logViewRuntimeState('render');
 
   enforceInstructorMode();
   view.innerHTML=''; view.style.display=''; view.style.flexDirection=''; view.style.alignItems=''; view.style.justifyContent=''; view.style.width=''; view.scrollTop=0; window.scrollTo(0,0); document.documentElement.scrollTop=0; document.body.scrollTop=0; view.classList.toggle('week-mode', window.mode === 'week');
