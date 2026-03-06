@@ -1920,6 +1920,22 @@ function renderSummary(){
   let totalMinutesAll = 0;
 
   const toSessionDateTime = (dateText, timeText) => {
+    if(!dateText || !timeText) return null;
+
+    try {
+      const baseDate = new Date(dateText);
+      const parts = String(timeText).split(':');
+      const h = Number(parts[0]);
+      const m = Number(parts[1]);
+
+      if(!Number.isNaN(baseDate.getTime()) && Number.isFinite(h) && Number.isFinite(m)){
+        baseDate.setHours(h, m, 0, 0);
+        return baseDate;
+      }
+    } catch(err){
+      console.warn('toSessionDateTime explicit parsing failed:', err);
+    }
+
     const isoDate = String(dateText || '').slice(0, 10);
     const candidate = new Date(`${isoDate}T${timeText}`);
     return Number.isNaN(candidate.getTime()) ? null : candidate;
