@@ -1903,7 +1903,7 @@ function renderSummary(){
   const instructorHoursButton = document.createElement('button');
   instructorHoursButton.type = 'button';
   instructorHoursButton.className = 'summary-action-btn instructor-hours-button';
-  instructorHoursButton.textContent = '📊 סה"כ שעות';
+  instructorHoursButton.textContent = 'סה"כ שעות';
   instructorHoursButton.setAttribute('aria-expanded', 'false');
 
   const instructorHoursPanel = document.createElement('section');
