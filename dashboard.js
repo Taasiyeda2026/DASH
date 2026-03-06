@@ -1916,38 +1916,43 @@ function renderSummary(){
   });
 
   const instructorHoursMap = {};
+  let totalSessionsAll = 0;
+  let totalMinutesAll = 0;
+
+  const toSessionDateTime = (dateText, timeText) => {
+    const isoDate = String(dateText || '').slice(0, 10);
+    const candidate = new Date(`${isoDate}T${timeText}`);
+    return Number.isNaN(candidate.getTime()) ? null : candidate;
+  };
 
   filteredSessions.forEach(session => {
-    const [startHours, startMinutes] = session.startTime.split(':').map(Number);
-    const [endHours, endMinutes] = session.endTime.split(':').map(Number);
+    const startDate = toSessionDateTime(session.date, session.startTime);
+    const endDate = toSessionDateTime(session.date, session.endTime);
+    if(!startDate || !endDate) return;
 
-    if(
-      Number.isNaN(startHours) ||
-      Number.isNaN(startMinutes) ||
-      Number.isNaN(endHours) ||
-      Number.isNaN(endMinutes)
-    ) return;
-
-    let startMinutesFromDayStart = (startHours * 60) + startMinutes;
-    let endMinutesFromDayStart = (endHours * 60) + endMinutes;
-
-    if(endMinutesFromDayStart < startMinutesFromDayStart){
-      endMinutesFromDayStart += 24 * 60;
+    let adjustedEndDate = endDate;
+    if(adjustedEndDate < startDate){
+      adjustedEndDate = new Date(adjustedEndDate.getTime() + (24 * 60 * 60 * 1000));
     }
 
-    const hours = (endMinutesFromDayStart - startMinutesFromDayStart) / 60;
+    const minutes = (adjustedEndDate - startDate) / 60000;
+    if(!Number.isFinite(minutes) || minutes < 0) return;
 
     if(!instructorHoursMap[session.employee]){
-      instructorHoursMap[session.employee] = { sessions: 0, hours: 0 };
+      instructorHoursMap[session.employee] = { sessions: 0, totalMinutes: 0 };
     }
 
     instructorHoursMap[session.employee].sessions += 1;
-    instructorHoursMap[session.employee].hours += hours;
+    instructorHoursMap[session.employee].totalMinutes += minutes;
+
+    totalSessionsAll += 1;
+    totalMinutesAll += minutes;
   });
 
-  const formatHours = decimalHours => {
-    const h = Math.floor(decimalHours);
-    const m = Math.round((decimalHours - h) * 60);
+  const formatMinutesAsHours = totalMinutes => {
+    const safeMinutes = Math.max(0, Number(totalMinutes) || 0);
+    const h = Math.floor(safeMinutes / 60);
+    const m = Math.round(safeMinutes % 60);
 
     if(m === 60){
       return `${h + 1}:00`;
@@ -1960,9 +1965,9 @@ function renderSummary(){
     .map(([name, totals]) => ({
       name,
       sessions: totals.sessions,
-      hours: totals.hours
+      totalMinutes: totals.totalMinutes
     }))
-    .sort((a,b) => b.hours - a.hours || b.sessions - a.sessions || a.name.localeCompare(b.name, 'he'));
+    .sort((a,b) => b.totalMinutes - a.totalMinutes || b.sessions - a.sessions || a.name.localeCompare(b.name, 'he'));
 
   if(instructorRows.length){
     const tableWrap = document.createElement('div');
@@ -1983,9 +1988,14 @@ function renderSummary(){
           <tr>
             <td>${escapeHtml(row.name)}</td>
             <td>${row.sessions}</td>
-            <td>${formatHours(row.hours)}</td>
+            <td>${formatMinutesAsHours(row.totalMinutes)}</td>
           </tr>
         `).join('')}
+        <tr>
+          <td><strong>סה״כ</strong></td>
+          <td><strong>${totalSessionsAll} מפגשים</strong></td>
+          <td><strong>${formatMinutesAsHours(totalMinutesAll)}</strong></td>
+        </tr>
       </tbody>
     `;
 
