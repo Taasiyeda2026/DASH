@@ -150,6 +150,7 @@ const btnWeek=document.getElementById('btnWeek');
 const btnSummary=document.getElementById('btnSummary');
 const btnInstructors=document.getElementById('btnInstructors');
 const btnEndDates=document.getElementById('btnEndDates');
+const btnZoom=document.getElementById('btnZoom');
 const goCalendar = document.getElementById('goCalendar');
 const managerFilter=document.getElementById('managerFilter');
 const employeeFilter=document.getElementById('employeeFilter');
@@ -181,6 +182,15 @@ function updateEndDatesButtonVisibility(){
     btnEndDates.style.display = '';
   }else{
     btnEndDates.style.display = 'none';
+  }
+}
+
+function updateZoomButtonVisibility(){
+  if(!btnZoom) return;
+  if(userRole === 'instructor'){
+    btnZoom.style.display = 'none';
+  }else{
+    btnZoom.style.display = '';
   }
 }
 
@@ -240,6 +250,7 @@ function switchDualRoleView(){
     btnInstructors.style.display = 'none';
     btnMonth.style.display = 'none';
     btnWeek.style.display = 'none';
+    if(btnZoom) btnZoom.style.display = 'none';
     if(filtersEl) filtersEl.style.display = 'none';
     window.mode = 'month';
   } else {
@@ -251,6 +262,7 @@ function switchDualRoleView(){
     btnInstructors.style.display = '';
     btnMonth.style.display = '';
     btnWeek.style.display = '';
+    if(btnZoom) btnZoom.style.display = '';
     if(filtersEl) filtersEl.style.display = '';
     window.mode = 'summary';
   }
@@ -697,12 +709,14 @@ function updateModeButtons(){
   btnSummary.classList.remove('active');
   btnInstructors.classList.remove('active');
   if(btnEndDates) btnEndDates.classList.remove('active');
+  if(btnZoom) btnZoom.classList.remove('active');
 
   if(window.mode === 'month') btnMonth.classList.add('active');
   if(window.mode === 'week') btnWeek.classList.add('active');
   if(window.mode === 'summary') btnSummary.classList.add('active');
   if(window.mode === 'instructors') btnInstructors.classList.add('active');
   if(window.mode === 'enddates' && btnEndDates) btnEndDates.classList.add('active');
+  if(window.mode === 'zoom' && btnZoom) btnZoom.classList.add('active');
 }
 
 function endDate(r){
@@ -768,6 +782,7 @@ async function initFromRawData(){
 
   updateSchedulingButtonVisibility();
   updateEndDatesButtonVisibility();
+  updateZoomButtonVisibility();
 
   window.mode = (userRole === 'instructor') ? 'month' : 'summary';
 
@@ -888,9 +903,10 @@ function render(){
   view.classList.toggle('view-summary', window.mode === 'summary');
   view.classList.toggle('view-managers', window.mode === 'instructors');
   view.classList.toggle('view-enddates', window.mode === 'enddates');
+  view.classList.toggle('view-zoom', window.mode === 'zoom');
   closeSidePanel();
 
-  if(userRole === 'instructor' || window._dualViewMode === 'instructor' || window.mode === 'summary' || window.mode === 'instructors' || window.mode === 'enddates' || isMobile()){
+  if(userRole === 'instructor' || window._dualViewMode === 'instructor' || window.mode === 'summary' || window.mode === 'instructors' || window.mode === 'enddates' || window.mode === 'zoom' || isMobile()){
     filtersEl.style.display = 'none';
   }else{
     filtersEl.style.display = 'flex';
@@ -908,6 +924,9 @@ function render(){
   else if(window.mode==='enddates'){
     renderEndDates();
   }
+  else if(window.mode==='zoom'){
+    renderZoom();
+  }
   else{
     renderMonthView();
   }
@@ -915,7 +934,7 @@ function render(){
   updateNavButtons();
   updateModeButtons();
 
-  if(window.mode === 'month' || window.mode === 'enddates'){
+  if(window.mode === 'month' || window.mode === 'enddates' || window.mode === 'zoom'){
     goCalendar.style.display = 'none';
   } else {
     goCalendar.style.display = 'inline-flex';
@@ -2599,6 +2618,125 @@ if(btnEndDates){
     window.mode='enddates';
     render();
   };
+}
+
+if(btnZoom){
+  btnZoom.onclick = ()=>{
+    if(userRole === 'instructor' || window._dualViewMode === 'instructor') return;
+    window.mode='zoom';
+    render();
+  };
+}
+
+function renderZoom(){
+  titleEl.textContent = 'ניהול מפגשי ZOOM';
+
+  const TARGET_DAYS = [8, 9, 10, 11, 12, 13, 15, 16, 17, 18, 19, 22, 23];
+  const ZOOM_LINKS = [
+    { label: 'Z1', url: 'https://zoom.us/j/6023602336?omn=96962875568' },
+    { label: 'Z2', url: 'https://zoom.us/j/7601360450?omn=98989531483' },
+    { label: 'Z3', url: 'https://zoom.us/j/97448258082' }
+  ];
+  const HEBREW_DAYS = ['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];
+
+  const rawCourses = schedulingJson && Array.isArray(schedulingJson.courses)
+    ? schedulingJson.courses
+    : [];
+  const courses = normalizeData(rawCourses).filter(isCourse);
+
+  const dayGroups = TARGET_DAYS.map(dayNum => {
+    const date = new Date(2026, 2, dayNum);
+    const dayItems = courses.filter(course =>
+      (course.Dates || []).some(d =>
+        d instanceof Date &&
+        d.getFullYear() === 2026 &&
+        d.getMonth() === 2 &&
+        d.getDate() === dayNum
+      )
+    );
+    dayItems.sort((a, b) => (a.StartTime || '').localeCompare(b.StartTime || ''));
+    return { date, dayNum, items: dayItems };
+  });
+
+  const zoomButtonsHtml = ZOOM_LINKS.map(({label, url}) =>
+    `<button class="zoom-link-btn" data-url="${escapeHtml(url)}" type="button">${escapeHtml(label)}</button>`
+  ).join('');
+
+  const dayCardsHtml = dayGroups.map(({ date, dayNum, items }) => {
+    if(items.length === 0) return '';
+    const hebrewDay = HEBREW_DAYS[date.getDay()];
+    const dateStr = String(dayNum).padStart(2,'0') + '.03.26';
+    const dayTitle = 'יום ' + hebrewDay + ' \u2013 ' + dateStr;
+    const rows = items.map(course => `
+      <tr>
+        <td data-label="רשות">${escapeHtml(course.Authority || '\u2014')}</td>
+        <td data-label="בית ספר">${escapeHtml(course.School || '\u2014')}</td>
+        <td data-label="קורס">${escapeHtml(course.Program || '\u2014')}</td>
+        <td data-label="מדריך">${escapeHtml(course.Employee || '\u2014')}</td>
+        <td data-label="שעת התחלה">${escapeHtml(course.StartTime || '\u2014')}</td>
+        <td data-label="שעת סיום">${escapeHtml(course.EndTime || '\u2014')}</td>
+        <td data-label="הערות"><input class="zoom-notes-input" type="text" placeholder="\u05d4\u05e2\u05e8\u05d4..." dir="rtl" aria-label="\u05d4\u05e2\u05e8\u05d5\u05ea"></td>
+      </tr>
+    `).join('');
+    return `
+      <div class="zoom-day-card">
+        <div class="zoom-day-title">${escapeHtml(dayTitle)}</div>
+        <div class="zoom-table-wrap">
+          <table class="zoom-table">
+            <thead><tr>
+              <th>\u05e8\u05e9\u05d5\u05ea</th>
+              <th>\u05d1\u05d9\u05ea \u05e1\u05e4\u05e8</th>
+              <th>\u05e7\u05d5\u05e8\u05e1</th>
+              <th>\u05de\u05d3\u05e8\u05d9\u05da</th>
+              <th>\u05e9\u05e2\u05ea \u05d4\u05ea\u05d7\u05dc\u05d4</th>
+              <th>\u05e9\u05e2\u05ea \u05e1\u05d9\u05d5\u05dd</th>
+              <th>\u05d4\u05e2\u05e8\u05d5\u05ea</th>
+            </tr></thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  view.innerHTML = `
+    <div class="zoom-page">
+      <h2 class="zoom-page-title">\u05e0\u05d9\u05d4\u05d5\u05dc \u05de\u05e4\u05d2\u05e9\u05d9 ZOOM \u2013 \u05e7\u05d5\u05e8\u05e1\u05d9\u05dd</h2>
+      <p class="zoom-page-subtitle">\u05de\u05de\u05e9\u05e7 \u05dc\u05d4\u05db\u05e0\u05ea \u05e9\u05d9\u05d1\u05d5\u05e5 \u05de\u05e4\u05d2\u05e9\u05d9 \u05d6\u05d5\u05dd \u05dc\u05e7\u05d5\u05e8\u05e1\u05d9\u05dd \u05d1\u05d7\u05d5\u05d3\u05e9 \u05de\u05e8\u05e5</p>
+      <div class="zoom-links-bar">${zoomButtonsHtml}</div>
+      <div class="zoom-days-area">${dayCardsHtml || '<div class="zoom-empty">\u05d0\u05d9\u05df \u05e7\u05d5\u05e8\u05e1\u05d9\u05dd \u05dc\u05d4\u05e6\u05d2\u05d4</div>'}</div>
+    </div>
+  `;
+
+  view.querySelectorAll('.zoom-link-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const url = btn.dataset.url;
+      const origText = btn.textContent;
+      const showCopied = () => {
+        btn.textContent = '\u05d4\u05e7\u05d9\u05e9\u05d5\u05e8 \u05d4\u05d5\u05e2\u05ea\u05e7 \u2713';
+        setTimeout(() => { btn.textContent = origText; }, 1500);
+      };
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(url).then(showCopied).catch(() => {
+          const ta = document.createElement('textarea');
+          ta.value = url;
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          document.body.removeChild(ta);
+          showCopied();
+        });
+      } else {
+        const ta = document.createElement('textarea');
+        ta.value = url;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        showCopied();
+      }
+    });
+  });
 }
 
 function renderEndDates(){
