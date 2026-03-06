@@ -592,19 +592,25 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
   display:block;
   align-self:center;
   margin:25px auto;
-  padding:10px 20px;
-  font-size:15px;
-  font-weight:600;
-  background:linear-gradient(135deg,#4f46e5,#6366f1);
-  color:#ffffff;
+  padding:18px 36px;
+  font-size:16px;
+  font-weight:700;
+  background:linear-gradient(135deg,#f9a8d4,#fda4af);
+  color:#831843;
   border:none;
-  border-radius:8px;
+  border-radius:14px;
   cursor:pointer;
-  transition:transform .2s ease,box-shadow .2s ease;
+  box-shadow:0 6px 0 #e879a0, 0 8px 20px rgba(244,114,182,.35);
+  transition:transform .15s ease,box-shadow .15s ease;
+  letter-spacing:0.02em;
 }
 .instructor-hours-button:hover{
-  transform:translateY(-1px);
-  box-shadow:0 4px 10px rgba(0,0,0,.15);
+  transform:translateY(-3px);
+  box-shadow:0 9px 0 #e879a0, 0 12px 28px rgba(244,114,182,.45);
+}
+.instructor-hours-button:active{
+  transform:translateY(3px);
+  box-shadow:0 2px 0 #e879a0, 0 4px 10px rgba(244,114,182,.3);
 }
 .summary-action-btn:hover{
   box-shadow:0 4px 14px rgba(15,23,42,.1);
@@ -613,14 +619,15 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
 
 .summary-instructor-hours-panel,
 .instructor-hours-panel{
-  width:100%;
-  max-width:800px;
-  margin:30px auto;
+  width:fit-content;
+  min-width:260px;
+  max-width:420px;
+  margin:16px auto;
   background:rgba(255,255,255,.85);
   backdrop-filter:blur(6px);
   border:1px solid var(--border);
   border-radius:12px;
-  padding:20px;
+  padding:14px 18px;
   box-sizing:border-box;
   box-shadow:0 6px 20px rgba(0,0,0,.08);
 }
@@ -635,7 +642,7 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
 }
 
 .summary-instructor-hours-panel .table-container{
-  width:50%;
+  width:100%;
   margin:0 auto;
 }
 
