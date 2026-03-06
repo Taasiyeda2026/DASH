@@ -564,6 +564,63 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
   text-align: center;
 }
 
+.summary-action-btn{
+  align-self:flex-start;
+  background:#ffffff;
+  color:#0f172a;
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:10px 14px;
+  font-size:14px;
+  font-weight:700;
+  cursor:pointer;
+  transition:box-shadow .2s ease,transform .2s ease;
+}
+.summary-action-btn:hover{
+  box-shadow:0 4px 14px rgba(15,23,42,.1);
+  transform:translateY(-1px);
+}
+
+.summary-instructor-hours-panel{
+  width:100%;
+  background:#ffffff;
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:14px;
+  box-sizing:border-box;
+}
+
+.summary-instructor-hours-table{
+  width:100%;
+  border-collapse:collapse;
+  direction:rtl;
+  text-align:right;
+}
+
+.summary-instructor-hours-table th,
+.summary-instructor-hours-table td{
+  padding:10px 12px;
+  border-bottom:1px solid #e2e8f0;
+  color:#1e293b;
+  font-size:14px;
+}
+
+.summary-instructor-hours-table th{
+  background:#f8fafc;
+  font-weight:700;
+}
+
+.summary-instructor-hours-table tbody tr:last-child td{
+  border-bottom:none;
+}
+
+.summary-instructor-hours-empty{
+  color:#64748b;
+  text-align:center;
+  padding:14px 8px;
+  font-size:14px;
+}
+
 .kpi-total {
   background: #e0f2fe;
   color: #0369a1;

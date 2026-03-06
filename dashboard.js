@@ -1872,6 +1872,119 @@ function renderSummary(){
 
   const wrap = document.createElement('div');
   wrap.className = 'summary-wrapper';
+
+  const instructorHoursButton = document.createElement('button');
+  instructorHoursButton.type = 'button';
+  instructorHoursButton.className = 'summary-action-btn';
+  instructorHoursButton.textContent = '📊 שעות מדריכים החודש';
+  instructorHoursButton.setAttribute('aria-expanded', 'false');
+
+  const instructorHoursPanel = document.createElement('section');
+  instructorHoursPanel.className = 'summary-instructor-hours-panel';
+  instructorHoursPanel.hidden = true;
+
+  const monthSessions = [];
+
+  rawData.forEach(record => {
+    if(!isCourse(record)) return;
+
+    const instructorName = String(record.Employee || '').trim();
+    if(!instructorName) return;
+
+    const startText = String(record.StartTime || '').trim();
+    const endText = String(record.EndTime || '').trim();
+    if(!startText || !endText) return;
+
+    (record.Dates || []).forEach(date => {
+      if(!date) return;
+      if(date.getFullYear() !== currentYear || date.getMonth() !== currentMonth) return;
+
+      monthSessions.push({
+        employee: instructorName,
+        startTime: startText,
+        endTime: endText
+      });
+    });
+  });
+
+  const instructorHoursMap = {};
+
+  monthSessions.forEach(session => {
+    const [startHours, startMinutes] = session.startTime.split(':').map(Number);
+    const [endHours, endMinutes] = session.endTime.split(':').map(Number);
+
+    if(
+      Number.isNaN(startHours) ||
+      Number.isNaN(startMinutes) ||
+      Number.isNaN(endHours) ||
+      Number.isNaN(endMinutes)
+    ) return;
+
+    let startMinutesFromDayStart = (startHours * 60) + startMinutes;
+    let endMinutesFromDayStart = (endHours * 60) + endMinutes;
+
+    if(endMinutesFromDayStart < startMinutesFromDayStart){
+      endMinutesFromDayStart += 24 * 60;
+    }
+
+    const hours = (endMinutesFromDayStart - startMinutesFromDayStart) / 60;
+
+    if(!instructorHoursMap[session.employee]){
+      instructorHoursMap[session.employee] = { sessions: 0, hours: 0 };
+    }
+
+    instructorHoursMap[session.employee].sessions += 1;
+    instructorHoursMap[session.employee].hours += hours;
+  });
+
+  const instructorRows = Object.entries(instructorHoursMap)
+    .map(([name, totals]) => ({
+      name,
+      sessions: totals.sessions,
+      hours: totals.hours
+    }))
+    .sort((a,b) => b.hours - a.hours || b.sessions - a.sessions || a.name.localeCompare(b.name, 'he'));
+
+  if(instructorRows.length){
+    const tableWrap = document.createElement('div');
+    tableWrap.className = 'table-container';
+
+    const table = document.createElement('table');
+    table.className = 'summary-instructor-hours-table';
+    table.innerHTML = `
+      <thead>
+        <tr>
+          <th>מדריך</th>
+          <th>מספר מפגשים</th>
+          <th>סה״כ שעות</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${instructorRows.map(row => `
+          <tr>
+            <td>${escapeHtml(row.name)}</td>
+            <td>${row.sessions}</td>
+            <td>${row.hours.toFixed(1)}</td>
+          </tr>
+        `).join('')}
+      </tbody>
+    `;
+
+    tableWrap.appendChild(table);
+    instructorHoursPanel.appendChild(tableWrap);
+  } else {
+    const emptyState = document.createElement('div');
+    emptyState.className = 'summary-instructor-hours-empty';
+    emptyState.textContent = 'אין מפגשים עם שעות מוגדרות בחודש הנבחר.';
+    instructorHoursPanel.appendChild(emptyState);
+  }
+
+  instructorHoursButton.onclick = () => {
+    const willOpen = instructorHoursPanel.hidden;
+    instructorHoursPanel.hidden = !willOpen;
+    instructorHoursButton.setAttribute('aria-expanded', String(willOpen));
+  };
+
   wrap.innerHTML = `
     <div class="kpi-total">
       <div class="kpi-title">סה"כ קורסים פעילים</div>
@@ -1906,6 +2019,9 @@ function renderSummary(){
     </div>
     ` : ''}
   `;
+
+  wrap.insertAdjacentElement('afterbegin', instructorHoursPanel);
+  wrap.insertAdjacentElement('afterbegin', instructorHoursButton);
   const managers = [...new Set(rawData.filter(isCourse).map(r=>getCourseManager(r)).filter(Boolean))]
     .sort((a,b)=>a.localeCompare(b,'he'));
   
