@@ -166,9 +166,9 @@ function updateSchedulingButtonVisibility(){
     return;
   }
 
-  const id = String(window.EmployeeID || '').trim();
-
-  if(id === '6000' || id === '8000'){
+  // Show the scheduling button for all admins (not instructors)
+  const isAdmin = (userRole === 'admin' || userRole === 'both') && window._dualViewMode !== 'instructor';
+  if(isAdmin){
     btn.style.display = '';
   }else{
     btn.style.display = 'none';
