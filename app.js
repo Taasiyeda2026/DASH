@@ -136,6 +136,14 @@ async function login(){
   try{
     try{
       const json = await fetchJsonWithErrors(`./data/instructors/${hash}.json`);
+      // Check if this user also has a 'both' role admin file
+      try{
+        const adminJson = await fetchJsonWithErrors(`./data/admins/${hash}.json`);
+        if(!Array.isArray(adminJson) && adminJson.role === 'both'){
+          startApp(adminJson, 'admin', hash, remember);
+          return;
+        }
+      }catch(_){}
       startApp(json, 'instructor', hash, remember);
       return;
     }catch(e){
