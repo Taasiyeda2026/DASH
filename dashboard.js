@@ -2801,7 +2801,7 @@ function renderZoom() {
 
 function renderZoomCalendar(container, courses, days, hdays) {
   const DAY_START  = 8 * 60;
-  const DAY_END    = 18 * 60;
+  const DAY_END    = 16 * 60;
   const TOTAL_MINS = DAY_END - DAY_START;
 
   // Gather assigned items for this week
@@ -2851,7 +2851,7 @@ function renderZoomCalendar(container, courses, days, hdays) {
   // Time column
   const timeCol = document.createElement('div');
   timeCol.className = 'zoom-cal-timecol';
-  for (let h = 8; h <= 18; h++) {
+  for (let h = 8; h <= 16; h++) {
     const lbl = document.createElement('div');
     lbl.className = 'zoom-cal-timeslot-label';
     lbl.textContent = String(h).padStart(2, '0') + ':00';
@@ -2863,7 +2863,7 @@ function renderZoomCalendar(container, courses, days, hdays) {
   days.forEach(dayNum => {
     const col = document.createElement('div');
     col.className = 'zoom-cal-daycol';
-    for (let h = 8; h < 18; h++) {
+    for (let h = 8; h < 16; h++) {
       const slot = document.createElement('div');
       slot.className = 'zoom-cal-slot';
       col.appendChild(slot);
@@ -2883,11 +2883,16 @@ function renderZoomCalendar(container, courses, days, hdays) {
         block.style.setProperty('--ic-bg',     color);
         block.style.setProperty('--ic-border', color);
         const accLow = account.toLowerCase();
+        block.title = [
+          account,
+          course.Employee || '',
+          course.Program || '',
+          course.School || '',
+          (course.StartTime || '') + (course.EndTime ? '–' + course.EndTime : ''),
+        ].filter(Boolean).join(' | ');
         block.innerHTML =
           `<span class="zoom-account-badge zoom-account-badge-${accLow}">${account}</span>` +
-          `<strong class="zoom-cal-block-program">${escapeHtml(course.Program || '')}</strong>` +
-          `<span class="zoom-cal-block-employee">${escapeHtml(course.Employee || '')}</span>` +
-          `<span class="zoom-cal-block-school">${escapeHtml(course.School || '')}</span>`;
+          `<span class="zoom-cal-block-employee">${escapeHtml(course.Employee || '')}</span>`;
         col.appendChild(block);
       });
     body.appendChild(col);

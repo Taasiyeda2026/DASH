@@ -281,7 +281,7 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
 .zoom-week-arrow:hover:not(:disabled){background:#dbeafe;}
 .zoom-week-arrow:disabled{opacity:.35;cursor:default;}
 .zoom-week-label{font-size:16px;font-weight:800;color:#1e3a5f;min-width:200px;text-align:center;}
-.zoom-cal-grid{direction:rtl;border:1px solid #dbe4ef;border-radius:14px;overflow:hidden;background:#fff;box-shadow:0 1px 6px rgba(0,0,0,.05);}
+.zoom-cal-grid{direction:rtl;border:1px solid #dbe4ef;border-radius:14px;overflow-x:auto;overflow-y:hidden;background:#fff;box-shadow:0 1px 6px rgba(0,0,0,.05);}
 .zoom-cal-header{display:flex;border-bottom:2px solid #dbe4ef;}
 .zoom-cal-timecol-header{width:52px;min-width:52px;background:#f8fafc;}
 .zoom-cal-day-header{flex:1;padding:10px 6px;text-align:center;background:#f0f6ff;border-right:1px solid #dbe4ef;display:flex;flex-direction:column;gap:2px;}
@@ -290,12 +290,12 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
 .zoom-cal-body{display:flex;position:relative;}
 .zoom-cal-timecol{width:52px;min-width:52px;display:flex;flex-direction:column;}
 .zoom-cal-timeslot-label{flex:0 0 60px;height:60px;padding:4px 6px 0;font-size:11px;color:#94a3b8;text-align:center;border-bottom:1px solid #f1f5f9;}
-.zoom-cal-daycol{flex:1;position:relative;border-right:1px solid #dbe4ef;height:600px;}
+.zoom-cal-daycol{flex:1;min-width:200px;position:relative;border-right:1px solid #dbe4ef;height:480px;}
 .zoom-cal-slot{height:60px;border-bottom:1px solid #f1f5f9;}
-.zoom-cal-block{position:absolute;left:3px;right:3px;border-radius:8px;padding:5px 7px;font-size:11px;overflow:hidden;background:var(--ic-bg,#bfdbfe);border-right:3px solid var(--ic-border,#3b82f6);box-shadow:0 1px 4px rgba(0,0,0,.09);}
-.zoom-cal-block-program{display:block;font-weight:800;font-size:11px;line-height:1.3;margin-bottom:1px;}
-.zoom-cal-block-employee{display:block;font-size:10px;color:#334155;}
-.zoom-cal-block-school{display:block;font-size:10px;color:#64748b;}
+.zoom-cal-block{position:absolute;left:3px;right:3px;border-radius:8px;padding:5px 7px;font-size:11px;overflow:hidden;background:var(--ic-bg,#bfdbfe);border-right:3px solid var(--ic-border,#3b82f6);box-shadow:0 1px 4px rgba(0,0,0,.09);cursor:default;display:flex;flex-direction:column;align-items:flex-start;gap:2px;}
+.zoom-cal-block-program{display:none;}
+.zoom-cal-block-employee{display:block;font-size:11px;font-weight:700;color:#1e293b;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;}
+.zoom-cal-block-school{display:none;}
 .zoom-account-badge{display:inline-block;border-radius:5px;padding:1px 6px;font-size:10px;font-weight:800;margin-bottom:3px;}
 .zoom-account-badge-z1{background:#bfdbfe;color:#1e3a8a;}
 .zoom-account-badge-z2{background:#bbf7d0;color:#14532d;}
