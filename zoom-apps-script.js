@@ -24,7 +24,24 @@ const ZOOM_ASSIGNMENT_HEADERS = [
   'Notes'
 ];
 
-function doGet() {
+const COURSES_HEADERS = [
+  'Id',
+  'Date',
+  'Authority',
+  'School',
+  'Program',
+  'Employee',
+  'EmployeeID',
+  'StartTime',
+  'EndTime'
+];
+
+function doGet(e) {
+  const type = (e && e.parameter && e.parameter.type) || 'assignments';
+  if (type === 'courses') {
+    const rows = getSheetRowsAsObjects_(SHEETS.COURSES, COURSES_HEADERS);
+    return jsonResponse_(rows);
+  }
   const rows = getSheetRowsAsObjects_(SHEETS.ZOOM_ASSIGNMENTS, ZOOM_ASSIGNMENT_HEADERS);
   return jsonResponse_(rows);
 }
