@@ -284,7 +284,7 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
 .zoom-week-arrow:disabled{opacity:.35;cursor:default;}
 .zoom-week-label{font-size:13px;font-weight:800;color:#1e3a5f;min-width:170px;text-align:center;direction:ltr;unicode-bidi:isolate;}
 .zoom-calendar-container{width:1100px;margin:0 auto;}
-.zoom-cal-grid{width:100%;direction:ltr;border:1px solid #dbe4ef;border-radius:14px;overflow-x:auto;overflow-y:hidden;background:#fff;box-shadow:0 1px 6px rgba(0,0,0,.05);}
+.zoom-cal-grid{width:100%;direction:ltr;border:1px solid #dbe4ef;border-radius:14px;overflow-x:auto;overflow-y:visible;background:#fff;box-shadow:0 1px 6px rgba(0,0,0,.05);}
 .zoom-cal-header,
 .zoom-cal-body{
   display:grid;
@@ -298,10 +298,11 @@ select,button{height:32px;border:1px solid var(--border);border-radius:8px;backg
 .zoom-cal-body{position:relative;}
 .zoom-cal-timecol{display:flex;flex-direction:column;}
 .zoom-cal-timeslot-label{flex:0 0 72px;height:72px;padding:4px 6px 0;font-size:11px;color:#94a3b8;text-align:center;border-bottom:1px solid #f1f5f9;}
-.zoom-cal-daycol{position:relative;border-right:1px solid #dbe4ef;height:576px;flex:1;min-width:130px;}
+.zoom-cal-daycol{position:relative;border-right:1px solid #dbe4ef;min-height:576px;height:auto;flex:1;min-width:130px;}
 .zoom-cal-slot{height:72px;border-bottom:1px solid #f1f5f9;padding:2px;box-sizing:border-box;overflow:hidden;}
-.zoom-slot{display:flex;flex-direction:column;height:100%;max-height:100%;overflow:hidden;}
-.zoom-line{display:flex;align-items:center;gap:8px;padding:4px 8px;border-radius:8px;margin-bottom:4px;font-size:13px;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.zoom-cal-slot--crowded{height:auto;min-height:104px;overflow:visible;}
+.zoom-slot{display:flex;flex-direction:column;height:auto;max-height:none;overflow:visible;}
+.zoom-line{display:flex;align-items:center;gap:8px;padding:4px 8px;border-radius:8px;margin-bottom:4px;font-size:13px;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;}
 .zoom-line strong,.zoom-line span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .zoom-line strong{flex:0 0 auto;}
 .zoom-line span{flex:1 1 auto;min-width:0;}

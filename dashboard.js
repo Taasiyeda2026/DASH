@@ -3178,6 +3178,7 @@ function renderZoomCalendar(container, courses, days, hdays) {
           return (a.course.Employee || '').localeCompare(b.course.Employee || '', 'he');
         });
 
+      if (slotItems.length >= 3) slot.classList.add('zoom-cal-slot--crowded');
       if (slotItems.length) {
         const slotList = document.createElement('div');
         slotList.className = 'zoom-slot';
