@@ -3388,6 +3388,7 @@ function renderZoomPrep(container, courses, days, hdays) {
     assignBtn.className = 'zoom-assign-btn';
     assignBtn.textContent = 'שיבוץ';
     assignBtn.addEventListener('click', async () => {
+      if (!canAssignZoom()) { notifyZoomNoPermission(); return; }
       // Only assign checked rows
       const rowCheckboxes = Array.from(tbody.querySelectorAll('.zoom-row-select'));
       const selectedCourses = dayCourses.filter((_, i) => rowCheckboxes[i] && rowCheckboxes[i].checked);
