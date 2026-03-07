@@ -78,21 +78,18 @@ function createHourSelect(value){
   const select = document.createElement('select');
   select.className = 'zoom-time-select';
 
+  const blank = document.createElement('option');
+  blank.value = '';
+  blank.textContent = '—';
+  select.appendChild(blank);
+
   for(let h = 8; h <= 18; h++){
     const hour = String(h).padStart(2, '0') + ':00';
     const opt = document.createElement('option');
     opt.value = hour;
     opt.textContent = hour;
-
-    if(hour === value){
-      opt.selected = true;
-    }
-
+    if(hour === value) opt.selected = true;
     select.appendChild(opt);
-  }
-
-  if(!select.value){
-    select.value = '08:00';
   }
 
   return select;
@@ -3317,10 +3314,12 @@ function renderZoomPrep(container, courses, days, hdays) {
       tdEnd.setAttribute('data-label', 'סיום');
       const endInput = createHourSelect(asgn.endTime || course.EndTime);
 
-      if (!asgn.endTime) {
+      if (!asgn.endTime && startInput.value) {
         const startHour = parseInt(startInput.value.split(':')[0], 10);
-        const endHour = Math.min(startHour + 1, 18);
-        endInput.value = String(endHour).padStart(2, '0') + ':00';
+        if (!Number.isNaN(startHour)) {
+          const endHour = Math.min(startHour + 1, 18);
+          endInput.value = String(endHour).padStart(2, '0') + ':00';
+        }
       }
 
       asgn.startTime = startInput.value;
@@ -3353,7 +3352,8 @@ function renderZoomPrep(container, courses, days, hdays) {
       tdNotes.setAttribute('data-label', 'הערות');
       const inp = document.createElement('input');
       inp.type = 'text'; inp.className = 'zoom-notes-input'; inp.dir = 'rtl';
-      inp.placeholder = 'הערה...'; inp.value = asgn.notes || '';
+      inp.placeholder = 'הערה...'; inp.value = asgn.notes || course.Notes || '';
+      if (!asgn.notes && course.Notes) asgn.notes = course.Notes;
       inp.addEventListener('input', async () => {
         window.zoomAssignments[key].notes = inp.value;
         await persistZoomAssignment(dayNum, course);

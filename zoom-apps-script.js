@@ -33,7 +33,8 @@ const COURSES_HEADERS = [
   'Employee',
   'EmployeeID',
   'StartTime',
-  'EndTime'
+  'EndTime',
+  'Notes'
 ];
 
 function doGet(e) {
