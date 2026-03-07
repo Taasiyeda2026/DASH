@@ -3254,6 +3254,7 @@ function renderZoomPrep(container, courses, days, hdays) {
     const thead = document.createElement('thead');
     thead.innerHTML =
       '<tr>' +
+      '<th style="width:2rem"><input type="checkbox" class="zoom-select-all" title="סמן הכל"></th>' +
       '<th>ZOOM</th>' +
       '<th>רשות</th>' +
       '<th>בית ספר</th>' +
@@ -3278,6 +3279,15 @@ function renderZoomPrep(container, courses, days, hdays) {
       const tr = document.createElement('tr');
       if (asgn.account)   tr.classList.add('zoom-assigned-row');
       if (asgn.conflict)  tr.classList.add('zoom-conflict-row');
+
+      // Checkbox cell
+      const tdCheck = document.createElement('td');
+      tdCheck.style.textAlign = 'center';
+      const chk = document.createElement('input');
+      chk.type = 'checkbox';
+      chk.className = 'zoom-row-select';
+      tdCheck.appendChild(chk);
+      tr.appendChild(tdCheck);
 
       // ZOOM cell: account badge
       const tdZoom = document.createElement('td');
@@ -3363,12 +3373,36 @@ function renderZoomPrep(container, courses, days, hdays) {
     tableWrap.appendChild(table);
     card.appendChild(tableWrap);
 
+    // Wire select-all checkbox
+    const selectAllChk = thead.querySelector('.zoom-select-all');
+    if (selectAllChk) {
+      selectAllChk.addEventListener('change', () => {
+        tbody.querySelectorAll('.zoom-row-select').forEach(c => { c.checked = selectAllChk.checked; });
+      });
+      tbody.querySelectorAll('.zoom-row-select').forEach(c => {
+        c.addEventListener('change', () => {
+          const all  = Array.from(tbody.querySelectorAll('.zoom-row-select'));
+          selectAllChk.checked      = all.every(x => x.checked);
+          selectAllChk.indeterminate = !selectAllChk.checked && all.some(x => x.checked);
+        });
+      });
+    }
+
     // Assign button
     const assignBtn = document.createElement('button');
     assignBtn.type = 'button';
     assignBtn.className = 'zoom-assign-btn';
     assignBtn.textContent = 'שיבוץ';
     assignBtn.addEventListener('click', async () => {
+      // Only assign checked rows
+      const rowCheckboxes = Array.from(tbody.querySelectorAll('.zoom-row-select'));
+      const selectedCourses = dayCourses.filter((_, i) => rowCheckboxes[i] && rowCheckboxes[i].checked);
+
+      if (!selectedCourses.length) {
+        alert('יש לסמן לפחות קורס אחד לשיבוץ');
+        return;
+      }
+
       assignBtn.disabled = true;
       assignBtn.textContent = 'מבצע שיבוץ...';
 
@@ -3376,8 +3410,8 @@ function renderZoomPrep(container, courses, days, hdays) {
       const freshAssignments = await loadZoomAssignmentsFromGoogle();
       window.zoomAssignments = mapZoomAssignmentsByCourseKey(freshAssignments);
 
-      // Ensure all day courses have an entry in window.zoomAssignments
-      dayCourses.forEach(c => {
+      // Ensure selected courses have an entry in window.zoomAssignments
+      selectedCourses.forEach(c => {
         const k = zoomCourseId(dayNum, c);
         if (!window.zoomAssignments[k]) {
           window.zoomAssignments[k] = { account: null, notes: '', startTime: c.StartTime || '', endTime: c.EndTime || '', conflict: false };
@@ -3387,8 +3421,8 @@ function renderZoomPrep(container, courses, days, hdays) {
         }
       });
 
-      // Perform assignment and save to Google Sheets
-      await autoAssignZoomDay(dayNum, dayCourses);
+      // Perform assignment only for selected courses and save to Google Sheets
+      await autoAssignZoomDay(dayNum, selectedCourses);
 
       assignBtn.textContent = 'שיבוץ';
       assignBtn.disabled = false;
