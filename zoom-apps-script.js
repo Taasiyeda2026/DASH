@@ -47,7 +47,7 @@ function doGet(e) {
 }
 
 function doPost(e) {
-  const payload = parseJsonBody_(e);
+  const payload = parsePostData_(e);
   const normalized = {
     CourseId: String(payload.CourseId || '').trim(),
     Date: String(payload.Date || '').trim(),
@@ -133,13 +133,20 @@ function getSheetByName_(sheetName) {
   return sheet;
 }
 
-function parseJsonBody_(e) {
-  if (!e || !e.postData || !e.postData.contents) return {};
-  try {
-    return JSON.parse(e.postData.contents);
-  } catch (err) {
-    throw new Error('Invalid JSON body');
+function parsePostData_(e) {
+  // URLSearchParams (application/x-www-form-urlencoded) → e.parameter
+  if (e && e.parameter && Object.keys(e.parameter).length > 0) {
+    return e.parameter;
   }
+  // Fallback: JSON body
+  if (e && e.postData && e.postData.contents) {
+    try {
+      return JSON.parse(e.postData.contents);
+    } catch (err) {
+      return {};
+    }
+  }
+  return {};
 }
 
 function jsonResponse_(data) {

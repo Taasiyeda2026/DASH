@@ -27,22 +27,9 @@ function escapeHtml(str){
     .replace(/'/g,"&#039;");
 }
 
-const API_URL = "https://script.google.com/macros/s/AKfycbz0jg3L48I1RaNefQmNywszGa3qTuPj6gPGnNiN2S31yTOibFzYQ94yj5GwjaiW9ZIXdg/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbzRs3A6xmOIXxv3LUy2xZoiFXDSZEiKQqq6veGeTrOpwu8bWmA7BYm9Ldfuz2WVOPIbrw/exec";
 async function saveZoomScheduling(data){
-  try{
-    const res = await fetch(API_URL, {
-      method: "POST",
-      headers:{
-        "Content-Type":"application/json"
-      },
-      body: JSON.stringify(data)
-    });
-
-    const result = await res.json();
-    console.log("Saved to Google Sheet", result);
-  }catch(err){
-    console.error("Save error", err);
-  }
+  return saveZoomAssignment(data);
 }
 
 function normalizeData(data){
@@ -2748,15 +2735,22 @@ async function loadZoomAssignmentsFromGoogle() {
 }
 async function saveZoomAssignment(data){
   try {
-    await fetch(API_URL, {
-      method:"POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(data)
-    });
+    const body = new URLSearchParams();
+    body.append("CourseId",   data.CourseId   || "");
+    body.append("Date",       data.Date       || "");
+    body.append("Program",    data.Program    || "");
+    body.append("Employee",   data.Employee   || "");
+    body.append("EmployeeID", data.EmployeeID || "");
+    body.append("StartTime",  data.StartTime  || "");
+    body.append("EndTime",    data.EndTime    || "");
+    body.append("ZoomAccount",data.ZoomAccount|| "");
+    body.append("Notes",      data.Notes      || "");
+    const res = await fetch(API_URL, { method: "POST", body });
+    const result = await res.json();
+    return result;
   } catch(err){
     console.error("Failed saving zoom assignment", err);
+    throw err;
   }
 }
 
