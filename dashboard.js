@@ -988,8 +988,7 @@ async function render(){
     renderEndDates();
   }
   else if(window.mode==='zoom'){
-    await ensureZoomAssignmentsLoaded();
-    renderZoom();
+    await renderZoom();
   }
   else{
     renderMonthView();
@@ -2725,6 +2724,28 @@ async function loadZoomAssignments(){
     return [];
   }
 }
+async function loadCoursesFromGoogle() {
+  try {
+    const res = await fetch(API_URL + '?type=courses', { cache: 'no-store' });
+    const data = await res.json();
+    return Array.isArray(data) ? data : [];
+  } catch(err) {
+    console.error('Failed loading courses from Google', err);
+    return [];
+  }
+}
+async function loadZoomAssignmentsFromGoogle() {
+  try {
+    const res = await fetch(API_URL + '?type=assignments', { cache: 'no-store' });
+    const data = await res.json();
+    window.zoomReadOnlyMode = false;
+    return Array.isArray(data) ? data : [];
+  } catch(err) {
+    console.error('Failed loading zoom assignments from Google', err);
+    window.zoomReadOnlyMode = true;
+    return [];
+  }
+}
 async function saveZoomAssignment(data){
   try {
     await fetch(API_URL, {
@@ -2807,7 +2828,7 @@ async function persistZoomAssignment(dayNum, course){
   const endTime = assignment.endTime || course.EndTime || '';
   await saveZoomAssignment({
     CourseId: courseKey,
-    Date: zoomDateString(dayNum),
+    Date: course.Date || zoomDateString(dayNum),
     Program: course.Program || '',
     Employee: course.Employee || '',
     EmployeeID: String(course.EmployeeID || ''),
@@ -2919,9 +2940,8 @@ async function autoAssignZoomDay(dayNum, dayCourses) {
 }
 // ─── End ZOOM helpers ─────────────────────────────────────────────────────────
 
-function renderZoom() {
+async function renderZoom() {
   titleEl.textContent = 'ניהול מפגשי ZOOM';
-  if (!window.zoomAssignments) window.zoomAssignments = {};
   if (window.zoomWeekPage === undefined) window.zoomWeekPage = 0;
   if (!window.zoomSubView) window.zoomSubView = 'calendar';
 
@@ -2937,7 +2957,15 @@ function renderZoom() {
   };
   const HDAYS = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
 
-  const courses = rawData.filter(isCourse);
+  // Load fresh data from Google Sheets
+  const [googleCourses, rawAssignments] = await Promise.all([
+    loadCoursesFromGoogle(),
+    loadZoomAssignmentsFromGoogle()
+  ]);
+  window.zoomGoogleCourses = googleCourses;
+  window.zoomAssignments = mapZoomAssignmentsByCourseKey(rawAssignments);
+
+  const courses = googleCourses;
   const currentPage = WEEK_PAGES[window.zoomWeekPage];
   const weekRangeLabel = formatZoomWeekRange(currentPage.days);
 
@@ -3081,19 +3109,18 @@ function renderZoomCalendar(container, courses, days, hdays) {
   // Gather assigned items for this week
   const assignedItems = [];
   displayDays.forEach(dayNum => {
-    const dayCourses = courses.filter(c =>
-      (c.Dates || []).some(d =>
-        d instanceof Date && d.getFullYear() === 2026 && d.getMonth() === 2 && d.getDate() === dayNum
-      )
-    );
+    const dateStr = zoomDateString(dayNum);
+    const dayCourses = courses.filter(c => String(c.Date || '').trim() === dateStr);
     dayCourses.forEach(course => {
       const asgn = window.zoomAssignments[zoomCourseId(dayNum, course)];
       if (asgn && asgn.account) {
+        const startMin = zoomTimeToMinutes(asgn.startTime || course.StartTime);
+        const endMin   = zoomTimeToMinutes(asgn.endTime   || course.EndTime);
         assignedItems.push({
           dayNum, course, account: asgn.account,
           courseId: zoomCourseId(dayNum, course),
-          startMin: zoomTimeToMinutes(course.StartTime),
-          endMin:   zoomTimeToMinutes(course.EndTime),
+          startMin,
+          endMin,
         });
       }
     });
@@ -3203,13 +3230,10 @@ function renderZoomPrep(container, courses, days, hdays) {
 
   days.forEach(dayNum => {
     const date = new Date(2026, 2, dayNum);
-    const dateStr = String(dayNum).padStart(2, '0') + '.03.26';
+    const displayDate = String(dayNum).padStart(2, '0') + '.03.26';
+    const dateStr = zoomDateString(dayNum);
     const dayCourses = courses
-      .filter(c =>
-        (c.Dates || []).some(d =>
-          d instanceof Date && d.getFullYear() === 2026 && d.getMonth() === 2 && d.getDate() === dayNum
-        )
-      )
+      .filter(c => String(c.Date || '').trim() === dateStr)
       .slice()
       .sort((a, b) => (a.StartTime || '').localeCompare(b.StartTime || ''));
 
@@ -3220,7 +3244,7 @@ function renderZoomPrep(container, courses, days, hdays) {
 
     const titleDiv = document.createElement('div');
     titleDiv.className = 'zoom-day-title';
-    titleDiv.textContent = 'יום ' + hdays[date.getDay()] + ' – ' + dateStr;
+    titleDiv.textContent = 'יום ' + hdays[date.getDay()] + ' – ' + displayDate;
     card.appendChild(titleDiv);
 
     const tableWrap = document.createElement('div');
@@ -3347,28 +3371,29 @@ function renderZoomPrep(container, courses, days, hdays) {
     assignBtn.addEventListener('click', async () => {
       assignBtn.disabled = true;
       assignBtn.textContent = 'מבצע שיבוץ...';
-      let assignedCount = 0;
-      await autoAssignZoomDay(dayNum, dayCourses);
-      const rows = Array.from(tbody.querySelectorAll('tr'));
-      dayCourses.forEach((course, i) => {
-        const k = zoomCourseId(dayNum, course);
-        const a = window.zoomAssignments[k] || {};
-        const tr = rows[i];
-        if (!tr) return;
-        tr.classList.toggle('zoom-assigned-row', !!a.account);
-        tr.classList.toggle('zoom-conflict-row',  !!a.conflict);
-        const badgeEl = tr.querySelector('.zoom-account-badge');
-        if (badgeEl) {
-          badgeEl.textContent = a.account || '';
-          badgeEl.className = 'zoom-account-badge' +
-            (a.account ? ' zoom-account-badge-' + a.account.toLowerCase() : '');
+
+      // Load fresh assignments from Google before assigning
+      const freshAssignments = await loadZoomAssignmentsFromGoogle();
+      window.zoomAssignments = mapZoomAssignmentsByCourseKey(freshAssignments);
+
+      // Ensure all day courses have an entry in window.zoomAssignments
+      dayCourses.forEach(c => {
+        const k = zoomCourseId(dayNum, c);
+        if (!window.zoomAssignments[k]) {
+          window.zoomAssignments[k] = { account: null, notes: '', startTime: c.StartTime || '', endTime: c.EndTime || '', conflict: false };
+        } else {
+          if (!window.zoomAssignments[k].startTime) window.zoomAssignments[k].startTime = c.StartTime || '';
+          if (!window.zoomAssignments[k].endTime)   window.zoomAssignments[k].endTime   = c.EndTime   || '';
         }
-        if (a.account) assignedCount += 1;
       });
+
+      // Perform assignment and save to Google Sheets
+      await autoAssignZoomDay(dayNum, dayCourses);
+
       assignBtn.textContent = 'שיבוץ';
       assignBtn.disabled = false;
-      alert(assignedCount ? `בוצע שיבוץ ל-${assignedCount} שיעורים` : 'השיבוץ הושלם');
-      renderZoom();
+      alert('השיבוץ הושלם');
+      await renderZoom();
     });
     card.appendChild(assignBtn);
     area.appendChild(card);
