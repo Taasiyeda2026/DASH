@@ -74,30 +74,14 @@ function toDateAndTimeSortable(item, date, start) {
   };
 }
 
-function createTimeInput(value){
-  const input = document.createElement('input');
-  input.type = 'time';
-  input.className = 'zoom-time-select';
-  input.step = 60;
-  input.value = normalizeZoomTime(value || '');
-  return input;
-}
+const ZOOM_HOUR_OPTIONS = Array.from({ length: 24 }, (_, hour) => {
+  const value = `${String(hour).padStart(2, '0')}:00`;
+  return { label: value, value };
+});
 
-const ZOOM_PROGRAMS = [
-  'בינה מלאכותית',
-  'ביומימיקרי',
-  'ביומימיקרי לחטיבה',
-  'השמיים אינם הגבול',
-  'התנסות בתעשייה',
-  'טכנולוגיות החלל',
-  'יישומי AI',
-  'מייקרים',
-  'מנהיגות ירוקה',
-  'משחקי קופסה',
-  'פורצות דרך',
-  'רוקחים עולם',
-  'תלמידים להייטק',
-];
+function createTimeInput(value){
+  return createZoomSelect(ZOOM_HOUR_OPTIONS, normalizeZoomTime(value || ''));
+}
 
 rawData = normalizeData(rawData);
 
@@ -2875,14 +2859,16 @@ async function getZoomData(forceReload = false){
       assignments: window.zoomDataCache.assignments || {},
       employees: window.zoomDataCache.employees || [],
       authorities: window.zoomDataCache.authorities || [],
-      schools: window.zoomDataCache.schools || []
+      schools: window.zoomDataCache.schools || [],
+      courses: window.zoomDataCache.courses || []
     };
   }
-  const [rawAssignments, employees, authorities, schools] = await Promise.all([
+  const [rawAssignments, employees, authorities, schools, courses] = await Promise.all([
     loadZoomAssignmentsFromGoogle(),
     loadEmployeesFromGoogle(),
     loadAuthoritiesFromGoogle(),
-    loadSchoolsFromGoogle()
+    loadSchoolsFromGoogle(),
+    loadCoursesFromGoogle()
   ]);
   const assignments = mapZoomAssignmentsByCourseKey(rawAssignments);
   window.zoomDataCache.assignmentsRows = rawAssignments;
@@ -2890,9 +2876,10 @@ async function getZoomData(forceReload = false){
   window.zoomDataCache.employees = employees;
   window.zoomDataCache.authorities = authorities;
   window.zoomDataCache.schools = schools;
+  window.zoomDataCache.courses = courses;
   window.zoomDataCache.loaded = true;
   console.log('[ZOOM] loaded assignments:', Array.isArray(rawAssignments) ? rawAssignments.length : 0);
-  return { assignmentsRows: rawAssignments, assignments, employees, authorities, schools };
+  return { assignmentsRows: rawAssignments, assignments, employees, authorities, schools, courses };
 }
 async function loadEmployeesFromGoogle() {
   try {
@@ -2929,6 +2916,21 @@ async function loadSchoolsFromGoogle() {
     return schools;
   } catch(err) {
     console.error('Failed loading schools from Google', err);
+    return [];
+  }
+}
+
+async function loadCoursesFromGoogle() {
+  try {
+    const res = await fetch(`${API_URL}?type=courses&v=${Date.now()}`, { cache: 'no-store' });
+    const courses = parseGoogleListArray(await res.json())
+      .filter(zoomIsActive)
+      .map(row => ({ label: String(row.Program || '').trim(), value: String(row.Program || '').trim() }))
+      .filter(row => row.value);
+    console.log('[TEMP] courses raw:', courses);
+    return courses;
+  } catch(err) {
+    console.error('Failed loading courses from Google', err);
     return [];
   }
 }
@@ -3069,10 +3071,10 @@ async function persistZoomAssignment(dayNum, course){
     const dateInput = row.querySelector('input[type="date"]');
     const authorityInput = row.querySelector('td[data-label="רשות"] select');
     const schoolInput = row.querySelector('td[data-label="בית ספר"] select');
-    const programSelect = row.querySelector('td[data-label="תוכנית"] input');
+    const programSelect = row.querySelector('td[data-label="תוכנית"] select');
     const employeeSelect = row.querySelector('td[data-label="מדריך"] select');
-    const startSelect = row.querySelector('.zoom-col-start input[type="time"]');
-    const endSelect = row.querySelector('.zoom-col-end input[type="time"]');
+    const startSelect = row.querySelector('.zoom-col-start select');
+    const endSelect = row.querySelector('.zoom-col-end select');
     const notesInput = row.querySelector('.zoom-notes-input');
     const selectedEmployee = employeeSelect?.selectedOptions?.[0];
 
@@ -3247,11 +3249,12 @@ async function renderZoom() {
   };
   const HDAYS = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
 
-  const { assignmentsRows, assignments, employees, authorities, schools } = await getZoomData(false);
+  const { assignmentsRows, assignments, employees, authorities, schools, courses: programs } = await getZoomData(false);
   window.zoomAssignments = assignments;
   window.zoomEmployees = employees;
   window.zoomAuthorities = authorities;
   window.zoomSchools = schools;
+  window.zoomPrograms = programs;
 
   const courses = (assignmentsRows || []).map(c => ({
     ...c,
@@ -3664,10 +3667,9 @@ async function addNewZoomRow(dayNum, tbody, defaultDate) {
   tdSchool.appendChild(schoolSelect); tr.appendChild(tdSchool);
 
   const tdProg = document.createElement('td'); tdProg.setAttribute('data-label', 'תוכנית');
-  const progInput = document.createElement('input'); progInput.type = 'text'; progInput.className = 'zoom-field-input'; progInput.dir = 'rtl';
-  progInput.addEventListener('input', () => { asgn.program = progInput.value; });
-  progInput.addEventListener('blur', async () => { await persistZoomAssignment(dayNum, course); });
-  tdProg.appendChild(progInput); tr.appendChild(tdProg);
+  const progSelect = createZoomSelect(window.zoomPrograms || [], '');
+  progSelect.addEventListener('change', async () => { asgn.program = progSelect.value; await persistZoomAssignment(dayNum, course); });
+  tdProg.appendChild(progSelect); tr.appendChild(tdProg);
 
   const tdEmp = document.createElement('td'); tdEmp.setAttribute('data-label', 'מדריך');
   const empSelect = createZoomSelect((window.zoomEmployees || []).filter(zoomIsActive).map(e => ({ value: e.Employee, label: e.Employee, id: e.EmployeeID })), '');
@@ -3684,7 +3686,7 @@ async function addNewZoomRow(dayNum, tbody, defaultDate) {
   const endInput = createTimeInput('');
   startInput.addEventListener('change', async () => {
     const h = parseInt(startInput.value.split(':')[0], 10);
-    if (!Number.isNaN(h)) endInput.value = String(Math.min(h + 1, 18)).padStart(2, '0') + ':00';
+    if (!Number.isNaN(h)) endInput.value = String(Math.min(h + 1, 23)).padStart(2, '0') + ':00';
     asgn.startTime = startInput.value; asgn.endTime = endInput.value;
     await persistZoomAssignment(dayNum, course);
   });
@@ -3847,16 +3849,12 @@ function renderZoomPrep(container, courses, days, hdays) {
       // Program cell
       const tdProg = document.createElement('td');
       tdProg.setAttribute('data-label', 'תוכנית');
-      const progInput = document.createElement('input');
-      progInput.type = 'text'; progInput.className = 'zoom-field-input'; progInput.dir = 'rtl';
-      progInput.value = asgn.program || course.Program || '';
-      progInput.addEventListener('input', () => {
-        asgn.program = progInput.value;
-      });
-      progInput.addEventListener('blur', async () => {
+      const progSelect = createZoomSelect(window.zoomPrograms || [], asgn.program || course.Program || '');
+      progSelect.addEventListener('change', async () => {
+        asgn.program = progSelect.value;
         await persistZoomAssignment(dayNum, course);
       });
-      tdProg.appendChild(progInput);
+      tdProg.appendChild(progSelect);
       tr.appendChild(tdProg);
 
       // Employee dropdown cell
@@ -3885,7 +3883,7 @@ function renderZoomPrep(container, courses, days, hdays) {
       if (!asgn.endTime && startInput.value) {
         const startHour = parseInt(startInput.value.split(':')[0], 10);
         if (!Number.isNaN(startHour)) {
-          const endHour = Math.min(startHour + 1, 18);
+          const endHour = Math.min(startHour + 1, 23);
           endInput.value = String(endHour).padStart(2, '0') + ':00';
         }
       }
@@ -3896,7 +3894,7 @@ function renderZoomPrep(container, courses, days, hdays) {
       startInput.addEventListener('change', async () => {
         const startHour = parseInt(startInput.value.split(':')[0], 10);
         if (!Number.isNaN(startHour)) {
-          const endHour = Math.min(startHour + 1, 18);
+          const endHour = Math.min(startHour + 1, 23);
           endInput.value = String(endHour).padStart(2, '0') + ':00';
         }
         asgn.startTime = startInput.value;
@@ -3982,10 +3980,10 @@ function renderZoomPrep(container, courses, days, hdays) {
         const dateInput = row.querySelector('input[type="date"]');
         const authorityInput = row.querySelector('td[data-label="רשות"] select');
         const schoolInput = row.querySelector('td[data-label="בית ספר"] select');
-        const programSelect = row.querySelector('td[data-label="תוכנית"] input');
+        const programSelect = row.querySelector('td[data-label="תוכנית"] select');
         const employeeSelect = row.querySelector('td[data-label="מדריך"] select');
-        const startSelect = row.querySelector('.zoom-col-start input[type="time"]');
-        const endSelect = row.querySelector('.zoom-col-end input[type="time"]');
+        const startSelect = row.querySelector('.zoom-col-start select');
+        const endSelect = row.querySelector('.zoom-col-end select');
         const notesInput = row.querySelector('.zoom-notes-input');
         const selectedEmployee = employeeSelect?.selectedOptions?.[0];
         if (dateInput) asgn.date = dateInput.value || asgn.date || '';
