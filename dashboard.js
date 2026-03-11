@@ -27,7 +27,7 @@ function escapeHtml(str){
     .replace(/'/g,"&#039;");
 }
 
-const API_URL = "https://script.google.com/macros/s/AKfycbw1XC2VXYx2NRh4pfJZahOPD5zu6uqQH9XdFNfQKD94KsFIImEpQFLlDGEGpbwunk0WxQ/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbwYB3IVtFnLfMNgEaAtpNkEO6XwZjPtUGMcRdy4S00f7Pr3RPrR-pTzUrO7PEn_bVeu4A/exec";
 async function saveZoomScheduling(data){
   return saveZoomAssignment(data);
 }
