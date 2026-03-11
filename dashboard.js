@@ -2930,8 +2930,10 @@ async function loadZoomAssignments(){
 async function loadEmployeesFromGoogle() {
   try {
     const res = await fetch(`${API_URL}?type=employees&v=${Date.now()}`, { cache: 'no-store' });
-    const data = await res.json();
-    return Array.isArray(data) ? data : [];
+    const json = await res.json();
+    console.log('[TEMP] loadEmployeesFromGoogle response:', json);
+    if (!json.ok) return [];
+    return Array.isArray(json.data) ? json.data : [];
   } catch(err) {
     console.error('Failed loading employees from Google', err);
     return [];
@@ -2941,8 +2943,10 @@ async function loadEmployeesFromGoogle() {
 async function loadAuthoritiesFromGoogle() {
   try {
     const res = await fetch(`${API_URL}?type=authorities&v=${Date.now()}`, { cache: 'no-store' });
-    const data = await res.json();
-    return Array.isArray(data) ? data : [];
+    const json = await res.json();
+    console.log('[TEMP] loadAuthoritiesFromGoogle response:', json);
+    if (!json.ok) return [];
+    return Array.isArray(json.data) ? json.data : [];
   } catch(err) {
     console.error('Failed loading authorities from Google', err);
     return [];
@@ -2952,8 +2956,10 @@ async function loadAuthoritiesFromGoogle() {
 async function loadSchoolsFromGoogle() {
   try {
     const res = await fetch(`${API_URL}?type=schools&v=${Date.now()}`, { cache: 'no-store' });
-    const data = await res.json();
-    return Array.isArray(data) ? data : [];
+    const json = await res.json();
+    console.log('[TEMP] loadSchoolsFromGoogle response:', json);
+    if (!json.ok) return [];
+    return Array.isArray(json.data) ? json.data : [];
   } catch(err) {
     console.error('Failed loading schools from Google', err);
     return [];
@@ -2962,9 +2968,11 @@ async function loadSchoolsFromGoogle() {
 async function loadZoomAssignmentsFromGoogle() {
   try {
     const res = await fetch(`${API_URL}?type=assignments&v=${Date.now()}`, { cache: 'no-store' });
-    const data = await res.json();
+    const json = await res.json();
+    console.log('[TEMP] loadZoomAssignmentsFromGoogle response:', json);
+    if (!json.ok) return [];
     window.zoomReadOnlyMode = false;
-    return Array.isArray(data) ? data : [];
+    return Array.isArray(json.data) ? json.data : [];
   } catch(err) {
     console.error('Failed loading zoom assignments from Google', err);
     window.zoomReadOnlyMode = true;
