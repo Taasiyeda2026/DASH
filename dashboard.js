@@ -2722,24 +2722,13 @@ function zoomCourseKey(dayNum, course) {
   ].map(v => String(v || '').trim()).join('|');
 }
 function zoomCourseId(dayNum, course){
-  const directId = course?.RowId ?? course?.rowId ?? course?.Id ?? course?.id;
-  if(directId != null && String(directId).trim() !== '') return String(directId).trim();
-  return zoomCourseKey(dayNum, course);
-}
-
-function zoomPersistentCourseId(course, assignment){
-  const fromAssignment = assignment?.rowId ?? assignment?.courseId;
-  if(fromAssignment != null && String(fromAssignment).trim() !== '') return String(fromAssignment).trim();
-
-  const directId = course?.RowId ?? course?.rowId ?? course?.Id ?? course?.id;
-  if(directId != null && String(directId).trim() !== '') return String(directId).trim();
-
-  return '';
+  const rowId = course?.RowId ?? course?.rowId;
+  if(rowId == null) return '';
+  return String(rowId).trim();
 }
 
 function clearZoomCache(){
   window.zoomDataCache = null;
-  window.zoomGoogleCourses = [];
   window.zoomAssignments = {};
   window.zoomReadOnlyMode = false;
 }
@@ -2810,12 +2799,42 @@ function normalizeZoomTime(value){
 function getZoomEmployeeMap(){
   if(window.zoomDataCache?.employeeMap) return window.zoomDataCache.employeeMap;
   const employeeMap = {};
-  rawData.forEach(r => {
-    if(r.Employee && r.EmployeeID) employeeMap[r.Employee] = String(r.EmployeeID);
-  });
+  const employees = Array.isArray(window.zoomEmployees) ? window.zoomEmployees : [];
+  employees
+    .filter(emp => String(emp?.Active ?? '').trim().toLowerCase() !== 'false' && String(emp?.Active ?? '').trim() !== '0')
+    .forEach(emp => {
+      const name = String(emp?.Employee || '').trim();
+      const id = String(emp?.EmployeeID || '').trim();
+      if(name) employeeMap[name] = id;
+    });
   if(!window.zoomDataCache) window.zoomDataCache = {};
   window.zoomDataCache.employeeMap = employeeMap;
   return employeeMap;
+}
+
+function zoomIsActive(item){
+  const active = String(item?.Active ?? '').trim().toLowerCase();
+  if(!active) return true;
+  return active !== 'false' && active !== '0' && active !== 'no';
+}
+
+function createZoomSelect(options, value){
+  const select = document.createElement('select');
+  select.className = 'zoom-emp-select';
+  select.dir = 'rtl';
+  const blank = document.createElement('option');
+  blank.value = '';
+  blank.textContent = '— בחר —';
+  select.appendChild(blank);
+  options.forEach(opt => {
+    const option = document.createElement('option');
+    option.value = opt.value;
+    option.textContent = opt.label;
+    if(opt.id) option.dataset.id = opt.id;
+    select.appendChild(option);
+  });
+  select.value = value || '';
+  return select;
 }
 
 function updateZoomAssignmentState(courseKey, patch){
@@ -2872,30 +2891,28 @@ async function getZoomData(forceReload = false){
   if(!window.zoomDataCache) window.zoomDataCache = {};
   if(!forceReload && window.zoomDataCache.loaded){
     return {
-      courses: window.zoomDataCache.courses || [],
+      assignmentsRows: window.zoomDataCache.assignmentsRows || [],
       assignments: window.zoomDataCache.assignments || {},
       employees: window.zoomDataCache.employees || [],
       authorities: window.zoomDataCache.authorities || [],
       schools: window.zoomDataCache.schools || []
     };
   }
-  const [googleCourses, rawAssignments, employees, authorities, schools] = await Promise.all([
-    loadCoursesFromGoogle(),
+  const [rawAssignments, employees, authorities, schools] = await Promise.all([
     loadZoomAssignmentsFromGoogle(),
     loadEmployeesFromGoogle(),
     loadAuthoritiesFromGoogle(),
     loadSchoolsFromGoogle()
   ]);
   const assignments = mapZoomAssignmentsByCourseKey(rawAssignments);
-  window.zoomDataCache.courses = googleCourses;
+  window.zoomDataCache.assignmentsRows = rawAssignments;
   window.zoomDataCache.assignments = assignments;
   window.zoomDataCache.employees = employees;
   window.zoomDataCache.authorities = authorities;
   window.zoomDataCache.schools = schools;
   window.zoomDataCache.loaded = true;
-  console.log('[ZOOM] loaded courses:', googleCourses.length);
-  console.log('[ZOOM] loaded assignments:', Array.isArray(rawAssignments) ? rawAssignments.length : Object.keys(assignments).length);
-  return { courses: googleCourses, assignments, employees, authorities, schools };
+  console.log('[ZOOM] loaded assignments:', Array.isArray(rawAssignments) ? rawAssignments.length : 0);
+  return { assignmentsRows: rawAssignments, assignments, employees, authorities, schools };
 }
 async function loadZoomAssignments(){
   try {
@@ -2910,17 +2927,6 @@ async function loadZoomAssignments(){
     return [];
   }
 }
-async function loadCoursesFromGoogle() {
-  try {
-    const res = await fetch(`${API_URL}?type=courses&v=${Date.now()}`, { cache: 'no-store' });
-    const data = await res.json();
-    return Array.isArray(data) ? data : [];
-  } catch(err) {
-    console.error('Failed loading courses from Google', err);
-    return [];
-  }
-}
-
 async function loadEmployeesFromGoogle() {
   try {
     const res = await fetch(`${API_URL}?type=employees&v=${Date.now()}`, { cache: 'no-store' });
@@ -3016,50 +3022,27 @@ function notifyZoomNoPermission(){
 
 function mapZoomAssignmentsByCourseKey(rows){
   const mapped = {};
-  if(Array.isArray(rows)){
-    rows.forEach((row)=>{
-      const courseKey = String(row?.RowId || row?.rowId || row?.CourseId || row?.courseId || row?.courseKey || row?.CourseKey || row?.Id || row?.id || '').trim();
-      if(!courseKey) return;
-      const account = row?.ZoomAccount || row?.zoom || row?.Zoom || row?.account || null;
-      const notes = row?.Notes || row?.notes || '';
-      mapped[courseKey] = {
-        rowId: courseKey,
-        account,
-        notes,
-        startTime:  normalizeZoomTime(row?.StartTime  || row?.startTime  || row?.start || ''),
-        endTime:    normalizeZoomTime(row?.EndTime    || row?.endTime    || row?.end || ''),
-        date:       normalizeZoomDateKey(row?.Date || row?.date || ''),
-        authority:  row?.Authority  || row?.authority  || '',
-        school:     row?.School     || row?.school     || '',
-        program:    row?.Program    || row?.program    || '',
-        employee:   row?.Employee   || row?.employee   || '',
-        employeeId: String(row?.EmployeeID || row?.employeeId || ''),
-        conflict: false
-      };
-    });
-    return mapped;
-  }
-
-  if(rows && typeof rows === 'object'){
-    Object.entries(rows).forEach(([courseKey, value])=>{
-      const account = value?.ZoomAccount || value?.zoom || value?.Zoom || value?.account || null;
-      const notes = value?.Notes || value?.notes || '';
-      mapped[String(courseKey)] = {
-        rowId: String(courseKey),
-        account,
-        notes,
-        startTime:  normalizeZoomTime(value?.StartTime  || value?.startTime  || ''),
-        endTime:    normalizeZoomTime(value?.EndTime    || value?.endTime    || ''),
-        date:       normalizeZoomDateKey(value?.Date || value?.date || ''),
-        authority:  value?.Authority  || value?.authority  || '',
-        school:     value?.School     || value?.school     || '',
-        program:    value?.Program    || value?.program    || '',
-        employee:   value?.Employee   || value?.employee   || '',
-        employeeId: value?.EmployeeID || value?.employeeId || '',
-        conflict: !!value?.conflict
-      };
-    });
-  }
+  if(!Array.isArray(rows)) return mapped;
+  rows.forEach((row)=>{
+    const rowId = String(row?.RowId || row?.rowId || '').trim();
+    if(!rowId) return;
+    const account = row?.ZoomAccount || row?.zoom || row?.Zoom || row?.account || null;
+    const notes = row?.Notes || row?.notes || '';
+    mapped[rowId] = {
+      rowId,
+      account,
+      notes,
+      startTime:  normalizeZoomTime(row?.StartTime  || row?.startTime  || row?.start || ''),
+      endTime:    normalizeZoomTime(row?.EndTime    || row?.endTime    || row?.end || ''),
+      date:       normalizeZoomDateKey(row?.Date || row?.date || ''),
+      authority:  row?.Authority  || row?.authority  || '',
+      school:     row?.School     || row?.school     || '',
+      program:    row?.Program    || row?.program    || '',
+      employee:   row?.Employee   || row?.employee   || '',
+      employeeId: String(row?.EmployeeID || row?.employeeId || ''),
+      conflict: false
+    };
+  });
 
   return mapped;
 }
@@ -3111,9 +3094,9 @@ async function persistZoomAssignment(dayNum, course){
   const row = Array.from(document.querySelectorAll('tr[data-zoom-course-key]')).find(r => r.dataset.zoomCourseKey === courseKey);
   if (row) {
     const dateInput = row.querySelector('input[type="date"]');
-    const authorityInput = row.querySelector('td[data-label="רשות"] input');
-    const schoolInput = row.querySelector('td[data-label="בית ספר"] input');
-    const programSelect = row.querySelector('td[data-label="קורס"] select');
+    const authorityInput = row.querySelector('td[data-label="רשות"] select');
+    const schoolInput = row.querySelector('td[data-label="בית ספר"] select');
+    const programSelect = row.querySelector('td[data-label="תוכנית"] input');
     const employeeSelect = row.querySelector('td[data-label="מדריך"] select');
     const startSelect = row.querySelector('.zoom-col-start select');
     const endSelect = row.querySelector('.zoom-col-end select');
@@ -3130,11 +3113,8 @@ async function persistZoomAssignment(dayNum, course){
     if (endSelect) assignment.endTime = normalizeZoomTime(endSelect.value || '');
     if (notesInput) assignment.notes = notesInput.value || '';
   }
-  const persistentCourseId = zoomPersistentCourseId(course, assignment);
-  if(!persistentCourseId){
-    console.error('[ZOOM] Cannot save assignment: missing RowId.', { dayNum, course, assignment, courseKey });
-    return;
-  }
+  const persistentCourseId = String(courseKey || '').trim();
+  if(!persistentCourseId) return;
   const startTime = normalizeZoomTime(assignment.startTime || course.StartTime || '');
   const endTime = normalizeZoomTime(assignment.endTime || course.EndTime || '');
   const payload = {
@@ -3214,8 +3194,13 @@ async function autoAssignZoomDay(dayNum, dayAssignments) {
 
   dayAssignments.forEach(c => {
     const k = zoomCourseId(dayNum, c);
+    const existing = window.zoomAssignments[k] || {};
+    const s = zoomTimeToMinutes(existing.startTime || c.StartTime);
+    const e = zoomTimeToMinutes(existing.endTime || c.EndTime);
+    if (existing.account && s != null && e != null) {
+      assignedSlots.push({ startMin: s, endMin: e, employee: existing.employee || c.Employee || '', zoom: existing.account });
+    }
     if (window.zoomAssignments[k]) {
-      window.zoomAssignments[k].account = null;
       window.zoomAssignments[k].conflict = false;
     }
   });
@@ -3260,6 +3245,10 @@ async function autoAssignZoomDay(dayNum, dayAssignments) {
       if (slot.employee === emp && slot.endMin === s) preferred = slot.zoom;
     });
 
+    if (assignment.account) {
+      return;
+    }
+
     const assigned = pickZoomForSlot(s, e, preferred, emp);
 
     if (assigned) {
@@ -3291,48 +3280,20 @@ async function renderZoom() {
   };
   const HDAYS = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
 
-  const { courses: googleCourses, assignments, employees, authorities, schools } = await getZoomData(false);
-  window.zoomGoogleCourses = googleCourses;
+  const { assignmentsRows, assignments, employees, authorities, schools } = await getZoomData(false);
   window.zoomAssignments = assignments;
   window.zoomEmployees = employees;
   window.zoomAuthorities = authorities;
   window.zoomSchools = schools;
 
-  // Fall back to rawData if Google COURSES sheet is empty
-  let courses = googleCourses;
-  if (!courses.length) {
-    courses = rawData
-      .filter(r => r.Date1)
-      .map(r => {
-        const d = parseDate(r.Date1);
-        if (!d) return null;
-        const yyyy = d.getFullYear();
-        const mm = String(d.getMonth() + 1).padStart(2, '0');
-        const dd = String(d.getDate()).padStart(2, '0');
-        return {
-          RowId: `raw-${r.EmployeeID || ''}-${yyyy}${mm}${dd}-${r.Program || ''}`,
-          Date: `${yyyy}-${mm}-${dd}`,
-          Authority: r.Authority || '',
-          School: r.School || '',
-          Program: r.Program || '',
-          Employee: r.Employee || '',
-          EmployeeID: String(r.EmployeeID || ''),
-          StartTime: normalizeZoomTime(r.StartTime || ''),
-          EndTime: normalizeZoomTime(r.EndTime || ''),
-          Notes: r.Notes || ''
-        };
-      })
-      .filter(Boolean);
-  }
-  courses = courses.map(c => ({
+  const courses = (assignmentsRows || []).map(c => ({
     ...c,
-    RowId: c.RowId != null ? String(c.RowId).trim() : (c.Id != null ? String(c.Id).trim() : ''),
+    RowId: String(c.RowId || c.rowId || '').trim(),
     Date: normalizeZoomDateKey(c.Date || c.date || ''),
     StartTime: normalizeZoomTime(c.StartTime || c.startTime || ''),
     EndTime: normalizeZoomTime(c.EndTime || c.endTime || '')
-  }));
+  })).filter(c => c.RowId);
   const currentPage = WEEK_PAGES[window.zoomWeekPage];
-  logZoomCourseDiagnostics(courses, currentPage.days);
   window.zoomCoursesForView = courses;
   window.zoomDaysForView = currentPage.days;
   window.zoomHdaysForView = HDAYS;
@@ -3673,13 +3634,18 @@ function renderZoomCalendar(container, courses, days, hdays) {
 }
 
 async function addNewZoomRow(dayNum, tbody, defaultDate) {
-  const key = 'new-' + dayNum + '-' + Date.now();
-  const course = { RowId: key, Id: key, Date: defaultDate || zoomDateString(dayNum) };
+  const existingIds = Object.keys(window.zoomAssignments || {});
+  const maxId = existingIds.reduce((max, id) => {
+    const m = String(id).match(/^R-(\d+)$/);
+    return m ? Math.max(max, Number(m[1])) : max;
+  }, 1000);
+  const key = `R-${maxId + 1}`;
+  const course = { RowId: key, Date: defaultDate || zoomDateString(dayNum) };
   updateZoomAssignmentState(key, {
     account: null, notes: '', conflict: false,
-    startTime: '', endTime: '',
-    date: defaultDate || zoomDateString(dayNum),
-    authority: '', school: '', program: '', employee: '', employeeId: '', rowId: key
+      startTime: '', endTime: '',
+      date: defaultDate || zoomDateString(dayNum),
+      authority: '', school: '', program: '', employee: '', employeeId: '', rowId: key
   });
   requestZoomCalendarRefresh();
   const asgn = window.zoomAssignments[key];
@@ -3709,40 +3675,23 @@ async function addNewZoomRow(dayNum, tbody, defaultDate) {
   tdDate.appendChild(dateInp); tr.appendChild(tdDate);
 
   const tdAuth = document.createElement('td'); tdAuth.setAttribute('data-label', 'רשות');
-  const authInp = document.createElement('input');
-  authInp.type = 'text'; authInp.className = 'zoom-field-input'; authInp.dir = 'rtl';
-  authInp.addEventListener('input', () => { asgn.authority = authInp.value; });
-  authInp.addEventListener('blur', async () => { await persistZoomAssignment(dayNum, course); });
-  tdAuth.appendChild(authInp); tr.appendChild(tdAuth);
+  const authSelect = createZoomSelect((window.zoomAuthorities || []).filter(zoomIsActive).map(a => ({ value: a.Authority, label: a.Authority })), '');
+  authSelect.addEventListener('change', async () => { asgn.authority = authSelect.value; await persistZoomAssignment(dayNum, course); });
+  tdAuth.appendChild(authSelect); tr.appendChild(tdAuth);
 
   const tdSchool = document.createElement('td'); tdSchool.setAttribute('data-label', 'בית ספר');
-  const schoolInp = document.createElement('input');
-  schoolInp.type = 'text'; schoolInp.className = 'zoom-field-input'; schoolInp.dir = 'rtl';
-  schoolInp.addEventListener('input', () => { asgn.school = schoolInp.value; });
-  schoolInp.addEventListener('blur', async () => { await persistZoomAssignment(dayNum, course); });
-  tdSchool.appendChild(schoolInp); tr.appendChild(tdSchool);
+  const schoolSelect = createZoomSelect((window.zoomSchools || []).filter(zoomIsActive).map(s => ({ value: s.School, label: s.School })), '');
+  schoolSelect.addEventListener('change', async () => { asgn.school = schoolSelect.value; await persistZoomAssignment(dayNum, course); });
+  tdSchool.appendChild(schoolSelect); tr.appendChild(tdSchool);
 
-  const tdProg = document.createElement('td'); tdProg.setAttribute('data-label', 'קורס');
-  const progSelect = document.createElement('select'); progSelect.className = 'zoom-emp-select'; progSelect.dir = 'rtl';
-  const blankProgOpt2 = document.createElement('option'); blankProgOpt2.value = ''; blankProgOpt2.textContent = '— בחר —';
-  progSelect.appendChild(blankProgOpt2);
-  ZOOM_PROGRAMS.forEach(name => {
-    const opt = document.createElement('option'); opt.value = name; opt.textContent = name;
-    progSelect.appendChild(opt);
-  });
-  progSelect.addEventListener('change', async () => { asgn.program = progSelect.value; await persistZoomAssignment(dayNum, course); });
-  tdProg.appendChild(progSelect); tr.appendChild(tdProg);
+  const tdProg = document.createElement('td'); tdProg.setAttribute('data-label', 'תוכנית');
+  const progInput = document.createElement('input'); progInput.type = 'text'; progInput.className = 'zoom-field-input'; progInput.dir = 'rtl';
+  progInput.addEventListener('input', () => { asgn.program = progInput.value; });
+  progInput.addEventListener('blur', async () => { await persistZoomAssignment(dayNum, course); });
+  tdProg.appendChild(progInput); tr.appendChild(tdProg);
 
   const tdEmp = document.createElement('td'); tdEmp.setAttribute('data-label', 'מדריך');
-  const empSelect = document.createElement('select'); empSelect.className = 'zoom-emp-select'; empSelect.dir = 'rtl';
-  const employeeMap = {};
-  rawData.forEach(r => { if (r.Employee && r.EmployeeID) employeeMap[r.Employee] = String(r.EmployeeID); });
-  const blankOpt = document.createElement('option'); blankOpt.value = ''; blankOpt.textContent = '— בחר —';
-  empSelect.appendChild(blankOpt);
-  Object.entries(employeeMap).sort(([a], [b]) => a.localeCompare(b, 'he')).forEach(([name, id]) => {
-    const opt = document.createElement('option'); opt.value = name; opt.dataset.id = id; opt.textContent = name;
-    empSelect.appendChild(opt);
-  });
+  const empSelect = createZoomSelect((window.zoomEmployees || []).filter(zoomIsActive).map(e => ({ value: e.Employee, label: e.Employee, id: e.EmployeeID })), '');
   empSelect.addEventListener('change', async () => {
     const sel = empSelect.selectedOptions[0];
     asgn.employee = sel.value; asgn.employeeId = sel.dataset.id || '';
@@ -3778,8 +3727,21 @@ async function addNewZoomRow(dayNum, tbody, defaultDate) {
 function renderZoomPrep(container, courses, days, hdays) {
   const area = document.createElement('div');
   area.className = 'zoom-days-area';
-  const employeeMap = getZoomEmployeeMap();
-  const sortedEmployees = Object.entries(employeeMap).sort(([a], [b]) => a.localeCompare(b, 'he'));
+  const employees = (window.zoomEmployees || [])
+    .filter(zoomIsActive)
+    .map(emp => ({ label: String(emp.Employee || ''), value: String(emp.Employee || ''), id: String(emp.EmployeeID || '') }))
+    .filter(emp => emp.value)
+    .sort((a, b) => a.label.localeCompare(b.label, 'he'));
+  const authorities = (window.zoomAuthorities || [])
+    .filter(zoomIsActive)
+    .map(row => ({ label: String(row.Authority || ''), value: String(row.Authority || '') }))
+    .filter(row => row.value)
+    .sort((a, b) => a.label.localeCompare(b.label, 'he'));
+  const schools = (window.zoomSchools || [])
+    .filter(zoomIsActive)
+    .map(row => ({ label: String(row.School || ''), value: String(row.School || ''), authority: String(row.Authority || '') }))
+    .filter(row => row.value)
+    .sort((a, b) => a.label.localeCompare(b.label, 'he'));
   console.log('[ZOOM][Prep] input courses:', Array.isArray(courses) ? courses.length : 0);
   console.log('[ZOOM][Prep] input assignments:', window.zoomAssignments ? Object.keys(window.zoomAssignments).length : 0);
 
@@ -3817,7 +3779,7 @@ function renderZoomPrep(container, courses, days, hdays) {
       '<th>תאריך</th>' +
       '<th>רשות</th>' +
       '<th>בית ספר</th>' +
-      '<th>קורס</th>' +
+      '<th>תוכנית</th>' +
       '<th>מדריך</th>' +
       '<th class="zoom-col-start">התחלה</th>' +
       '<th class="zoom-col-end">סיום</th>' +
@@ -3832,7 +3794,7 @@ function renderZoomPrep(container, courses, days, hdays) {
       const key = zoomCourseId(dayNum, course);
       dayKeyCounts[key] = (dayKeyCounts[key] || 0) + 1;
       if (!window.zoomAssignments[key]) {
-        updateZoomAssignmentState(key, { account: null, notes: '', conflict: false, rowId: zoomPersistentCourseId(course, null) });
+        updateZoomAssignmentState(key, { account: null, notes: '', conflict: false, rowId: key });
       }
       const asgn = window.zoomAssignments[key];
       asgn.startTime = normalizeZoomTime(asgn.startTime || course.StartTime || '');
@@ -3881,75 +3843,47 @@ function renderZoomPrep(container, courses, days, hdays) {
       // Authority cell
       const tdAuth = document.createElement('td');
       tdAuth.setAttribute('data-label', 'רשות');
-      const authInp = document.createElement('input');
-      authInp.type = 'text'; authInp.className = 'zoom-field-input'; authInp.dir = 'rtl';
-      authInp.value = asgn.authority || course.Authority || '';
-      authInp.addEventListener('input', () => {
-        asgn.authority = authInp.value;
-      });
-      authInp.addEventListener('blur', async () => {
+      const authSelect = createZoomSelect(authorities, asgn.authority || course.Authority || '');
+      authSelect.addEventListener('change', async () => {
+        asgn.authority = authSelect.value;
         await persistZoomAssignment(dayNum, course);
       });
-      tdAuth.appendChild(authInp);
+      tdAuth.appendChild(authSelect);
       tr.appendChild(tdAuth);
 
       // School cell
       const tdSchool = document.createElement('td');
       tdSchool.setAttribute('data-label', 'בית ספר');
-      const schoolInp = document.createElement('input');
-      schoolInp.type = 'text'; schoolInp.className = 'zoom-field-input'; schoolInp.dir = 'rtl';
-      schoolInp.value = asgn.school || course.School || '';
-      schoolInp.addEventListener('input', () => {
-        asgn.school = schoolInp.value;
-      });
-      schoolInp.addEventListener('blur', async () => {
+      const filteredSchools = (asgn.authority || course.Authority || '')
+        ? schools.filter(s => !s.authority || s.authority === (asgn.authority || course.Authority || ''))
+        : schools;
+      const schoolSelect = createZoomSelect(filteredSchools, asgn.school || course.School || '');
+      schoolSelect.addEventListener('change', async () => {
+        asgn.school = schoolSelect.value;
         await persistZoomAssignment(dayNum, course);
       });
-      tdSchool.appendChild(schoolInp);
+      tdSchool.appendChild(schoolSelect);
       tr.appendChild(tdSchool);
 
       // Program cell
       const tdProg = document.createElement('td');
-      tdProg.setAttribute('data-label', 'קורס');
-      const progSelect = document.createElement('select');
-      progSelect.className = 'zoom-emp-select'; progSelect.dir = 'rtl';
-      const currentProg = asgn.program || course.Program || '';
-      const blankProgOpt = document.createElement('option'); blankProgOpt.value = ''; blankProgOpt.textContent = '— בחר —';
-      progSelect.appendChild(blankProgOpt);
-      if (!ZOOM_PROGRAMS.includes(currentProg) && currentProg) {
-        const opt = document.createElement('option'); opt.value = currentProg; opt.textContent = currentProg; opt.selected = true;
-        progSelect.appendChild(opt);
-      }
-      ZOOM_PROGRAMS.forEach(name => {
-        const opt = document.createElement('option'); opt.value = name; opt.textContent = name;
-        if (name === currentProg) opt.selected = true;
-        progSelect.appendChild(opt);
+      tdProg.setAttribute('data-label', 'תוכנית');
+      const progInput = document.createElement('input');
+      progInput.type = 'text'; progInput.className = 'zoom-field-input'; progInput.dir = 'rtl';
+      progInput.value = asgn.program || course.Program || '';
+      progInput.addEventListener('input', () => {
+        asgn.program = progInput.value;
       });
-      progSelect.addEventListener('change', async () => {
-        asgn.program = progSelect.value;
+      progInput.addEventListener('blur', async () => {
         await persistZoomAssignment(dayNum, course);
       });
-      tdProg.appendChild(progSelect);
+      tdProg.appendChild(progInput);
       tr.appendChild(tdProg);
 
       // Employee dropdown cell
       const tdEmp = document.createElement('td');
       tdEmp.setAttribute('data-label', 'מדריך');
-      const empSelect = document.createElement('select');
-      empSelect.className = 'zoom-emp-select'; empSelect.dir = 'rtl';
-      const currentEmp = asgn.employee || course.Employee || '';
-      if (!employeeMap[currentEmp] && currentEmp) {
-        const blankOpt = document.createElement('option');
-        blankOpt.value = currentEmp; blankOpt.dataset.id = asgn.employeeId || String(course.EmployeeID || '');
-        blankOpt.textContent = currentEmp; blankOpt.selected = true;
-        empSelect.appendChild(blankOpt);
-      }
-      sortedEmployees.forEach(([name, id]) => {
-        const opt = document.createElement('option');
-        opt.value = name; opt.dataset.id = id; opt.textContent = name;
-        if (name === currentEmp) opt.selected = true;
-        empSelect.appendChild(opt);
-      });
+      const empSelect = createZoomSelect(employees, asgn.employee || course.Employee || '');
       empSelect.addEventListener('change', async () => {
         const sel = empSelect.selectedOptions[0];
         asgn.employee = sel.value;
@@ -4028,12 +3962,6 @@ function renderZoomPrep(container, courses, days, hdays) {
     tableWrap.appendChild(table);
     card.appendChild(tableWrap);
 
-    const dayCourseByKey = {};
-    dayAssignments.forEach(course => {
-      const key = zoomCourseId(dayNum, course);
-      if (!dayCourseByKey[key]) dayCourseByKey[key] = course;
-    });
-
     // Wire select-all checkbox
     const selectAllChk = thead.querySelector('.zoom-select-all');
     if (selectAllChk) {
@@ -4073,9 +4001,9 @@ function renderZoomPrep(container, courses, days, hdays) {
         if (!key || !window.zoomAssignments[key]) return;
         const asgn = window.zoomAssignments[key];
         const dateInput = row.querySelector('input[type="date"]');
-        const authorityInput = row.querySelector('td[data-label="רשות"] input');
-        const schoolInput = row.querySelector('td[data-label="בית ספר"] input');
-        const programSelect = row.querySelector('td[data-label="קורס"] select');
+        const authorityInput = row.querySelector('td[data-label="רשות"] select');
+        const schoolInput = row.querySelector('td[data-label="בית ספר"] select');
+        const programSelect = row.querySelector('td[data-label="תוכנית"] input');
         const employeeSelect = row.querySelector('td[data-label="מדריך"] select');
         const startSelect = row.querySelector('.zoom-col-start select');
         const endSelect = row.querySelector('.zoom-col-end select');
@@ -4097,11 +4025,10 @@ function renderZoomPrep(container, courses, days, hdays) {
         .map(row => {
           const key = row.dataset.zoomCourseKey;
           if (!key) return null;
-          const existing = dayCourseByKey[key];
-          if (existing) return existing;
           const asgn = window.zoomAssignments?.[key] || {};
+          if (asgn.account) return null;
           return {
-            Id: key,
+            RowId: key,
             Date: asgn.date || zoomDateString(dayNum),
             Authority: asgn.authority || '',
             School: asgn.school || '',
@@ -4116,7 +4043,7 @@ function renderZoomPrep(container, courses, days, hdays) {
         .filter(Boolean);
 
       if (!selectedAssignments.length) {
-        alert('יש לסמן לפחות קורס אחד לשיבוץ');
+        alert('יש לסמן לפחות מפגש אחד ללא חשבון ZOOM לשיבוץ');
         return;
       }
 
@@ -4127,7 +4054,7 @@ function renderZoomPrep(container, courses, days, hdays) {
       selectedAssignments.forEach(c => {
         const k = zoomCourseId(dayNum, c);
         if (!window.zoomAssignments[k]) {
-          updateZoomAssignmentState(k, { account: null, notes: '', startTime: c.StartTime || '', endTime: c.EndTime || '', conflict: false, rowId: zoomPersistentCourseId(c, window.zoomAssignments[k]) });
+          updateZoomAssignmentState(k, { account: null, notes: '', startTime: c.StartTime || '', endTime: c.EndTime || '', conflict: false, rowId: k });
         } else {
           if (!window.zoomAssignments[k].startTime) updateZoomAssignmentState(k, { startTime: c.StartTime || '' });
           if (!window.zoomAssignments[k].endTime)   updateZoomAssignmentState(k, { endTime: c.EndTime || '' });
