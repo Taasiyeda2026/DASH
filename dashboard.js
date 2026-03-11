@@ -2981,21 +2981,23 @@ async function saveZoomAssignment(data){
     const payload = {
       RowId: rowId,
       Date: data.Date || '',
-      Authority: data.Authority || '',
-      School: data.School || '',
-      Program: data.Program || '',
-      Employee: data.Employee || '',
-      EmployeeID: data.EmployeeID || '',
       StartTime: data.StartTime || '',
       EndTime: data.EndTime || '',
+      Program: data.Program || '',
+      Authority: data.Authority || '',
+      School: data.School || '',
+      Employee: data.Employee || '',
+      EmployeeID: data.EmployeeID || '',
       ZoomAccount: data.ZoomAccount || '',
-      Notes: data.Notes || '',
-      UpdatedAt: new Date().toISOString()
+      Notes: data.Notes || ''
     };
+
+    const body = new URLSearchParams();
+    Object.entries(payload).forEach(([key, value]) => body.append(key, String(value ?? '')));
+
     const res = await fetch(`${API_URL}?type=assignment`, {
       method: "POST",
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
+      body
     });
     if(!res.ok) throw new Error(`POST assignment failed with HTTP ${res.status}`);
     const result = await res.json();
