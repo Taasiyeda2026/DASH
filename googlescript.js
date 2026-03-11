@@ -33,11 +33,21 @@ const COURSES_HEADERS = [
   'Notes'
 ];
 
+const EMPLOYEES_HEADERS = [
+  'EmployeeID',
+  'Employee'
+];
+
 function doGet(e) {
   const type = (e && e.parameter && e.parameter.type) || 'assignments';
 
   if (type === 'courses') {
     const rows = getSheetRowsAsObjects_(SHEETS.COURSES, COURSES_HEADERS);
+    return jsonResponse_(rows);
+  }
+
+  if (type === 'employees') {
+    const rows = getSheetRowsAsObjects_(SHEETS.EMPLOYEES, EMPLOYEES_HEADERS);
     return jsonResponse_(rows);
   }
 
