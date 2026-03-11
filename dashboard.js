@@ -3275,7 +3275,7 @@ async function renderZoom() {
   const header = document.createElement('div');
   header.className = 'zoom-header';
 
-  // ── Z1 / Z2 / Z3 copy buttons ──
+  // ── Z1 / Z2 / Z3 copy buttons (rendered below content) ──
   const linksBar = document.createElement('div');
   linksBar.className = 'zoom-links-bar';
 [['Z1', 'Zoom1', 'zoom-btn-1'], ['Z2', 'Zoom2', 'zoom-btn-2'], ['Z3', 'Zoom3', 'zoom-btn-3']].forEach(([key, label, cls]) => {
@@ -3286,11 +3286,9 @@ async function renderZoom() {
   btn.addEventListener('click', () => copyZoomLink(ZOOM_LINKS_MAP[key], btn));
   linksBar.appendChild(btn);
   });
-  header.appendChild(linksBar);
   const caption = document.createElement('p');
   caption.className = 'zoom-links-caption';
   caption.textContent = 'לחיצה מעתיקה את קישור הפגישה';
-  header.appendChild(caption);
 
   // ── Sub-nav: יומן שבועי / הכנת שיבוץ (הכנת שיבוץ רק למורשים) ──
   if (!canAssignZoom() && window.zoomSubView === 'prep') window.zoomSubView = 'calendar';
@@ -3366,6 +3364,14 @@ async function renderZoom() {
     renderZoomPrep(content, courses, currentPage.days, HDAYS);
   }
   wrap.appendChild(content);
+
+  // ── Links bar below content, centered ──
+  const linksBarWrap = document.createElement('div');
+  linksBarWrap.className = 'zoom-links-bar-bottom';
+  linksBarWrap.appendChild(linksBar);
+  linksBarWrap.appendChild(caption);
+  wrap.appendChild(linksBarWrap);
+
   view.innerHTML = '';
   view.appendChild(wrap);
 }
@@ -3730,6 +3736,7 @@ function renderZoomPrep(container, courses, days, hdays) {
   let prepRowsRendered = 0;
 
   days.forEach(dayNum => {
+    if (dayNum <= 11) return; // skip days up to and including March 11 (already passed)
     const date = new Date(2026, 2, dayNum);
     const displayDate = String(dayNum).padStart(2, '0') + '.03.26';
     const dateStr = zoomDateString(dayNum);
