@@ -228,6 +228,10 @@ function getSheetByName_(sheetName) {
 }
 
 function parsePostData_(e) {
+  if (e && e.parameter && Object.keys(e.parameter).length > 0) {
+    return e.parameter;
+  }
+
   if (e && e.postData && e.postData.contents) {
     const type = (e.postData.type || '').toLowerCase();
 
@@ -249,10 +253,6 @@ function parsePostData_(e) {
       });
       return out;
     }
-  }
-
-  if (e && e.parameter && Object.keys(e.parameter).length > 0) {
-    return e.parameter;
   }
 
   return {};
